@@ -1,0 +1,201 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Creda — Recruitment offer verification.
+  AWS First Commit Hackathon, Ship It track, Sept 17-20 2026.
+  Everything in one template. One sam deploy reproduces the backend.
+
+# ---------------------------------------------------------------------------
+# Globals: shared settings for all Lambda functions
+# ---------------------------------------------------------------------------
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures:
+      - x86_64
+    MemorySize: 512
+    Timeout: 30
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref CredaTable
+        QUEUE_URL: !Ref CredaQueue
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        LOG_LEVEL: INFO
+        # Never log offer text. Set to "true" to disable Bedrock in local testing.
+        BEDROCK_DISABLED: "false"
+
+# ---------------------------------------------------------------------------
+# Parameters: things you change per-deploy without touching the template
+# ---------------------------------------------------------------------------
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: anthropic.claude-3-haiku-20240307-v1:0
+    Description: >
+      The Bedrock model ID enabled in your region. Verify access in the
+      Bedrock console BEFORE deploying. Swap to amazon.nova-micro-v1:0
+      or meta.llama3-8b-instruct-v1:0 if Haiku is unavailable.
+
+  StageName:
+    Type: String
+    Default: prod
+    Description: API Gateway stage name (prod / dev)
+
+# ---------------------------------------------------------------------------
+# Resources
+# ---------------------------------------------------------------------------
+Resources:
+
+  # ---- DynamoDB: single on-demand table ----------------------------------
+  CredaTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: creda-cases
+      BillingMode: PAY_PER_REQUEST       # on-demand, no capacity planning
+      TableClass: STANDARD
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false   # too expensive for a hackathon
+
+  # ---- SQS: main queue + dead-letter queue --------------------------------
+  CredaDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: creda-dlq
+      MessageRetentionPeriod: 1209600   # 14 days so we can inspect failed cases
+
+  CredaQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: creda-jobs
+      VisibilityTimeout: 360            # must be > worker Lambda timeout (300s)
+      MessageRetentionPeriod: 86400     # 1 day; case should complete in < 60s
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt CredaDLQ.Arn
+        maxReceiveCount: 2              # after 2 failed attempts → DLQ
+
+  # ---- Lambda: Intake (POST /cases, GET /cases/{caseId}) ------------------
+  IntakeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: creda-intake
+      CodeUri: ../backend/
+      Handler: intake.handler.lambda_handler
+      Description: Validates offer submission, creates case, enqueues to SQS
+      Timeout: 10                       # must return in < 1s in practice; 10s safety net
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CredaTable
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt CredaQueue.QueueName
+      Events:
+        CreateCase:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaApi
+            Path: /cases
+            Method: POST
+        GetCase:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaApi
+            Path: /cases/{caseId}
+            Method: GET
+        Health:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaApi
+            Path: /health
+            Method: GET
+
+  # ---- Lambda: Worker (SQS-triggered) ------------------------------------
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: creda-worker
+      CodeUri: ../backend/
+      Handler: worker.handler.lambda_handler
+      Description: Runs employer resolver + checks + Bedrock extraction, writes verdict
+      Timeout: 300                      # hard cap; resolver + Bedrock < 60s in practice
+      MemorySize: 512
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CredaTable
+        - SQSPollerPolicy:
+            QueueName: !GetAtt CredaQueue.QueueName
+        - S3CrudPolicy:
+            BucketName: !Ref CredaEvidenceBucket
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:ApplyGuardrail
+              Resource: "*"
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CredaTable
+          QUEUE_URL: !Ref CredaQueue
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          LOG_LEVEL: INFO
+          BEDROCK_DISABLED: "false"
+          EVIDENCE_BUCKET: !Ref CredaEvidenceBucket
+          GUARDRAIL_ID: !GetAtt CredaGuardrail.GuardrailId
+          GUARDRAIL_VERSION: !GetAtt CredaGuardrail.Version
+      Events:
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt CredaQueue.Arn
+            BatchSize: 1                # process one case at a time
+            FunctionResponseTypes:
+              - ReportBatchItemFailures  # partial batch failure support
+
+  # ---- API Gateway: HTTP API (cheaper + lower latency than REST API) ------
+  CredaApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref StageName
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"                         # tighten to Amplify URL after Day 1
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - X-Case-Token
+        MaxAge: 300
+
+# ---------------------------------------------------------------------------
+# Outputs: what sam deploy prints so you can curl immediately
+# ---------------------------------------------------------------------------
+Outputs:
+  ApiUrl:
+    Description: "Base URL for the Creda API — paste into the React app"
+    Value: !Sub "https://${CredaApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+
+  TableName:
+    Description: "DynamoDB table name"
+    Value: !Ref CredaTable
+
+  QueueUrl:
+    Description: "SQS queue URL"
+    Value: !Ref CredaQueue
+
+  DLQUrl:
+    Description: "Dead-letter queue URL — inspect here when a case fails permanently"
+    Value: !Ref CredaDLQ

@@ -1,0 +1,14 @@
+version = 0.1
+
+[default.build.parameters]
+template_file = "template.yaml"
+
+[default.deploy.parameters]
+stack_name = "creda"
+s3_bucket = ""
+s3_prefix = "creda"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = false
+image_repositories = []

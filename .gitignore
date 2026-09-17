@@ -1,0 +1,20 @@
+# AWS SAM
+.aws-sam/
+env.local.json
+mock_sqs.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+Pipfile.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
