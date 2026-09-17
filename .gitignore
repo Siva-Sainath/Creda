@@ -18,3 +18,7 @@ Pipfile.lock
 .vscode/
 .idea/
 *.swp
+
+# Documentation artifacts
+*.pdf
+*.html
