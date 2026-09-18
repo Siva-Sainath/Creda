@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Creda Investigation</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cropper.min.css">
+  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="investigate.css">
+</head>
+<body>
+  <header class="header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div class="brand">WorkOffer Shield <span>Investigation</span></div>
+    <div class="window-controls" style="display:flex; gap:12px;">
+      <a id="btn-new-tab" href="investigate.html" target="_blank" style="color:var(--ink-2); text-decoration:none; font-size:14px; padding:4px 8px;">⤢ Open in New Tab</a>
+      <button id="btn-close" style="background:none; border:none; font-size:16px; cursor:pointer; color:var(--ink);">✕</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Left Column: Input and Cropper -->
+    <section class="panel input-panel">
+      <div class="section-header">
+        <h2>1. Review Evidence</h2>
+        <p>Adjust the bounding box to crop out private chats or background data.</p>
+      </div>
+
+      <div class="cropper-container">
+        <img id="screenshot-image" src="" alt="Captured screen">
+      </div>
+
+      <div class="field text-field">
+        <label>Selected Text</label>
+        <textarea id="captured-text" placeholder="No text highlighted..."></textarea>
+      </div>
+      
+      <div class="field">
+        <label>Source URL</label>
+        <input type="text" id="captured-url" readonly />
+      </div>
+
+      <button id="btn-check" class="primary-btn">Run Agent Check</button>
+    </section>
+
+    <!-- Right Column: Results -->
+    <section class="panel result-panel">
+      <div class="section-header">
+        <h2>2. Investigation Results</h2>
+        <p>The agent will compare this against official employer policies.</p>
+      </div>
+
+      <div id="idle-view" class="view active">
+        <div class="placeholder-state">Ready to investigate.</div>
+      </div>
+
+      <div id="loading-view" class="view">
+        <div class="spinner"></div>
+        <p id="loading-status">Queued...</p>
+      </div>
+
+      <div id="result-view" class="view">
+        <div id="verdict-banner" class="vchip">
+          <b id="verdict-title"></b>
+          <span id="verdict-headline"></span>
+        </div>
+        <div class="evidence-list" id="evidence-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="cropper.min.js"></script>
+  <script src="investigate.js"></script>
+</body>
+</html>

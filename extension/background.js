@@ -9,10 +9,24 @@ chrome.action.onClicked.addListener(async (tab) => {
     const screenshotDataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'jpeg', quality: 90 });
     
     // 2. Ask content script to extract text, url and display the floating modal
-    chrome.tabs.sendMessage(tab.id, { 
-      action: "toggleModal", 
-      screenshot: screenshotDataUrl 
-    });
+    try {
+      await chrome.tabs.sendMessage(tab.id, { 
+        action: "toggleModal", 
+        screenshot: screenshotDataUrl 
+      });
+    } catch (e) {
+      // If content script isn't loaded yet (e.g. tab was open before extension installed), inject it first
+      console.log("Content script not found, injecting dynamically...");
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['content.js']
+      });
+      // Try sending the message again after injection
+      await chrome.tabs.sendMessage(tab.id, { 
+        action: "toggleModal", 
+        screenshot: screenshotDataUrl 
+      });
+    }
 
   } catch (err) {
     console.error("Capture failed:", err);

@@ -4,6 +4,15 @@ let currentToken = null;
 let pollInterval = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Hide new tab button if we are already in a top-level tab
+  if (window.self === window.top) {
+    const btnNewTab = document.getElementById('btn-new-tab');
+    if (btnNewTab) btnNewTab.style.display = 'none';
+  }
+
+  // Hide the results panel initially so Step 1 takes full width
+  document.querySelector('.result-panel').style.display = 'none';
+
   document.getElementById('btn-close').addEventListener('click', () => {
     if (window.self !== window.top) {
       parent.postMessage("closeModal", "*");
@@ -48,6 +57,10 @@ document.getElementById('btn-check').addEventListener('click', () => {
   }
   
   showView('loading-view');
+  
+  // 1. Hide the input panel and show the result panel
+  document.querySelector('.input-panel').style.display = 'none';
+  document.querySelector('.result-panel').style.display = 'flex';
   
   // Get cropped image data URL
   const screenshotDataUrl = cropper ? cropper.getCroppedCanvas().toDataURL('image/jpeg', 0.8) : null;
