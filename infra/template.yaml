@@ -10,7 +10,7 @@ Description: >
 # ---------------------------------------------------------------------------
 Globals:
   Function:
-    Runtime: python3.12
+    Runtime: python3.13
     Architectures:
       - x86_64
     MemorySize: 512
@@ -96,11 +96,16 @@ Resources:
       Description: Validates offer submission, creates case, enqueues to SQS
       Timeout: 10                       # must return in < 1s in practice; 10s safety net
       MemorySize: 256
+      Environment:
+        Variables:
+          EVIDENCE_BUCKET: !Ref CredaEvidenceBucket
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CredaTable
         - SQSSendMessagePolicy:
             QueueName: !GetAtt CredaQueue.QueueName
+        - S3CrudPolicy:
+            BucketName: !Ref CredaEvidenceBucket
       Events:
         CreateCase:
           Type: HttpApi
@@ -114,12 +119,34 @@ Resources:
             ApiId: !Ref CredaApi
             Path: /cases/{caseId}
             Method: GET
+        UploadUrl:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaApi
+            Path: /upload-url
+            Method: POST
         Health:
           Type: HttpApi
           Properties:
             ApiId: !Ref CredaApi
             Path: /health
             Method: GET
+
+  # ---- S3: Evidence and Uploads ------------------------------------------
+  CredaEvidenceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "creda-evidence-${AWS::AccountId}-${AWS::Region}"
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - PUT
+              - POST
+            AllowedOrigins:
+              - "*"
+            MaxAge: 3600
 
   # ---- Lambda: Worker (SQS-triggered) ------------------------------------
   WorkerFunction:

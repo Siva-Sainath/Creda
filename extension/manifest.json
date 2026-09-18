@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Creda - WorkOffer Shield",
+  "version": "1.0",
+  "description": "Check job offers and recruitment messages directly from your browser.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*/*"
+  ],
+  "action": {
+    "default_title": "Check with Creda"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

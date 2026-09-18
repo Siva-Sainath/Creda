@@ -50,6 +50,8 @@ if os.environ.get("DYNAMODB_ENDPOINT"):
 _dynamo = boto3.resource("dynamodb", **_dynamo_kwargs)
 _table = _dynamo.Table(TABLE_NAME)
 _sqs = boto3.client("sqs", config=_boto_config)
+_s3 = boto3.client("s3", config=_boto_config)
+EVIDENCE_BUCKET = os.environ.get("EVIDENCE_BUCKET", "")
 
 
 # ---------------------------------------------------------------------------
@@ -103,6 +105,31 @@ def _ttl_epoch(days: int = CASE_TTL_DAYS) -> int:
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+# ---------------------------------------------------------------------------
+# POST /upload-url
+# ---------------------------------------------------------------------------
+
+def _upload_url(event: dict) -> dict:
+    # Generates a presigned PUT URL for screenshots
+    if not EVIDENCE_BUCKET:
+        return _err("EVIDENCE_BUCKET not configured", status=500)
+        
+    object_key = f"uploads/{uuid.uuid4().hex}.jpeg"
+    
+    try:
+        url = _s3.generate_presigned_url(
+            'put_object',
+            Params={
+                'Bucket': EVIDENCE_BUCKET,
+                'Key': object_key,
+                'ContentType': 'image/jpeg'
+            },
+            ExpiresIn=300 # 5 minutes
+        )
+        return _ok({"uploadUrl": url, "key": object_key})
+    except Exception:
+        logger.exception("Failed to generate presigned URL")
+        return _err("Failed to generate upload URL", status=500)
 
 # ---------------------------------------------------------------------------
 # POST /cases
@@ -120,10 +147,11 @@ def _create_case(event: dict) -> dict:
     links: list[str] = body.get("links", [])
     employer_hint: str | None = body.get("employerHint") or None
     locale: str = body.get("locale", "en-IN")
+    screenshot_key: str | None = body.get("screenshotKey") or None
 
     # Validate
-    if not offer_text:
-        return _err("text is required and must not be empty")
+    if not offer_text and not screenshot_key:
+        return _err("text or screenshotKey is required")
     if len(offer_text.encode()) > MAX_TEXT_BYTES:
         return _err(f"text exceeds {MAX_TEXT_BYTES // 1024} KB limit")
     if not isinstance(links, list):
@@ -143,6 +171,7 @@ def _create_case(event: dict) -> dict:
         "stage": "Queued",
         "token_hash": token_hash,
         "offer_text": offer_text,          # worker needs this; cleared after analysis
+        "screenshot_key": screenshot_key,
         "sender_email": sender_email,
         "links": links,
         "employer_hint": employer_hint,
@@ -296,6 +325,9 @@ def lambda_handler(event: dict, context: Any) -> dict:
 
     if path == "/health":
         return _health()
+
+    if method == "POST" and path == "/upload-url":
+        return _upload_url(event)
 
     if method == "POST" and path == "/cases":
         return _create_case(event)
