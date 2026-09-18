@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Creda — Check a job offer before you reply</title>
+  <meta name="description" content="Creda WorkOffer Shield helps job seekers verify recruitment messages before paying fees or sharing documents.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f7f4ef;
+      --paper-elevated: #ffffff;
+      --ink: #1a1f2e;
+      --ink-muted: #5c6578;
+      --ink-faint: #8b93a3;
+      --line: #e2ddd4;
+      --line-strong: #cfc8bc;
+      --risk: #b42318;
+      --risk-bg: #fef3f2;
+      --risk-border: #fecdca;
+      --safe: #087443;
+      --safe-bg: #ecfdf3;
+      --safe-border: #abefc6;
+      --warn: #9a6700;
+      --warn-bg: #fffaeb;
+      --warn-border: #fedf89;
+      --blue: #155eef;
+      --blue-bg: #eff4ff;
+      --blue-border: #b2ccff;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+      --shadow-md: 0 4px 16px rgba(16, 24, 40, 0.08);
+      --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --mx: 50%;
+      --my: 40%;
+      --fog-opacity: 0.22;
+      --fog-a: rgba(21, 94, 239, 0.07);
+      --fog-b: rgba(247, 244, 239, 0.92);
+      --max-w: 680px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--ink);
+      background: var(--paper);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body[data-verdict="high_risk"] {
+      --fog-a: rgba(180, 35, 24, 0.06);
+      --fog-b: rgba(254, 243, 242, 0.94);
+    }
+    body[data-verdict="no_conflict_found"] {
+      --fog-a: rgba(8, 116, 67, 0.05);
+      --fog-b: rgba(236, 253, 243, 0.94);
+    }
+    body[data-verdict="unverified"] {
+      --fog-a: rgba(154, 103, 0, 0.05);
+      --fog-b: rgba(255, 250, 235, 0.94);
+    }
+
+    .fog {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: var(--fog-opacity);
+      background:
+        radial-gradient(900px circle at var(--mx) var(--my), var(--fog-a), transparent 55%),
+        radial-gradient(1200px circle at 50% -10%, var(--fog-b), transparent 70%);
+      transition: opacity 0.4s ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .fog { display: none; }
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper-elevated) 88%, transparent);
+      backdrop-filter: blur(10px);
+    }
+    .topbar-in {
+      max-width: calc(var(--max-w) + 96px);
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--paper-elevated);
+      display: grid;
+      place-items: center;
+    }
+    .brand-sub {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--ink-faint);
+      font-weight: 500;
+    }
+    .health-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ink-faint);
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .health-dot.ok { background: var(--safe); }
+    .health-dot.err { background: var(--risk); }
+
+    main {
+      flex: 1;
+      max-width: calc(var(--max-w) + 96px);
+      margin: 0 auto;
+      padding: 40px 24px 120px;
+      width: 100%;
+    }
+
+    .panel {
+      background: var(--paper-elevated);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Intake */
+    .hero { margin-bottom: 28px; }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 36px);
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+      margin: 0 0 10px;
+      max-width: 16ch;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 16px;
+      max-width: 46ch;
+    }
+
+    .intake-panel { padding: 24px; }
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .field-hint {
+      font-size: 12px;
+      color: var(--ink-faint);
+      margin: -4px 0 8px;
+    }
+    textarea.offer-input {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+      background: var(--paper);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    textarea.offer-input:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-bg);
+    }
+
+    .details-toggle {
+      margin-top: 16px;
+      border: none;
+      background: none;
+      padding: 0;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--blue);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .details-toggle svg { transition: transform 0.2s; }
+    .details-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+    .details-grid {
+      display: none;
+      margin-top: 16px;
+      gap: 12px;
+    }
+    .details-grid.open { display: grid; }
+    .details-grid input {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 14px;
+      background: var(--paper);
+    }
+    .details-grid input:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-bg);
+    }
+
+    .demo-row {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .demo-label {
+      font-size: 12px;
+      color: var(--ink-faint);
+      font-weight: 500;
+      margin-right: 4px;
+    }
+    .demo-chip {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .demo-chip:hover {
+      border-color: var(--line-strong);
+      background: var(--paper-elevated);
+    }
+    .demo-chip svg { opacity: 0.7; flex-shrink: 0; }
+
+    .cta-row {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--ink);
+      color: var(--paper-elevated);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.92; }
+    .btn-primary:active { transform: translateY(1px); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .cta-note { font-size: 12px; color: var(--ink-faint); max-width: 28ch; }
+
+    /* Waiting */
+    .wait-panel { padding: 24px; }
+    .wait-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .wait-head h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .wait-head p { margin: 0; font-size: 13px; color: var(--ink-muted); }
+    .timer {
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      white-space: nowrap;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--paper);
+    }
+
+    .pipeline {
+      position: relative;
+      padding-left: 28px;
+      margin-bottom: 24px;
+    }
+    .pipeline::before {
+      content: "";
+      position: absolute;
+      left: 9px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--line);
+    }
+    .pipe-step {
+      position: relative;
+      padding: 0 0 18px;
+    }
+    .pipe-step:last-child { padding-bottom: 0; }
+    .pipe-dot {
+      position: absolute;
+      left: -28px;
+      top: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--line-strong);
+      background: var(--paper-elevated);
+      display: grid;
+      place-items: center;
+    }
+    .pipe-step.done .pipe-dot {
+      border-color: var(--safe);
+      background: var(--safe-bg);
+      color: var(--safe);
+    }
+    .pipe-step.active .pipe-dot {
+      border-color: var(--blue);
+      background: var(--blue-bg);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 12%, transparent);
+    }
+    .pipe-step.pending .pipe-dot { opacity: 0.55; }
+    .pipe-step.fail .pipe-dot {
+      border-color: var(--warn);
+      background: var(--warn-bg);
+    }
+    .pipe-label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .pipe-summary {
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+    .pipe-step.active .pipe-label { color: var(--blue); }
+
+    .stream-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--paper);
+      overflow: hidden;
+    }
+    .stream-head {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+      animation: pulse 1.4s ease infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.35; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pulse { animation: none; opacity: 0.7; }
+    }
+    .stream-body {
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--ink-muted);
+      min-height: 72px;
+      max-height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Results */
+    .result-stack { display: flex; flex-direction: column; gap: 16px; }
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .btn-ghost {
+      border: 1px solid var(--line-strong);
+      background: var(--paper-elevated);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      cursor: pointer;
+    }
+    .btn-ghost:hover { background: var(--paper); }
+
+    .block { margin: 0; }
+    .verdict-banner {
+      padding: 20px 22px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      border-left-width: 4px;
+    }
+    .verdict-banner.risk {
+      background: var(--risk-bg);
+      border-color: var(--risk-border);
+      border-left-color: var(--risk);
+    }
+    .verdict-banner.safe {
+      background: var(--safe-bg);
+      border-color: var(--safe-border);
+      border-left-color: var(--safe);
+    }
+    .verdict-banner.warn {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+      border-left-color: var(--warn);
+    }
+    .verdict-banner h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+    .verdict-banner p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .verdict-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+      opacity: 0.85;
+    }
+
+    .reasoning-card,
+    .block-card {
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--paper-elevated);
+    }
+    .block-card h3,
+    .reasoning-card h3 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .reasoning-text {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+
+    .list-plain {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .list-plain li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+    }
+    .list-plain li:last-child { border-bottom: 0; padding-bottom: 0; }
+
+    .evidence-item {
+      display: grid;
+      gap: 4px;
+    }
+    .evidence-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--line);
+      color: var(--ink-muted);
+    }
+    .badge.conflict { color: var(--risk); border-color: var(--risk-border); background: var(--risk-bg); }
+    .badge.confirmed { color: var(--safe); border-color: var(--safe-border); background: var(--safe-bg); }
+    .badge.t1 { color: var(--safe); }
+    .badge.t2 { color: var(--blue); }
+    .badge.t3 { color: var(--warn); }
+
+    .tactic-item strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+    .tactic-item span { font-size: 13px; color: var(--ink-muted); }
+
+    .safe-actions { display: grid; gap: 10px; }
+    .safe-action {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+    .safe-action.urgent {
+      border-color: var(--risk-border);
+      background: var(--risk-bg);
+    }
+    .safe-action.primary {
+      border-color: var(--blue-border);
+      background: var(--blue-bg);
+    }
+    .safe-action strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+    .safe-action span { font-size: 13px; color: var(--ink-muted); }
+
+    .followup-q {
+      width: 100%;
+      text-align: left;
+      border: 1px dashed var(--line-strong);
+      background: var(--paper);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .followup-q:hover { border-color: var(--blue); color: var(--blue); }
+
+    .conversation-turn {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .conversation-turn:last-child { border-bottom: 0; }
+    .conversation-turn .role {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-faint);
+      margin-bottom: 4px;
+    }
+    .conversation-turn.user .role { color: var(--blue); }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--ink-faint);
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--paper);
+    }
+    .guardrail-note {
+      font-size: 12px;
+      color: var(--ink-faint);
+      padding: 10px 14px;
+      border-left: 3px solid var(--line-strong);
+      background: var(--paper);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .followup-bar {
+      margin-top: 20px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--paper-elevated);
+    }
+    .followup-bar label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .followup-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .followup-input-row input {
+      flex: 1;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 14px;
+    }
+    .followup-input-row input:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-bg);
+    }
+
+    .lambda-timeline details {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--paper-elevated);
+      overflow: hidden;
+    }
+    .lambda-timeline summary {
+      padding: 14px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lambda-timeline summary::-webkit-details-marker { display: none; }
+    .lambda-timeline .timeline-in { padding: 0 16px 16px; }
+
+    .error-banner {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--risk-border);
+      background: var(--risk-bg);
+      color: var(--risk);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .sticky-safe {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 40;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      background: color-mix(in srgb, var(--risk-bg) 94%, transparent);
+      border-top: 1px solid var(--risk-border);
+      backdrop-filter: blur(8px);
+    }
+    .sticky-safe strong {
+      display: block;
+      font-size: 14px;
+      color: var(--risk);
+      margin-bottom: 2px;
+    }
+    .sticky-safe span { font-size: 12px; color: var(--ink-muted); }
+
+    @media (max-width: 640px) {
+      main { padding: 28px 16px 100px; }
+      .intake-panel, .wait-panel { padding: 18px; }
+      .hero h1 { font-size: 26px; }
+      textarea.offer-input { min-height: 180px; }
+      body.has-urgent-safe .sticky-safe { display: block; }
+      body.has-urgent-safe main { padding-bottom: 140px; }
+    }
+
+    footer.trust {
+      border-top: 1px solid var(--line);
+      background: var(--paper-elevated);
+      margin-top: auto;
+    }
+    .trust-in {
+      max-width: calc(var(--max-w) + 96px);
+      margin: 0 auto;
+      padding: 0 24px 24px;
+    }
+    .trust-acc {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 16px;
+    }
+    .trust-acc summary {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      cursor: pointer;
+      list-style: none;
+    }
+    .trust-acc summary::-webkit-details-marker { display: none; }
+    .trust-body {
+      padding: 0 16px 16px;
+      font-size: 13px;
+      color: var(--ink-muted);
+    }
+    .trust-body p { margin: 0 0 10px; }
+    .trust-grid {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .trust-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+    }
+    .trust-row:last-child { border-bottom: 0; }
+    .btn-link {
+      border: none;
+      background: none;
+      padding: 0;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--blue);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .hidden { display: none !important; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="fog" aria-hidden="true"></div>
+  <div class="shell">
+    <header class="topbar">
+      <div class="topbar-in">
+        <a class="brand" href="/" aria-label="Creda home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </span>
+          Creda WorkOffer Shield
+        </a>
+        <span class="brand-sub" id="health-label"><span class="health-dot" id="health-dot"></span>Checking API…</span>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="view-intake">
+        <div class="hero">
+          <h1>Check a job offer before you reply.</h1>
+          <p>Paste the full recruitment message. Creda gathers evidence, explains its judgment, and tells you what is safe to do next — without claiming the offer is authenticated.</p>
+        </div>
+
+        <div class="panel intake-panel">
+          <label class="field-label" for="offer-text">Recruitment message</label>
+          <p class="field-hint">Include sender, links, and any fee or document requests from the original message.</p>
+          <textarea id="offer-text" class="offer-input" placeholder="Paste the complete email, SMS, WhatsApp, or recruiter message here…" spellcheck="false"></textarea>
+
+          <button type="button" class="details-toggle" id="details-toggle" aria-expanded="false" aria-controls="details-grid">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            Add details
+          </button>
+          <div class="details-grid" id="details-grid">
+            <div>
+              <label class="field-label" for="sender-email">Sender email</label>
+              <input id="sender-email" type="email" placeholder="hr@company.com" autocomplete="off">
+            </div>
+            <div>
+              <label class="field-label" for="offer-links">Links (comma-separated)</label>
+              <input id="offer-links" type="text" placeholder="https://careers.example.com/apply" autocomplete="off">
+            </div>
+            <div>
+              <label class="field-label" for="employer-hint">Employer hint</label>
+              <input id="employer-hint" type="text" placeholder="Company name if mentioned" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="demo-row" id="demo-row">
+            <span class="demo-label">Try a demo</span>
+          </div>
+
+          <div class="cta-row">
+            <button type="button" class="btn-primary" id="btn-check">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Check this offer
+            </button>
+            <span class="cta-note">Your case token stays in this browser session only — never in the URL.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-wait" class="hidden">
+        <div class="panel wait-panel">
+          <div class="wait-head">
+            <div>
+              <h2 id="wait-title">Gathering evidence</h2>
+              <p id="wait-subtitle">Creda is checking sender signals, employer records, and approved sources.</p>
+            </div>
+            <div class="timer" id="elapsed-timer" aria-live="polite">0:00</div>
+          </div>
+          <div class="pipeline" id="pipeline" aria-label="Verification pipeline"></div>
+          <div class="stream-panel">
+            <div class="stream-head">
+              <span class="pulse" aria-hidden="true"></span>
+              Creda explains its judgment
+            </div>
+            <div class="stream-body" id="stream-body" aria-live="polite">Waiting for agent review…</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-result" class="hidden">
+        <div class="result-actions">
+          <button type="button" class="btn-ghost" id="btn-new-check">Check another offer</button>
+        </div>
+        <div id="error-banner" class="error-banner hidden" role="alert"></div>
+        <div class="result-stack" id="result-stack"></div>
+        <div class="followup-bar" id="followup-bar">
+          <label for="followup-input">Add context for a follow-up check</label>
+          <div class="followup-input-row">
+            <input id="followup-input" type="text" placeholder="e.g. The official careers site is amazon.jobs" autocomplete="off">
+            <button type="button" class="btn-primary" id="btn-followup">Re-verify</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="trust">
+      <div class="trust-in">
+        <details class="trust-acc" id="trust-acc">
+          <summary>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            Coverage, reporting &amp; limitations
+          </summary>
+          <div class="trust-body">
+            <p>Creda compares messages against approved employer policies and deterministic checks. It does <strong>not</strong> authenticate offers or guarantee employment legitimacy.</p>
+            <div class="trust-grid" id="coverage-grid">
+              <div class="trust-row"><span>API health</span><span id="footer-health">—</span></div>
+              <div class="trust-row"><span>Pattern version</span><span id="footer-pattern">—</span></div>
+              <div class="trust-row"><span>Dataset</span><span id="footer-dataset">—</span></div>
+            </div>
+            <p id="coverage-note">India-focused reporting guidance. No LinkedIn access. Cases expire after seven days; tokens cannot be recovered.</p>
+            <button type="button" class="btn-link" id="btn-report">Draft a private report about this case</button>
+            <p id="report-status" class="field-hint" style="margin-top:8px"></p>
+          </div>
+        </details>
+      </div>
+    </footer>
+  </div>
+
+  <div class="sticky-safe" id="sticky-safe" role="status" aria-live="polite"></div>
+
+  <script>
+(function () {
+  "use strict";
+
+  var API_URL = "__CREDA_API_URL__";
+  var POLL_MS = 1500;
+  var POLL_MAX_MS = 120000;
+
+  var session = { caseId: null, token: null };
+  var pollTimer = null;
+  var pollStartedAt = 0;
+  var elapsedTimer = null;
+  var latestCase = null;
+  var urgentSafeAction = null;
+
+  var PIPELINE_STEPS = [
+    { id: "input", label: "Intake", checkIds: ["input"] },
+    { id: "evidence", label: "Evidence", checkIds: ["claims", "employer", "policy", "sources"] },
+    { id: "verdict", label: "Verdict", checkIds: ["assessment"] },
+    { id: "judgment", label: "Judgment", checkIds: ["explanation"] },
+    { id: "followup", label: "Follow-up", checkIds: [] }
+  ];
+
+  var DEMOS = [
+    {
+      id: "amazon-scam",
+      label: "Amazon fee scam",
+      icon: "mail",
+      offerText: "From: recruiter@amaz0n-jobs.in\nTo: candidate@gmail.com\nSubject: Amazon Job Offer\n\nDear Applicant,\n\nCongratulations! You have been selected for Amazon India. Pay INR 3500 registration fee via UPI to secure your slot.\n\nApply here: https://amaz0n-jobs.in/register\n\nAmazon HR Team",
+      senderEmail: "recruiter@amaz0n-jobs.in",
+      links: "https://amaz0n-jobs.in/register",
+      employerHint: "Amazon"
+    },
+    {
+      id: "tcs-legit",
+      label: "TCS careers email",
+      icon: "mail",
+      offerText: "From: careers@tcs.com\nSubject: TCS Offer\n\nDear Candidate,\n\nWe are pleased to offer you a role at Tata Consultancy Services. Please visit careers.tcs.com to complete onboarding. No fees required.\n\nRegards,\nTCS Talent Acquisition",
+      senderEmail: "careers@tcs.com",
+      links: "https://careers.tcs.com",
+      employerHint: "TCS"
+    },
+    {
+      id: "whatsapp-vague",
+      label: "WhatsApp recruiter",
+      icon: "whatsapp",
+      offerText: "Hi, I am Rahul from HR. We have an urgent opening at Infosys with 12 LPA package. Send your resume and pay Rs 2000 for interview slot booking.\n\nWhatsApp: +91 98765 43210\nLink: https://bit.ly/infosys-fast-track",
+      senderEmail: "",
+      links: "https://bit.ly/infosys-fast-track",
+      employerHint: "Infosys"
+    }
+  ];
+
+  function esc(value) {
+    if (value == null) return "";
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  function iconSvg(name) {
+    var icons = {
+      shield: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+      mail: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5L4 8V6l8 5 8-5v2Z"/></svg>',
+      whatsapp: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>',
+      link: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+      alert: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+      chevron: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>'
+    };
+    return icons[name] || icons.shield;
+  }
+
+  function normalizeStatus(value) {
+    return String(value || "").toLowerCase();
+  }
+
+  function verdictClass(verdict) {
+    if (verdict === "high_risk") return "risk";
+    if (verdict === "no_conflict_found") return "safe";
+    return "warn";
+  }
+
+  function verdictLabel(verdict) {
+    if (verdict === "high_risk") return "High risk";
+    if (verdict === "no_conflict_found") return "No conflict found";
+    if (verdict === "unverified") return "Unverified";
+    if (verdict === "pending") return "Review in progress";
+    return "Unknown";
+  }
+
+  function parseLinks(raw) {
+    if (!raw) return [];
+    return raw.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  function restoreSession() {
+    try {
+      var saved = sessionStorage.getItem("creda_case");
+      if (saved) {
+        var parsed = JSON.parse(saved);
+        if (parsed.caseId && parsed.token) {
+          session.caseId = parsed.caseId;
+          session.token = parsed.token;
+        }
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function saveSession() {
+    if (session.caseId && session.token) {
+      sessionStorage.setItem("creda_case", JSON.stringify({ caseId: session.caseId, token: session.token }));
+    } else {
+      sessionStorage.removeItem("creda_case");
+    }
+  }
+
+  function showView(name) {
+    $("view-intake").classList.toggle("hidden", name !== "intake");
+    $("view-wait").classList.toggle("hidden", name !== "wait");
+    $("view-result").classList.toggle("hidden", name !== "result");
+  }
+
+  function setBodyVerdict(verdict) {
+    if (verdict && verdict !== "pending") {
+      document.body.setAttribute("data-verdict", verdict);
+    } else {
+      document.body.removeAttribute("data-verdict");
+    }
+  }
+
+  function formatElapsed(ms) {
+    var sec = Math.floor(ms / 1000);
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ":" + String(s).padStart(2, "0");
+  }
+
+  function startElapsedTimer() {
+    pollStartedAt = Date.now();
+    if (elapsedTimer) clearInterval(elapsedTimer);
+    elapsedTimer = setInterval(function () {
+      $("elapsed-timer").textContent = formatElapsed(Date.now() - pollStartedAt);
+    }, 250);
+  }
+
+  function stopElapsedTimer() {
+    if (elapsedTimer) {
+      clearInterval(elapsedTimer);
+      elapsedTimer = null;
+    }
+  }
+
+  async function apiFetch(path, options) {
+    var url = API_URL.replace(/\/$/, "") + path;
+    var resp = await fetch(url, options);
+    var data = null;
+    try { data = await resp.json(); } catch (e) { data = null; }
+    if (!resp.ok) {
+      var msg = (data && (data.message || data.error)) || ("Request failed (" + resp.status + ")");
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  async function checkHealth() {
+    try {
+      var data = await apiFetch("/health");
+      $("health-dot").className = "health-dot ok";
+      $("health-label").innerHTML = '<span class="health-dot ok"></span>API ready';
+      $("footer-health").textContent = data.status === "ok" ? "Connected" : esc(data.status);
+      return data;
+    } catch (e) {
+      $("health-dot").className = "health-dot err";
+      $("health-label").innerHTML = '<span class="health-dot err"></span>API unreachable';
+      $("footer-health").textContent = "Unavailable";
+      return null;
+    }
+  }
+
+  function buildPayload() {
+    var offerText = $("offer-text").value.trim();
+    if (!offerText) throw new Error("Paste the complete recruitment message first.");
+    var payload = {
+      offerText: offerText,
+      locale: "en-IN"
+    };
+    var sender = $("sender-email").value.trim();
+    var links = parseLinks($("offer-links").value);
+    var hint = $("employer-hint").value.trim();
+    if (sender) payload.senderEmail = sender;
+    if (links.length) payload.links = links;
+    if (hint) payload.employerHint = hint;
+    return payload;
+  }
+
+  async function submitCase() {
+    $("btn-check").disabled = true;
+    try {
+      var payload = buildPayload();
+      var data = await apiFetch("/cases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      session.caseId = data.caseId;
+      session.token = data.accessToken;
+      saveSession();
+      showView("wait");
+      startPolling();
+    } catch (e) {
+      alert(e.message || "Could not submit the offer.");
+    } finally {
+      $("btn-check").disabled = false;
+    }
+  }
+
+  function stopPolling() {
+    if (pollTimer) {
+      clearTimeout(pollTimer);
+      pollTimer = null;
+    }
+    stopElapsedTimer();
+  }
+
+  function isWaitingState(data) {
+    var status = normalizeStatus(data.status);
+    var verdict = normalizeStatus(data.verdict);
+    var agentStatus = normalizeStatus(data.agentStatus);
+    if (status === "queued" || status === "running") return true;
+    if (status === "completed" && (verdict === "pending" || !verdict)) return true;
+    if (agentStatus === "running" || agentStatus === "streaming" || agentStatus === "pending") return true;
+    if (status === "needs_evidence") return false;
+    return false;
+  }
+
+  function isTerminalState(data) {
+    var status = normalizeStatus(data.status);
+    var verdict = normalizeStatus(data.verdict);
+    var agentStatus = normalizeStatus(data.agentStatus);
+    if (status === "could_not_complete") return true;
+    if (status === "needs_evidence") return true;
+    if (agentStatus === "ready" && verdict && verdict !== "pending") return true;
+    return false;
+  }
+
+  function mapCheckState(check) {
+    var state = normalizeStatus(check && check.state);
+    if (state === "passed") return "done";
+    if (state === "pending") return "active";
+    if (state === "failed" || state === "conflict") return "fail";
+    if (state === "unavailable") return "fail";
+    return "pending";
+  }
+
+  function renderPipeline(data) {
+    var checks = data.checks || [];
+    var byId = {};
+    checks.forEach(function (c) { byId[c.id] = c; });
+
+    var html = "";
+    PIPELINE_STEPS.forEach(function (step, idx) {
+      var related = step.checkIds.map(function (id) { return byId[id]; }).filter(Boolean);
+      var state = "pending";
+      var summary = "Waiting…";
+      var label = step.label;
+
+      if (step.id === "followup") {
+        var turns = data.conversationTurns || [];
+        state = turns.length ? "done" : (isTerminalState(data) ? "done" : "pending");
+        summary = turns.length ? (turns.length + " follow-up message" + (turns.length > 1 ? "s" : "") + " recorded") : "Available after first result";
+      } else if (related.length) {
+        var states = related.map(mapCheckState);
+        if (states.indexOf("active") >= 0) state = "active";
+        else if (states.every(function (s) { return s === "done"; })) state = "done";
+        else if (states.indexOf("fail") >= 0 && states.indexOf("done") >= 0) state = "active";
+        else if (states.indexOf("fail") >= 0) state = "fail";
+        else if (states.indexOf("done") >= 0) state = "active";
+        var activeCheck = related.find(function (c) { return mapCheckState(c) === "active"; }) || related[related.length - 1];
+        summary = activeCheck ? activeCheck.summary || activeCheck.label : summary;
+      } else if (idx === 0) {
+        state = "done";
+        summary = "Offer received";
+      }
+
+      var dotInner = state === "done" ? iconSvg("check") : (state === "fail" ? iconSvg("alert") : "");
+      html += '<div class="pipe-step ' + state + '">' +
+        '<div class="pipe-dot" aria-hidden="true">' + dotInner + '</div>' +
+        '<div class="pipe-label">' + esc(label) + '</div>' +
+        '<div class="pipe-summary">' + esc(summary) + '</div>' +
+      '</div>';
+    });
+    $("pipeline").innerHTML = html;
+  }
+
+  function extractStreamPreview(streamText) {
+    if (!streamText) return "";
+    var text = streamText;
+    try {
+      var parsed = JSON.parse(streamText);
+      if (parsed.reasoning) return parsed.reasoning;
+      if (parsed.headline) return parsed.headline;
+      if (parsed.explanation) return parsed.explanation;
+    } catch (e) { /* partial JSON */ }
+    var reasoningMatch = text.match(/"reasoning"\s*:\s*"([^"]*)/);
+    if (reasoningMatch) return reasoningMatch[1].replace(/\\n/g, "\n");
+    var headlineMatch = text.match(/"headline"\s*:\s*"([^"]*)/);
+    if (headlineMatch) return headlineMatch[1];
+    return text.slice(0, 420) + (text.length > 420 ? "…" : "");
+  }
+
+  function renderWaitView(data) {
+    var status = normalizeStatus(data.status);
+    var agentStatus = normalizeStatus(data.agentStatus);
+    var title = "Gathering evidence";
+    var subtitle = data.stage ? String(data.stage) : "Running deterministic checks and approved source lookups.";
+
+    if (status === "completed" && normalizeStatus(data.verdict) === "pending") {
+      title = "Evidence ready — agent judging";
+      subtitle = data.headline || "Creda separated verified evidence from what still needs checking.";
+    }
+    if (agentStatus === "streaming") {
+      title = "Creda explains its judgment";
+      subtitle = "Structured review in progress — this usually takes under a minute.";
+    }
+
+    $("wait-title").textContent = title;
+    $("wait-subtitle").textContent = subtitle;
+    renderPipeline(data);
+
+    var streamPreview = extractStreamPreview(data.agentStreamText);
+    var reasoning = data.agentReasoning || "";
+    var bodyText = streamPreview || reasoning || data.headline || "Waiting for agent review…";
+    $("stream-body").textContent = bodyText;
+  }
+
+  var BLOCK_RENDERERS = {
+    verdict_banner: function (block, data) {
+      var props = block.props || {};
+      var verdict = normalizeStatus(data.verdict);
+      var el = document.createElement("article");
+      el.className = "block verdict-banner " + verdictClass(verdict);
+      el.innerHTML =
+        '<div class="verdict-tag">' + esc(verdictLabel(verdict)) + '</div>' +
+        '<h2>' + esc(props.title || data.headline || "Review complete") + '</h2>' +
+        (props.subtitle ? '<p>' + esc(props.subtitle) + '</p>' : '');
+      return el;
+    },
+
+    explanation: function (block) {
+      var props = block.props || {};
+      var el = document.createElement("article");
+      el.className = "block block-card";
+      el.innerHTML = '<h3>Summary</h3><p class="reasoning-text">' + esc(props.text || "") + '</p>';
+      return el;
+    },
+
+    research_status: function (block) {
+      var props = block.props || {};
+      var items = props.items || [];
+      var el = document.createElement("article");
+      el.className = "block block-card";
+      var lis = items.map(function (item) { return "<li>" + esc(item) + "</li>"; }).join("");
+      el.innerHTML = '<h3>' + esc(props.label || "What Creda checked") + '</h3><ul class="list-plain">' + lis + '</ul>';
+      return el;
+    },
+
+    evidence_highlights: function (block) {
+      var props = block.props || {};
+      var items = props.items || [];
+      var el = document.createElement("article");
+      el.className = "block block-card";
+      var body = items.map(function (item) {
+        var outcome = normalizeStatus(item.outcome);
+        return '<li><div class="evidence-item">' +
+          '<div class="evidence-meta">' +
+            '<span class="badge ' + esc(outcome) + '">' + esc(outcome) + '</span>' +
+            '<span class="badge t' + esc(item.tier) + '">Tier ' + esc(item.tier) + '</span>' +
+            '<span class="badge">' + esc((item.check || "").replace(/_/g, " ")) + '</span>' +
+          '</div>' +
+          '<div>' + esc(item.text || item.excerpt || "") + '</div>' +
+        '</div></li>';
+      }).join("");
+      el.innerHTML = '<h3>Evidence highlights</h3><ul class="list-plain">' + body + '</ul>';
+      return el;
+    },
+
+    tactic_highlights: function (block) {
+      var props = block.props || {};
+      var items = props.items || [];
+      var el = document.createElement("article");
+      el.className = "block block-card";
+      var body = items.map(function (item) {
+        return '<li class="tactic-item"><strong>' + esc(item.title || item.display_name || "") + '</strong><span>' + esc(item.guidance || item.user_guidance || "") + '</span></li>';
+      }).join("");
+      el.innerHTML = '<h3>Matched scam patterns</h3><ul class="list-plain">' + body + '</ul>';
+      return el;
+    },
+
+    uncertainty: function (block, data) {
+      var props = block.props || {};
+      var items = props.items || data.unresolved || [];
+      if (!items.length) return null;
+      var el = document.createElement("article");
+      el.className = "block block-card";
+      var body = items.map(function (item) {
+        var text = typeof item === "string" ? item : (item.text || item.message || "");
+        return "<li>" + esc(text) + "</li>";
+      }).join("");
+      el.innerHTML = '<h3>What we could not confirm</h3><ul class="list-plain">' + body + '</ul>';
+      return el;
+    },
+
+    safe_actions: function (block) {
+      var props = block.props || {};
+      var items = props.items || [];
+      var el = document.createElement("article");
+      el.className = "block block-card";
+      var body = items.map(function (item) {
+        var tone = normalizeStatus(item.tone || "");
+        if (tone === "urgent") urgentSafeAction = item;
+        return '<div class="safe-action ' + esc(tone) + '"><strong>' + esc(item.label || "") + '</strong><span>' + esc(item.detail || "") + '</span></div>';
+      }).join("");
+      el.innerHTML = '<h3>Safe next steps</h3><div class="safe-actions">' + body + '</div>';
+      return el;
+    },
+
+    follow_up_questions: function (block, data) {
+      var props = block.props || {};
+      var items = props.items || data.agentFollowups || data.needsMoreInfo || [];
+      if (!items.length) return null;
+      var el = document.createElement("article");
+      el.className = "block block-card";
+      var body = items.map(function (q) {
+        return '<button type="button" class="followup-q" data-q="' + esc(q) + '">' + esc(q) + '</button>';
+      }).join("");
+      el.innerHTML = '<h3>Questions that would help verify</h3>' + body;
+      el.querySelectorAll(".followup-q").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          $("followup-input").value = btn.getAttribute("data-q") || "";
+          $("followup-input").focus();
+        });
+      });
+      return el;
+    },
+
+    conversation: function (block, data) {
+      var props = block.props || {};
+      var turns = props.turns || data.conversationTurns || [];
+      if (!turns.length) return null;
+      var el = document.createElement("article");
+      el.className = "block block-card";
+      var body = turns.map(function (turn) {
+        var role = normalizeStatus(turn.role || "user");
+        return '<div class="conversation-turn ' + esc(role) + '"><div class="role">' + esc(role) + '</div><div>' + esc(turn.text || "") + '</div></div>';
+      }).join("");
+      el.innerHTML = '<h3>Follow-up conversation</h3>' + body;
+      return el;
+    }
+  };
+
+  function renderBlocks(data) {
+    var stack = $("result-stack");
+    stack.innerHTML = "";
+    urgentSafeAction = null;
+
+    var presentation = data.agentPresentation || {};
+    var blocks = presentation.blocks || [];
+
+    if (!blocks.length) {
+      blocks = buildFallbackBlocks(data);
+    }
+
+    var verdictBlock = blocks.find(function (b) { return b.type === "verdict_banner"; });
+    var otherBlocks = blocks.filter(function (b) { return b.type !== "verdict_banner"; });
+
+    if (verdictBlock) {
+      var bannerNode = BLOCK_RENDERERS.verdict_banner(verdictBlock, data);
+      if (bannerNode) stack.appendChild(bannerNode);
+    }
+
+    if (data.agentReasoning) {
+      var reasoningEl = document.createElement("article");
+      reasoningEl.className = "block reasoning-card";
+      reasoningEl.innerHTML = '<h3>Creda explains its judgment</h3><p class="reasoning-text">' + esc(data.agentReasoning) + '</p>';
+      stack.appendChild(reasoningEl);
+    }
+
+    otherBlocks.forEach(function (block) {
+      if (block.type === "verdict_banner") return;
+      var renderer = BLOCK_RENDERERS[block.type];
+      if (!renderer) return;
+      var node = renderer(block, data);
+      if (node) stack.appendChild(node);
+    });
+
+    if (data.agentConfidence != null) {
+      var conf = document.createElement("div");
+      conf.className = "meta-row";
+      conf.innerHTML = '<span>Confidence</span><strong>' + Math.round(Number(data.agentConfidence) * 100) + '%</strong>';
+      stack.appendChild(conf);
+    }
+
+    if (data.agentGuardrailNote) {
+      var note = document.createElement("div");
+      note.className = "guardrail-note";
+      note.textContent = data.agentGuardrailNote === "fallback"
+        ? "Agent inference used a rule-based fallback. Deterministic evidence above still applies."
+        : String(data.agentGuardrailNote);
+      stack.appendChild(note);
+    }
+
+    var timeline = document.createElement("section");
+    timeline.className = "lambda-timeline";
+    timeline.innerHTML = '<details><summary>' + iconSvg("chevron") + ' Lambda evidence timeline</summary><div class="timeline-in" id="lambda-timeline-in"></div></details>';
+    stack.appendChild(timeline);
+    renderPipelineIn(timeline.querySelector("#lambda-timeline-in"), data);
+
+    if ((data.conversationTurns || []).length && !blocks.some(function (b) { return b.type === "conversation"; })) {
+      var convNode = BLOCK_RENDERERS.conversation({ props: {} }, data);
+      if (convNode) stack.insertBefore(convNode, timeline);
+    }
+
+    updateStickySafe();
+    updateFooterMeta(data);
+    setBodyVerdict(normalizeStatus(data.verdict));
+  }
+
+  function buildFallbackBlocks(data) {
+    var blocks = [];
+    blocks.push({
+      type: "verdict_banner",
+      props: {
+        title: data.headline || verdictLabel(normalizeStatus(data.verdict)),
+        subtitle: data.agentSummary || "Creda separated verified evidence from what still needs checking."
+      }
+    });
+    if (data.agentSummary || data.headline) {
+      blocks.push({ type: "explanation", props: { text: data.agentSummary || data.headline } });
+    }
+    if (data.evidence && data.evidence.length) {
+      blocks.push({
+        type: "evidence_highlights",
+        props: {
+          items: data.evidence.map(function (ev) {
+            return {
+              text: ev.excerpt,
+              check: ev.check,
+              outcome: ev.outcome,
+              tier: ev.tier
+            };
+          })
+        }
+      });
+    }
+    if (data.matchedTactics && data.matchedTactics.length) {
+      blocks.push({
+        type: "tactic_highlights",
+        props: {
+          items: data.matchedTactics.map(function (t) {
+            return {
+              title: t.display_name,
+              guidance: t.user_guidance,
+              tacticId: t.tactic_id
+            };
+          })
+        }
+      });
+    }
+    if (data.unresolved && data.unresolved.length) {
+      blocks.push({ type: "uncertainty", props: { items: data.unresolved } });
+    }
+    blocks.push({
+      type: "safe_actions",
+      props: {
+        items: buildSafeActions(data)
+      }
+    });
+    var followups = data.agentFollowups || data.needsMoreInfo || [];
+    if (followups.length) {
+      blocks.push({ type: "follow_up_questions", props: { items: followups } });
+    }
+    return blocks;
+  }
+
+  function buildSafeActions(data) {
+    var verdict = normalizeStatus(data.verdict);
+    var items = [];
+    if (verdict === "high_risk") {
+      items.push({ label: "Do not pay", detail: "Stop payment until you verify on an official careers channel.", tone: "urgent" });
+    }
+    items.push({ label: "Verify on official careers site", detail: "Compare sender, role, and hiring process with the employer's official jobs page.", tone: "primary" });
+    if (verdict !== "high_risk") {
+      items.push({ label: "Do not share documents yet", detail: "Wait until sender and vacancy are confirmed through official channels.", tone: "urgent" });
+    }
+    return items;
+  }
+
+  function renderPipelineIn(container, data) {
+    container.innerHTML = "";
+    var clone = $("pipeline").cloneNode(true);
+    clone.removeAttribute("id");
+    container.appendChild(clone);
+  }
+
+  function updateStickySafe() {
+    var sticky = $("sticky-safe");
+    if (urgentSafeAction) {
+      document.body.classList.add("has-urgent-safe");
+      sticky.innerHTML = "<strong>" + esc(urgentSafeAction.label) + "</strong><span>" + esc(urgentSafeAction.detail || "") + "</span>";
+    } else {
+      document.body.classList.remove("has-urgent-safe");
+      sticky.innerHTML = "";
+    }
+  }
+
+  function updateFooterMeta(data) {
+    if (!data) return;
+    $("footer-pattern").textContent = data.patternVersion || "—";
+    $("footer-dataset").textContent = data.datasetVersion || "—";
+  }
+
+  function renderResult(data) {
+    latestCase = data;
+    showView("result");
+    $("error-banner").classList.add("hidden");
+
+    if (normalizeStatus(data.status) === "could_not_complete") {
+      $("error-banner").classList.remove("hidden");
+      $("error-banner").textContent = data.stage || "Creda could not complete this review. You can try again with more details.";
+    }
+
+    renderBlocks(data);
+  }
+
+  async function pollOnce() {
+    if (!session.caseId || !session.token) return;
+    try {
+      var data = await apiFetch("/cases/" + encodeURIComponent(session.caseId), {
+        headers: { "X-Case-Token": session.token }
+      });
+      latestCase = data;
+
+      if (isWaitingState(data)) {
+        showView("wait");
+        renderWaitView(data);
+        return false;
+      }
+
+      if (isTerminalState(data)) {
+        stopPolling();
+        renderResult(data);
+        return true;
+      }
+
+      showView("wait");
+      renderWaitView(data);
+      return false;
+    } catch (e) {
+      stopPolling();
+      showView("result");
+      $("error-banner").classList.remove("hidden");
+      $("error-banner").textContent = e.message || "Lost connection while checking this case.";
+      return true;
+    }
+  }
+
+  function startPolling() {
+    stopPolling();
+    startElapsedTimer();
+    var deadline = Date.now() + POLL_MAX_MS;
+
+    async function tick() {
+      var done = await pollOnce();
+      if (done) return;
+      if (Date.now() >= deadline) {
+        stopPolling();
+        if (latestCase) {
+          renderResult(latestCase);
+          $("error-banner").classList.remove("hidden");
+          $("error-banner").textContent = "Review is taking longer than expected. Partial results are shown below.";
+        }
+        return;
+      }
+      pollTimer = setTimeout(tick, POLL_MS);
+    }
+
+    tick();
+  }
+
+  async function submitFollowup() {
+    var text = $("followup-input").value.trim();
+    if (!text || !session.caseId || !session.token) return;
+    $("btn-followup").disabled = true;
+    try {
+      await apiFetch("/cases/" + encodeURIComponent(session.caseId) + "/followup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Case-Token": session.token
+        },
+        body: JSON.stringify({ text: text })
+      });
+      $("followup-input").value = "";
+      showView("wait");
+      $("wait-title").textContent = "Re-verifying with your context";
+      $("wait-subtitle").textContent = "Creda will incorporate your follow-up and refresh the judgment.";
+      startPolling();
+    } catch (e) {
+      alert(e.message || "Follow-up failed.");
+    } finally {
+      $("btn-followup").disabled = false;
+    }
+  }
+
+  async function submitReport() {
+    if (!session.caseId || !session.token) {
+      $("report-status").textContent = "Run a check first to draft a report.";
+      return;
+    }
+    $("report-status").textContent = "Submitting…";
+    try {
+      var data = await apiFetch("/cases/" + encodeURIComponent(session.caseId) + "/report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Case-Token": session.token
+        },
+        body: JSON.stringify({ note: "User-initiated report from WorkOffer Shield UI." })
+      });
+      $("report-status").textContent = data.reportId
+        ? ("Report draft saved (" + data.reportId + "). Our team reviews redacted submissions.")
+        : "Report submitted for review.";
+    } catch (e) {
+      $("report-status").textContent = "Report endpoint unavailable in this environment. Case ID: " + session.caseId;
+    }
+  }
+
+  function resetToIntake() {
+    stopPolling();
+    session = { caseId: null, token: null };
+    saveSession();
+    latestCase = null;
+    urgentSafeAction = null;
+    document.body.classList.remove("has-urgent-safe");
+    document.body.removeAttribute("data-verdict");
+    $("result-stack").innerHTML = "";
+    $("error-banner").classList.add("hidden");
+    showView("intake");
+  }
+
+  function loadDemo(demo) {
+    $("offer-text").value = demo.offerText;
+    $("sender-email").value = demo.senderEmail || "";
+    $("offer-links").value = demo.links || "";
+    $("employer-hint").value = demo.employerHint || "";
+  }
+
+  function initDemos() {
+    var row = $("demo-row");
+    DEMOS.forEach(function (demo) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "demo-chip";
+      btn.innerHTML = iconSvg(demo.icon) + esc(demo.label);
+      btn.addEventListener("click", function () { loadDemo(demo); });
+      row.appendChild(btn);
+    });
+  }
+
+  function initFog() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    document.addEventListener("mousemove", function (e) {
+      var x = (e.clientX / window.innerWidth) * 100;
+      var y = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty("--mx", x + "%");
+      document.documentElement.style.setProperty("--my", y + "%");
+    }, { passive: true });
+  }
+
+  function initDetailsToggle() {
+    var toggle = $("details-toggle");
+    var grid = $("details-grid");
+    toggle.addEventListener("click", function () {
+      var open = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", open ? "false" : "true");
+      grid.classList.toggle("open", !open);
+    });
+  }
+
+  function init() {
+    initFog();
+    initDemos();
+    initDetailsToggle();
+    restoreSession();
+    checkHealth();
+
+    $("btn-check").addEventListener("click", submitCase);
+    $("btn-followup").addEventListener("click", submitFollowup);
+    $("btn-report").addEventListener("click", submitReport);
+    $("btn-new-check").addEventListener("click", resetToIntake);
+
+    $("followup-input").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") submitFollowup();
+    });
+
+    if (session.caseId && session.token) {
+      showView("wait");
+      startPolling();
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+  </script>
+</body>
+</html>

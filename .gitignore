@@ -22,3 +22,4 @@ Pipfile.lock
 # Documentation artifacts
 *.pdf
 *.html
+!frontend/index.html
