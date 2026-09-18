@@ -311,6 +311,18 @@ def _build_unresolved(evidence: list[EvidenceRecord]) -> list[str]:
     return list(dict.fromkeys(msgs))  # deduplicate, preserve order
 
 
+def update_stage(case_id: str, new_stage: str):
+    """Updates the real-time stage in DynamoDB so the UI can show live progress."""
+    try:
+        _table.update_item(
+            Key={"PK": f"CASE#{case_id}", "SK": "REV#0"},
+            UpdateExpression="SET stage = :s",
+            ExpressionAttributeValues={":s": new_stage}
+        )
+    except Exception as e:
+        logger.warning(f"Failed to update stage to {new_stage}: {e}")
+
+
 # ---------------------------------------------------------------------------
 # Core analysis pipeline
 # ---------------------------------------------------------------------------
@@ -325,6 +337,7 @@ def _analyse_case(case_id: str, item: dict) -> None:
     bedrock_error = False
 
     # Step 1: Extract claims from offer text via Bedrock
+    update_stage(case_id, "Extracting entities from job offer...")
     _update_stage(case_id, "running", STAGES["extracting_claims"])
     bedrock_result = _extract_claims_bedrock(offer_text, case_id)
     claims_raw: list[dict] = bedrock_result.get("claims", [])

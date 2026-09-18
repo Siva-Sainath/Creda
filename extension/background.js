@@ -8,24 +8,11 @@ chrome.action.onClicked.addListener(async (tab) => {
     // 1. Capture screen immediately
     const screenshotDataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'jpeg', quality: 90 });
     
-    // 2. Extract text and URL
-    const [{ result }] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['content.js']
+    // 2. Ask content script to extract text, url and display the floating modal
+    chrome.tabs.sendMessage(tab.id, { 
+      action: "toggleModal", 
+      screenshot: screenshotDataUrl 
     });
-
-    // 3. Save to local storage for the new tab to pick up
-    await chrome.storage.local.set({
-      captureData: {
-        text: result?.text || '',
-        url: result?.url || tab.url,
-        extractedLinks: result?.extractedLinks || [],
-        screenshot: screenshotDataUrl
-      }
-    });
-
-    // 4. Open the full page UI
-    chrome.tabs.create({ url: 'investigate.html' });
 
   } catch (err) {
     console.error("Capture failed:", err);

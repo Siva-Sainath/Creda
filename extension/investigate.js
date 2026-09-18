@@ -4,6 +4,13 @@ let currentToken = null;
 let pollInterval = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('btn-close').addEventListener('click', () => {
+    if (window.self !== window.top) {
+      parent.postMessage("closeModal", "*");
+    } else {
+      window.close();
+    }
+  });
   // Load data from storage passed by the background script
   chrome.storage.local.get(['captureData'], (result) => {
     const data = result.captureData;
