@@ -52,7 +52,7 @@
     *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
-      margin: 0; min-height: 100vh; font-family: var(--font); color: var(--ink);
+      margin: 0; min-height: 100dvh; font-family: var(--font); color: var(--ink);
       background-color: var(--bg);
       background-image:
         radial-gradient(ellipse 75% 60% at 5% -10%, var(--bg-mesh-blue), transparent 60%),
@@ -1406,7 +1406,21 @@
     }
 
     /* v58 single-card intake + scannable result board */
-    body.creda-v58 .shell { max-width: 720px; margin: 0 auto; }
+    /* v58/v59/v60 shell: exactly viewport height on desktop; overflow hidden so panes scroll internally */
+    body.creda-v58 .shell { 
+      min-height: 100dvh; 
+      width: 100%; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    
+    @media (min-width: 1024px) {
+      body.creda-v58 .shell {
+        height: 100dvh;
+        overflow: hidden;
+      }
+      /* Allow the page to scroll on mobile/tablet */
+    }
     body.creda-v58 .intake-single { display: grid; gap: 1rem; }
     body.creda-v58 .intake-head { text-align: left; }
     body.creda-v58 .intake-kicker {
@@ -1578,6 +1592,342 @@
     body.creda-v58 #stream-body,
     body.creda-v58 #judgment-host:not(:empty),
     body.creda-v58 #research-host:not(:empty) { display: none !important; }
+    
+    /* v59/v60: Two-pane workspace layout */
+    
+    /* T1: Fix main flex chain — main must stretch to fill below topbar */
+    body.creda-v58 main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      max-width: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    /* T6: Design tokens */
+    body.creda-v58 {
+      --header-h: 3.5rem;
+      --workspace-max: min(1400px, calc(100vw - 2rem));
+      --gutter: clamp(1rem, 3vw, 2rem);
+    }
+    
+    /* T5: Topbar full-bleed in v59/v60 */
+    body.creda-v58 .topbar {
+      width: 100%;
+      max-width: none;
+      padding-left: var(--gutter);
+      padding-right: var(--gutter);
+    }
+
+    /* T2: Fix #view-intake section + .intake-single flex chain */
+    body.creda-v58 #view-intake {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow-y: auto;
+    }
+    /* Override the grid on intake-single to flex so composer-card can grow */
+    body.creda-v58 .intake-single {
+      flex: 1;
+      display: flex !important;
+      flex-direction: column;
+      min-height: 0;
+      gap: 1rem;
+      padding: 1rem 0 1rem;
+    }
+    /* Composer card grows but does NOT push lower elements out —
+       use flex-grow with no flex-shrink protection on siblings */
+    @media (min-width: 1024px) {
+      body.creda-v58 .composer-card {
+        /* grow but cap at a sensible max so chips/telegram remain visible */
+        max-height: 55vh;
+      }
+      body.creda-v58 .composer-card textarea {
+        max-height: calc(55vh - 120px);
+      }
+      /* Static items below composer: don't shrink */
+      body.creda-v58 .composer-safety,
+      body.creda-v58 .demo-chips,
+      body.creda-v58 .telegram-row,
+      body.creda-v58 .intake-explain {
+        flex-shrink: 0;
+      }
+    }
+    
+    body.creda-v58 .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: var(--gutter);
+      padding-top: 0;
+      width: 100%;
+      max-width: var(--workspace-max);
+      min-height: 0;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 1024px) {
+      body.creda-v58 .workspace {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 1.5rem;
+      }
+    }
+    
+    body.creda-v58 .pane {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    
+    body.creda-v58 .pane-intake {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 0;
+    }
+    
+    body.creda-v58 .pane-casefile {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: min(60vh, 500px);
+    }
+    
+    /* T7: On desktop, right pane fills workspace height with internal scroll */
+    @media (min-width: 1024px) {
+      body.creda-v58 .pane-casefile {
+        min-height: 0;
+        flex: 1;
+        overflow-y: auto;
+      }
+      /* Left pane also scrollable internally */
+      body.creda-v58 .pane-intake {
+        overflow-y: auto;
+      }
+      body.creda-v58 #view-result {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      body.creda-v58 .result-board {
+        flex: 1;
+      }
+    }
+    
+    /* Intake card grows to fill left pane */
+    body.creda-v58 .composer-card {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 320px;
+    }
+    
+    body.creda-v58 .composer-card textarea {
+      flex: 1;
+      min-height: 180px;
+      max-height: 50vh;
+    }
+    
+    @media (min-width: 1024px) {
+      body.creda-v58 .composer-card textarea {
+        min-height: 280px;
+        max-height: none;
+      }
+    }
+    
+    /* Telegram band - full width, slim */
+    body.creda-v58 .telegram-band {
+      padding: .65rem 1rem;
+      background: rgba(255,255,255,.75);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    
+    body.creda-v58 .telegram-band-inner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      max-width: min(1400px, calc(100vw - 2rem));
+      margin: 0 auto;
+    }
+    
+    body.creda-v58 .telegram-band-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #229ED9;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    
+    body.creda-v58 .telegram-band-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    body.creda-v58 .telegram-band-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+    
+    body.creda-v58 .telegram-band-title {
+      font-weight: 700;
+      font-size: .85rem;
+    }
+    
+    body.creda-v58 .telegram-band-title a {
+      color: var(--ink);
+      text-decoration: none;
+    }
+    
+    body.creda-v58 .telegram-band-steps {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .75rem;
+      color: var(--muted);
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body.creda-v58 .telegram-band-steps li {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+    }
+    
+    body.creda-v58 .telegram-band-steps li::before {
+      content: counter(step);
+      counter-increment: step;
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: rgba(15,36,51,.08);
+      font-size: .65rem;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      font-family: var(--mono);
+    }
+    
+    body.creda-v58 .telegram-band-steps {
+      counter-reset: step;
+    }
+    
+    body.creda-v58 .telegram-band-steps code {
+      font-family: var(--mono);
+      font-size: .7rem;
+      background: rgba(15,36,51,.05);
+      padding: .1rem .3rem;
+      border-radius: 3px;
+    }
+    
+    @media (max-width: 768px) {
+      body.creda-v58 .telegram-band-steps {
+        display: none;
+      }
+    }
+    
+    /* Case file pane - wait and result stacked */
+    body.creda-v58 .casefile-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    
+    /* Follow-up pinned to bottom of right pane */
+    body.creda-v58 .followup-composer {
+      position: sticky;
+      bottom: 0;
+      margin-top: auto;
+      padding-top: .75rem;
+      background: linear-gradient(180deg, transparent, var(--bg) 20%);
+    }
+    
+    @media (min-width: 1024px) {
+      body.creda-v58 .followup-composer {
+        position: relative;
+        bottom: auto;
+        margin-top: .75rem;
+        padding: .75rem;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(255,255,255,.85);
+      }
+    }
+    
+    /* Result board fills right pane */
+    body.creda-v58 .result-board {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+    
+    /* Wait single fills pane */
+    body.creda-v58 .wait-single {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+    
+    /* Empty state for right pane */
+    body.creda-v58 .casefile-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+    }
+    
+    body.creda-v58 .casefile-empty-icon {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1rem;
+      opacity: .4;
+    }
+    
+    body.creda-v58 .casefile-empty-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0 0 .5rem;
+      color: var(--ink);
+    }
+    
+    body.creda-v58 .casefile-empty-text {
+      font-size: .85rem;
+      margin: 0;
+      max-width: 280px;
+    }
+    
+    /* T4: Empty state visibility — hide when wait or result is active */
+    body.creda-v58 .pane-casefile:has(#view-wait:not(.hidden)) #casefile-empty,
+    body.creda-v58 .pane-casefile:has(#view-result:not(.hidden)) #casefile-empty {
+      display: none;
+    }
+    /* Mobile: hide empty state always (not needed in single column flow) */
+    @media (max-width: 1023px) {
+      body.creda-v58 #casefile-empty {
+        display: none;
+      }
+    }
+    
     @media (max-width: 640px) {
       body.creda-v58 .tactic-line { white-space: normal; }
       body.creda-v58 .prestream-step { font-size: .6rem; padding: .35rem .15rem; }

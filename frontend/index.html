@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Creda — verify a job offer against official sources before you reply." />
   <title>Creda — Verify offers</title>
-  <meta name="creda-build" content="baseten-20260919-58-single-card" />
+  <meta name="creda-build" content="baseten-20260919-v60-fullscreen" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -35,146 +35,173 @@
     </header>
 
     <main>
-      <section id="view-intake">
-        <div class="intake-single">
-          <header class="intake-head">
-            <p class="intake-kicker">Case intake · ap-south-1</p>
-            <h1 id="hero-title">Paste the offer</h1>
-            <p class="intake-lede">Paste the message or drop a screenshot. Creda checks official sources before you reply.</p>
-          </header>
+      <div class="workspace">
 
-          <div class="composer-card" id="composer-shell">
-            <div class="drop-overlay hidden" id="drop-overlay" aria-hidden="true">Drop screenshot or PDF here</div>
-            <div class="attachment-row hidden" id="attachment-row" aria-live="polite"></div>
-            <div class="parsed-links hidden" id="parsed-links" aria-label="Detected links"></div>
-            <textarea id="offer-text" placeholder="Paste the recruiter message or drop a screenshot / PDF on this card…" spellcheck="false" rows="6"></textarea>
-            <div class="composer-toolbar">
-              <button type="button" class="attach-btn attach-plus" id="btn-attach" aria-label="Attach screenshot or PDF" title="Attach">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-              </button>
-              <div class="composer-actions">
-                <button type="button" class="btn btn-ghost btn-sm" id="btn-clear">Clear</button>
-                <button type="button" class="send-btn" id="btn-check" aria-label="Check this offer" disabled>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                  <span class="send-label">Check</span>
-                </button>
+        <!-- Left pane: Intake -->
+        <div class="pane pane-intake">
+          <section id="view-intake">
+            <div class="intake-single">
+              <header class="intake-head">
+                <p class="intake-kicker">Case intake · ap-south-1</p>
+                <h1 id="hero-title">Paste the offer</h1>
+                <p class="intake-lede">Paste the message or drop a screenshot. Creda checks official sources before you reply.</p>
+              </header>
+
+              <div class="composer-card" id="composer-shell">
+                <div class="drop-overlay hidden" id="drop-overlay" aria-hidden="true">Drop screenshot or PDF here</div>
+                <div class="attachment-row hidden" id="attachment-row" aria-live="polite"></div>
+                <div class="parsed-links hidden" id="parsed-links" aria-label="Detected links"></div>
+                <textarea id="offer-text" placeholder="Paste the recruiter message or drop a screenshot / PDF on this card…" spellcheck="false" rows="6"></textarea>
+                <div class="composer-toolbar">
+                  <button type="button" class="attach-btn attach-plus" id="btn-attach" aria-label="Attach screenshot or PDF" title="Attach">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                  <div class="composer-actions">
+                    <button type="button" class="btn btn-ghost btn-sm" id="btn-clear">Clear</button>
+                    <button type="button" class="send-btn" id="btn-check" aria-label="Check this offer" disabled>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                      <span class="send-label">Check</span>
+                    </button>
+                  </div>
+                </div>
+                <input type="file" id="file-input" class="hidden" accept="image/jpeg,image/png,image/webp,application/pdf" multiple tabindex="-1" />
+              </div>
+
+              <p class="composer-safety">Don't paste OTPs, bank details, or passwords.</p>
+              <div id="intake-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
+
+              <div class="demo-chips" id="links-chips" aria-label="Quick examples">
+                <button type="button" class="demo-chip" data-demo="Amazon hiring. Pay INR 5000 security deposit to hr@amaz0n-jobs.in before onboarding.">Fee scam</button>
+                <button type="button" class="demo-chip" data-demo="Flipkart WFH catalog tagging. Buy starter kit Rs 2499 via PhonePe. Training on WhatsApp only.">Kit scam</button>
+              </div>
+
+              <div class="telegram-row" id="telegram-row">
+                <a class="telegram-row-icon" href="https://t.me/CredashieldBot" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                </a>
+                <div class="telegram-row-body">
+                  <p class="telegram-row-title"><a href="https://t.me/CredashieldBot" target="_blank" rel="noopener">@CredashieldBot</a></p>
+                  <ol class="telegram-steps">
+                    <li>Open the bot</li>
+                    <li>Send <code>/start</code></li>
+                    <li>Forward the job message</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="intake-explain" id="intake-explain" aria-hidden="true">
+                <svg viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg" class="explain-svg">
+                  <path d="M24 52 L56 40 H120 L136 52 H280 V68 H24 Z" fill="#e8efe8" stroke="#3d5a45" stroke-width="1.2"/>
+                  <rect x="56" y="28" width="48" height="56" rx="6" fill="#fff" stroke="#d7e0e8"/>
+                  <path d="M68 42h32M68 52h24M68 62h28" stroke="#c3ced8" stroke-width="1.2"/>
+                  <circle cx="248" cy="44" r="18" fill="#eff4ff" stroke="#155eef" stroke-width="1.5"/>
+                  <path d="M240 44h16M248 36v16" stroke="#155eef" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <p class="explain-caption" id="explain-caption">Paste → official checks → stamped ruling</p>
               </div>
             </div>
-            <input type="file" id="file-input" class="hidden" accept="image/jpeg,image/png,image/webp,application/pdf" multiple tabindex="-1" />
-          </div>
+          </section>
+        </div><!-- /pane-intake -->
 
-          <p class="composer-safety">Don't paste OTPs, bank details, or passwords.</p>
-          <div id="intake-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
+        <!-- Right pane: Case file (empty → wait → result) -->
+        <div class="pane pane-casefile">
 
-          <div class="demo-chips" id="links-chips" aria-label="Quick examples">
-            <button type="button" class="demo-chip" data-demo="Amazon hiring. Pay INR 5000 security deposit to hr@amaz0n-jobs.in before onboarding.">Fee scam</button>
-            <button type="button" class="demo-chip" data-demo="Flipkart WFH catalog tagging. Buy starter kit Rs 2499 via PhonePe. Training on WhatsApp only.">Kit scam</button>
-          </div>
-
-          <div class="telegram-row" id="telegram-row">
-            <a class="telegram-row-icon" href="https://t.me/CredashieldBot" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-            </a>
-            <div class="telegram-row-body">
-              <p class="telegram-row-title"><a href="https://t.me/CredashieldBot" target="_blank" rel="noopener">@CredashieldBot</a></p>
-              <ol class="telegram-steps">
-                <li>Open the bot</li>
-                <li>Send <code>/start</code></li>
-                <li>Forward the job message</li>
-              </ol>
+          <!-- Empty state: shown until a case is started -->
+          <div class="casefile-empty" id="casefile-empty" aria-label="No active case">
+            <div class="casefile-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="40" cy="40" r="36" stroke="currentColor" stroke-width="2" opacity=".3"/>
+                <path d="M40 20 52 26v11c0 8-5 14.5-12 17C27 51.5 22 45 22 37V26l18-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"/>
+                <path d="M33 40l4.5 4.5 9-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </div>
+            <p class="casefile-empty-title">No case open</p>
+            <p class="casefile-empty-text">Paste a job offer on the left and press Check.</p>
           </div>
 
-          <div class="intake-explain" id="intake-explain" aria-hidden="true">
-            <svg viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg" class="explain-svg">
-              <path d="M24 52 L56 40 H120 L136 52 H280 V68 H24 Z" fill="#e8efe8" stroke="#3d5a45" stroke-width="1.2"/>
-              <rect x="56" y="28" width="48" height="56" rx="6" fill="#fff" stroke="#d7e0e8"/>
-              <path d="M68 42h32M68 52h24M68 62h28" stroke="#c3ced8" stroke-width="1.2"/>
-              <circle cx="248" cy="44" r="18" fill="#eff4ff" stroke="#155eef" stroke-width="1.5"/>
-              <path d="M240 44h16M248 36v16" stroke="#155eef" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <p class="explain-caption" id="explain-caption">Paste → official checks → stamped ruling</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="view-wait" class="hidden" aria-hidden="true">
-        <div class="wait-single">
-          <div class="wait-meta">
-            <h2 id="wait-title">Opening your case</h2>
-            <p id="wait-subtitle" class="wait-sub">Preparing the case file…</p>
-            <div class="elapsed" id="elapsed-timer" title="Elapsed time">0:00</div>
-          </div>
-          <div class="prestream-rail" id="prestream-rail" aria-label="Verification stages">
-            <span class="prestream-step" data-step="file">File</span>
-            <span class="prestream-step" data-step="signals">Signals</span>
-            <span class="prestream-step" data-step="check">Check</span>
-            <span class="prestream-step" data-step="qwen">Qwen</span>
-          </div>
-          <div class="stage-canvas" id="stage-canvas">
-            <svg viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg" id="stage-svg">
-              <g id="scene-intake" class="stage-scene">
-                <g id="stage-folder">
-                  <path d="M88 58 L108 48 H148 L158 58 H228 V88 H88 Z" fill="#e8efe8" stroke="#3d5a45" stroke-width="1.2"/>
-                  <rect id="stage-folder-tab" x="108" y="44" width="40" height="8" rx="2" fill="#c5d6c8"/>
-                </g>
-                <g id="stage-sheet">
-                  <rect x="118" y="22" width="84" height="52" rx="6" fill="#fff" stroke="#d7e0e8"/>
-                  <path d="M130 36h60M130 48h44M130 58h52" stroke="#c3ced8" stroke-width="1.5"/>
-                </g>
-              </g>
-              <g id="scene-evidence" class="stage-scene is-off">
-                <circle cx="108" cy="52" r="20" fill="#fff" stroke="#0f2433" stroke-width="2"/>
-                <line x1="122" y1="66" x2="136" y2="80" stroke="#0f2433" stroke-width="2.2" stroke-linecap="round"/>
-              </g>
-              <g id="scene-ocr" class="stage-scene is-off">
-                <rect x="96" y="22" width="128" height="68" rx="10" fill="#fff" stroke="#d7e0e8"/>
-                <line class="scan-line" x1="108" x2="212" y1="40" y2="40" stroke="#155eef" stroke-width="2"/>
-              </g>
-              <g id="scene-qwen" class="stage-scene is-off">
-                <circle cx="160" cy="50" r="28" fill="#eff4ff" stroke="#155eef" stroke-width="2"/>
-                <text x="160" y="54" text-anchor="middle" font-size="9" fill="#155eef" font-family="monospace" font-weight="700">QWEN</text>
-              </g>
-              <g id="scene-stamp" class="stage-scene is-off">
-                <g id="stage-stamp-press">
-                  <rect class="stamp-body" x="132" y="28" width="56" height="40" rx="6"/>
-                  <text class="stamp-text" x="160" y="54" text-anchor="middle" font-size="8" font-family="monospace" font-weight="700">RULING</text>
-                </g>
-              </g>
-            </svg>
-          </div>
-          <p class="official-status" id="official-status"></p>
-          <div class="evidence-slip" id="live-exhibits"></div>
-          <button type="button" class="btn btn-ghost" id="btn-cancel-wait">Back</button>
-        </div>
-      </section>
-
-      <section id="view-result" class="hidden" aria-hidden="true">
-        <div id="sticky-urgent" class="sticky-urgent hidden" role="status" aria-live="polite"></div>
-        <div class="result-board">
-          <div class="result-toolbar">
-            <button type="button" class="btn-text" id="btn-new">Check another</button>
-            <button type="button" class="btn-text" id="btn-report">Report a missed scam</button>
-          </div>
-          <div id="ruling-host" class="board-stamp-host"></div>
-          <h2 id="board-headline" class="board-headline"></h2>
-          <div id="tactics-host" class="board-tactics"></div>
-          <div id="exhibits-host" class="board-exhibits bento"></div>
-          <div id="orders-host" class="board-actions"></div>
-          <div id="conversation-host" class="board-thread"></div>
-          <div class="followup-composer" id="followup-composer">
-            <label for="followup-input">Follow-up</label>
-            <div class="followup-row">
-              <input id="followup-input" type="text" placeholder="e.g. Is the careers link real?" autocomplete="off" />
-              <button type="button" class="btn btn-primary" id="btn-followup">Send</button>
+          <!-- Wait state -->
+          <section id="view-wait" class="hidden" aria-hidden="true">
+            <div class="wait-single">
+              <div class="wait-meta">
+                <h2 id="wait-title">Opening your case</h2>
+                <p id="wait-subtitle" class="wait-sub">Preparing the case file…</p>
+                <div class="elapsed" id="elapsed-timer" title="Elapsed time">0:00</div>
+              </div>
+              <div class="prestream-rail" id="prestream-rail" aria-label="Verification stages">
+                <span class="prestream-step" data-step="file">File</span>
+                <span class="prestream-step" data-step="signals">Signals</span>
+                <span class="prestream-step" data-step="check">Check</span>
+                <span class="prestream-step" data-step="qwen">Qwen</span>
+              </div>
+              <div class="stage-canvas" id="stage-canvas">
+                <svg viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg" id="stage-svg">
+                  <g id="scene-intake" class="stage-scene">
+                    <g id="stage-folder">
+                      <path d="M88 58 L108 48 H148 L158 58 H228 V88 H88 Z" fill="#e8efe8" stroke="#3d5a45" stroke-width="1.2"/>
+                      <rect id="stage-folder-tab" x="108" y="44" width="40" height="8" rx="2" fill="#c5d6c8"/>
+                    </g>
+                    <g id="stage-sheet">
+                      <rect x="118" y="22" width="84" height="52" rx="6" fill="#fff" stroke="#d7e0e8"/>
+                      <path d="M130 36h60M130 48h44M130 58h52" stroke="#c3ced8" stroke-width="1.5"/>
+                    </g>
+                  </g>
+                  <g id="scene-evidence" class="stage-scene is-off">
+                    <circle cx="108" cy="52" r="20" fill="#fff" stroke="#0f2433" stroke-width="2"/>
+                    <line x1="122" y1="66" x2="136" y2="80" stroke="#0f2433" stroke-width="2.2" stroke-linecap="round"/>
+                  </g>
+                  <g id="scene-ocr" class="stage-scene is-off">
+                    <rect x="96" y="22" width="128" height="68" rx="10" fill="#fff" stroke="#d7e0e8"/>
+                    <line class="scan-line" x1="108" x2="212" y1="40" y2="40" stroke="#155eef" stroke-width="2"/>
+                  </g>
+                  <g id="scene-qwen" class="stage-scene is-off">
+                    <circle cx="160" cy="50" r="28" fill="#eff4ff" stroke="#155eef" stroke-width="2"/>
+                    <text x="160" y="54" text-anchor="middle" font-size="9" fill="#155eef" font-family="monospace" font-weight="700">QWEN</text>
+                  </g>
+                  <g id="scene-stamp" class="stage-scene is-off">
+                    <g id="stage-stamp-press">
+                      <rect class="stamp-body" x="132" y="28" width="56" height="40" rx="6"/>
+                      <text class="stamp-text" x="160" y="54" text-anchor="middle" font-size="8" font-family="monospace" font-weight="700">RULING</text>
+                    </g>
+                  </g>
+                </svg>
+              </div>
+              <p class="official-status" id="official-status"></p>
+              <div class="evidence-slip" id="live-exhibits"></div>
+              <button type="button" class="btn btn-ghost" id="btn-cancel-wait">Back</button>
             </div>
-            <div id="followup-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
-          </div>
-        </div>
-        <div id="judgment-host" class="hidden" aria-hidden="true"></div>
-        <div id="research-host" class="hidden" aria-hidden="true"></div>
-        <div id="result-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
-      </section>
+          </section>
+
+          <!-- Result state -->
+          <section id="view-result" class="hidden" aria-hidden="true">
+            <div id="sticky-urgent" class="sticky-urgent hidden" role="status" aria-live="polite"></div>
+            <div class="result-board">
+              <div class="result-toolbar">
+                <button type="button" class="btn-text" id="btn-new">Check another</button>
+                <button type="button" class="btn-text" id="btn-report">Report a missed scam</button>
+              </div>
+              <div id="ruling-host" class="board-stamp-host"></div>
+              <h2 id="board-headline" class="board-headline"></h2>
+              <div id="tactics-host" class="board-tactics"></div>
+              <div id="exhibits-host" class="board-exhibits bento"></div>
+              <div id="orders-host" class="board-actions"></div>
+              <div id="conversation-host" class="board-thread"></div>
+              <div class="followup-composer" id="followup-composer">
+                <label for="followup-input">Follow-up</label>
+                <div class="followup-row">
+                  <input id="followup-input" type="text" placeholder="e.g. Is the careers link real?" autocomplete="off" />
+                  <button type="button" class="btn btn-primary" id="btn-followup">Send</button>
+                </div>
+                <div id="followup-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
+              </div>
+            </div>
+            <div id="judgment-host" class="hidden" aria-hidden="true"></div>
+            <div id="research-host" class="hidden" aria-hidden="true"></div>
+            <div id="result-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
+          </section>
+
+        </div><!-- /pane-casefile -->
+
+      </div><!-- /workspace -->
     </main>
 
     <footer class="footer">
