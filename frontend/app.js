@@ -25,6 +25,7 @@
   var followupBaseline = null;
   var followupGraceStartedAt = 0;
   var FOLLOWUP_GRACE_MS = 8000;
+  var readySince = 0;
 
   var CredaStageMachine = {
     current: null,
@@ -36,6 +37,13 @@
       stamp: { id: "scene-stamp", label: "Stamping your ruling…" }
     },
     sceneIds: ["scene-intake", "scene-evidence", "scene-careers", "scene-qwen", "scene-stamp"],
+    subtitles: {
+      intake: "Reading the message for sender, links, and claims…",
+      evidence: "Comparing against known scam tactics…",
+      official_checks: "Cross-checking the careers link with official listings…",
+      qwen_weigh: "Qwen is weighing every signal before ruling…",
+      stamp: "Finalizing the ruling…"
+    },
     forceScene: function (key, data) {
       var meta = this.scenes[key];
       if (!meta) return;
@@ -50,7 +58,9 @@
       if (title) title.textContent = meta.label;
       if (sub) {
         var copy = pipelineWaitCopy(data || {});
-        if (!copy || (/preparing/i.test(copy) && key !== "intake")) copy = meta.label;
+        if (!copy || copy === meta.label || (/preparing/i.test(copy) && key !== "intake")) {
+          copy = this.subtitles[key] || "Please wait — this can take under a minute.";
+        }
         sub.textContent = copy;
       }
       updatePrestreamRail(key);
@@ -95,11 +105,13 @@
     readyData: null,
     dwellComplete: false,
     lastPollData: null,
+    stampShownAt: 0,
     start: function () {
       this.running = true;
       this.readyData = null;
       this.dwellComplete = false;
       this.lastPollData = null;
+      this.stampShownAt = 0;
       this.sequence = ["intake", "evidence", "official_checks", "qwen_weigh", "stamp"];
       this.stepIndex = 0;
       this._playStep();
@@ -131,12 +143,23 @@
       this.lastPollData = data;
     },
     markReady: function (data) {
+      // Wall-clock driven on purpose: this fires from the outer poll loop
+      // (every ~2-3s, reliable) rather than depending on the inner 400ms
+      // setTimeout retry chain, which can silently stop rescheduling (e.g.
+      // background-tab timer throttling) and leave the wait screen stuck
+      // forever even though the backend is ready.
       this.readyData = data;
       var stampIdx = this.sequence.indexOf("stamp");
-      if (stampIdx >= 0 && this.stepIndex < stampIdx && this.running) {
-        this.stepIndex = stampIdx;
-        clearTimeout(this.stepTimer);
-        this._playStep();
+      if (stampIdx >= 0 && this.running) {
+        if (CredaStageMachine.current !== "stamp") {
+          this.stepIndex = stampIdx;
+          clearTimeout(this.stepTimer);
+          CredaStageMachine.forceScene("stamp", data);
+          this.stampShownAt = Date.now();
+        }
+        if (this.stampShownAt && Date.now() - this.stampShownAt >= this.MIN_MS) {
+          this.dwellComplete = true;
+        }
       }
       this._tryFinish();
     },
@@ -158,6 +181,7 @@
       this.running = false;
       this.readyData = null;
       this.dwellComplete = false;
+      this.stampShownAt = 0;
       clearTimeout(this.stepTimer);
     }
   };
@@ -739,6 +763,14 @@
     for (var k = 0; k < candidates.length; k++) {
       var t = String(candidates[k] || "").trim();
       if (t && !isInterimText(t)) return t;
+    }
+    // Live backend regenerates agentReasoning/explanation in place on follow-up —
+    // it never appends a discrete assistant turn or agentReply field. Treat a
+    // changed, non-interim reasoning string as the real answer.
+    var reasoning = String(data.agentReasoning || data.explanation || "").trim();
+    if (reasoning && !isInterimText(reasoning)) {
+      var baselineReasoning = String((followupBaseline && followupBaseline.explanation) || "").trim();
+      if (reasoning !== baselineReasoning) return reasoning;
     }
     return "";
   }
@@ -1970,22 +2002,19 @@
 
   function mergeFollowupSnapshot(data) {
     if (!followupPollMode || !followupBaseline) return data;
+    // Board lock: the live backend regenerates verdict/headline/explanation/evidence
+    // in place while answering a follow-up. The product rule is the board (stamp,
+    // headline, tiles, exhibits) must NEVER change from a follow-up — only the
+    // conversation thread may show the new answer. Pin everything unconditionally.
     var merged = Object.assign({}, data);
-    var interim = INTERIM_REPLY_RE;
     merged.verdict = followupBaseline.verdict || merged.verdict;
-    if (followupBaseline.headline && (!merged.headline || interim.test(String(merged.headline || "")))) {
-      merged.headline = followupBaseline.headline;
-    }
-    if (followupBaseline.explanation) {
-      merged.explanation = followupBaseline.explanation;
-      merged.agentReasoning = followupBaseline.explanation;
-    }
+    merged.headline = followupBaseline.headline || merged.headline;
+    merged.explanation = followupBaseline.explanation || merged.explanation;
+    merged.agentReasoning = followupBaseline.explanation || merged.agentReasoning;
     if (followupBaseline.presentation) merged.agentPresentation = followupBaseline.presentation;
-    if (followupBaseline.evidence && followupBaseline.evidence.length) merged.evidence = followupBaseline.evidence;
-    if (followupBaseline.tactics && followupBaseline.tactics.length) merged.tactics = followupBaseline.tactics;
-    if (followupBaseline.nextActions && followupBaseline.nextActions.length) {
-      if (!extractRawActions(merged).length) merged.nextActions = followupBaseline.nextActions;
-    }
+    merged.evidence = followupBaseline.evidence || merged.evidence;
+    merged.tactics = followupBaseline.tactics || merged.tactics;
+    merged.nextActions = followupBaseline.nextActions || merged.nextActions;
     merged.conversationTurns = data.conversationTurns || merged.conversationTurns;
     return merged;
   }
@@ -2167,8 +2196,6 @@
       showView("result");
       if (followupReplyComplete(data)) {
         stopPolling();
-        conversationPending = false;
-        followupPollMode = false;
         var answer = extractFollowupAnswer(data);
         if (!answer) answer = "Couldn't verify that yet — the ruling above still stands.";
         optimisticTurns = ensureFollowupAssistantTurn(
@@ -2186,15 +2213,19 @@
         if (fi) fi.disabled = false;
         document.body.classList.remove("ui-waiting");
         document.body.classList.add("ui-ready");
+        // conversationPending must clear before this render so the conversation
+        // block doesn't append a stale "checking…" bubble after the real answer.
+        // followupPollMode stays true through the render so mergeFollowupSnapshot
+        // still pins the board (stamp/headline/tiles) to the pre-follow-up baseline.
+        conversationPending = false;
         renderResult(data);
+        followupPollMode = false;
         optimisticTurns = [];
         return;
       }
       renderResult(data, { skipReveal: true, followupOnly: true });
       if (Date.now() - pollStartedAt > POLL_MAX_MS) {
         stopPolling();
-        conversationPending = false;
-        followupPollMode = false;
         var timeoutMsg = "I couldn't verify that domain yet";
         var baseTurns = (data.conversationTurns && data.conversationTurns.length)
           ? data.conversationTurns.slice()
@@ -2225,7 +2256,9 @@
         document.body.classList.remove("ui-waiting");
         document.body.classList.add("ui-ready");
         showError("followup-error", { code: "POLL_TIMEOUT", message: timeoutMsg + " — prior ruling kept." });
+        conversationPending = false;
         renderResult(data, { skipReveal: true });
+        followupPollMode = false;
         optimisticTurns = [];
         return;
       }
@@ -2235,15 +2268,29 @@
     if (isReady(data)) {
       if (WaitStoryboard.isRunning()) {
         WaitStoryboard.markReady(data);
+        if (!readySince) readySince = Date.now();
+        // Safety net: the storyboard should finish within ~2x its own dwell
+        // window of becoming ready. If it hasn't (any unforeseen stall),
+        // stop waiting on it and show the result directly.
+        if (Date.now() - readySince > WaitStoryboard.MIN_MS * 2 + 1000) {
+          WaitStoryboard.reset();
+          stopPolling();
+          showView("result");
+          renderResult(data);
+          readySince = 0;
+          return;
+        }
         renderWait(data);
         pollTimer = setTimeout(function () { pollOnce().catch(function () {}); }, POLL_MS);
         return;
       }
+      readySince = 0;
       stopPolling();
       showView("result");
       renderResult(data);
       return;
     }
+    readySince = 0;
     if (Date.now() - pollStartedAt > POLL_MAX_MS) {
       stopPolling();
       followupPollMode = false;
@@ -2276,6 +2323,7 @@
       CredaStageMachine.reset();
       WaitStoryboard.reset();
       WaitStoryboard.start();
+      readySince = 0;
       showView("wait");
       $("live-exhibits").innerHTML = "";
       lastLiveExhibitCount = 0;
