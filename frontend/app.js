@@ -223,6 +223,17 @@
           onComplete: function () { gsap.set(sel, { clearProps: "opacity,transform,autoAlpha" }); }
         });
       });
+      var staggerTargets = [".guide-tile", ".how-step"];
+      staggerTargets.forEach(function (sel) {
+        gsap.fromTo(sel, { y: 10, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 0.35, stagger: 0.06, delay: 0.15, ease: ease,
+          onComplete: function () { gsap.set(sel, { clearProps: "opacity,transform,autoAlpha" }); }
+        });
+      });
+      gsap.fromTo(".hero-shield", { scale: 0.85, autoAlpha: 0 }, {
+        scale: 1, autoAlpha: 1, duration: 0.5, delay: 0.1, ease: "back.out(1.6)",
+        onComplete: function () { gsap.set(".hero-shield", { clearProps: "transform,opacity" }); }
+      });
     },
     startHintCycle: function () {
       var host = document.getElementById("hint-cycle");
