@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var API_URL = "__CREDA_API_URL__";
+  var API_URL = "https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com";
   var POLL_MS = 1500;
   var POLL_MAX_MS = 120000;
   var STAGES = ["Intake", "Evidence", "Verdict", "Judgment", "Follow-up"];
@@ -48,7 +48,11 @@
       var title = $("wait-title");
       var sub = $("wait-subtitle");
       if (title) title.textContent = meta.label;
-      if (sub) sub.textContent = pipelineWaitCopy(data || {}) || meta.label;
+      if (sub) {
+        var copy = pipelineWaitCopy(data || {});
+        if (!copy || (/preparing/i.test(copy) && key !== "intake")) copy = meta.label;
+        sub.textContent = copy;
+      }
       updatePrestreamRail(key);
       if (!CredaMotion.ok() || CredaMotion.reduced) return;
       if (meta.id) {
@@ -115,6 +119,15 @@
           self._playStep();
         } else {
           self.dwellComplete = true;
+          if (!self.readyData) {
+            CredaStageMachine.forceScene("qwen_weigh", self.lastPollData || {});
+            self.stepTimer = setTimeout(function () {
+              if (!self.running) return;
+              CredaStageMachine.forceScene("stamp", self.lastPollData || {});
+              self._tryFinish();
+            }, self.MIN_MS);
+            return;
+          }
           self._tryFinish();
         }
       }, this.MIN_MS);
@@ -191,14 +204,10 @@
     pageLoad: function () {
       if (!this.ok() || this.reduced) return;
       var ease = "cubic-bezier(.22,1,.36,1)";
-      gsap.from(".topbar", { y: 12, autoAlpha: 0, duration: 0.4, ease: ease });
-      gsap.from(".intake-motif", { scale: 0.92, autoAlpha: 0, duration: 0.35, delay: 0.05, ease: ease });
-      gsap.from(".intake-kicker", { y: 8, autoAlpha: 0, duration: 0.35, delay: 0.08, ease: ease });
-      gsap.from("#hero-title", { y: 14, autoAlpha: 0, duration: 0.4, delay: 0.1, ease: ease });
-      gsap.from(".intake-lede", { y: 10, autoAlpha: 0, duration: 0.38, delay: 0.14, ease: ease });
-      gsap.from(".composer-card", { y: 20, autoAlpha: 0, duration: 0.45, delay: 0.18, ease: ease });
-      gsap.from(".telegram-row", { y: 8, autoAlpha: 0, duration: 0.35, delay: 0.28, ease: ease });
-      gsap.from(".intake-explain", { y: 6, autoAlpha: 0, duration: 0.32, delay: 0.34, ease: ease });
+      gsap.from(".topbar", { y: 10, autoAlpha: 0, duration: 0.38, ease: ease });
+      gsap.from(".pane-intake > *", { y: 14, autoAlpha: 0, duration: 0.4, stagger: 0.05, delay: 0.06, ease: ease });
+      gsap.from(".casefile-guide", { y: 16, autoAlpha: 0, duration: 0.45, delay: 0.18, ease: ease });
+      gsap.from(".demo-chip", { y: 8, autoAlpha: 0, duration: 0.3, stagger: 0.04, delay: 0.28, ease: ease });
     },
     startHintCycle: function () {
       var host = document.getElementById("hint-cycle");
@@ -277,24 +286,67 @@
         x: -16, autoAlpha: 0, duration: 0.42, stagger: 0.08, ease: "power3.out"
       });
     },
+    revealTargets: function () {
+      return [
+        ".board-stamp", ".board-stamp-host", ".ruling-stamp-press",
+        "#board-headline", "#board-meta",
+        "#orders-host .action-chip", "#tactics-host .tactic-tile",
+        "#exhibits-host .extra-checks", "#judgment-host .why-collapsed"
+      ];
+    },
+    forceRevealVisible: function () {
+      var sel = this.revealTargets().join(", ");
+      var nodes = document.querySelectorAll(sel);
+      for (var i = 0; i < nodes.length; i++) {
+        nodes[i].style.opacity = "1";
+        nodes[i].style.visibility = "visible";
+      }
+      if (!this.ok()) return;
+      try {
+        if (this._revealTl) { this._revealTl.kill(); this._revealTl = null; }
+        gsap.killTweensOf(sel);
+        gsap.set(sel, { autoAlpha: 1, opacity: 1, visibility: "visible", clearProps: "opacity,visibility,transform,autoAlpha" });
+        if (typeof gsap.utils !== "undefined" && gsap.utils.toArray) {
+          gsap.utils.toArray(sel).forEach(function (el) {
+            try { gsap.set(el, { clearProps: "all" }); } catch (e1) {}
+            el.style.opacity = "1";
+            el.style.visibility = "visible";
+          });
+        }
+      } catch (e) {}
+    },
     resultReveal: function () {
-      if (!this.ok() || this.reduced) return;
       var stamp = document.querySelector(".ruling-stamp-press");
       if (stamp) stamp.classList.add("is-pressed");
-      var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.from(".board-stamp", { y: 16, autoAlpha: 0, duration: 0.45 })
-        .from(stamp, { scale: 2.2, rotation: -18, autoAlpha: 0, duration: 0.55, ease: "back.out(2.2)" }, "-=0.2")
-        .from("#board-headline", { y: 10, autoAlpha: 0, duration: 0.35 }, "-=0.15")
-        .from("#tactics-host .tactic-line", {
-          y: 10, autoAlpha: 0, duration: 0.28, stagger: { each: 0.06, from: "start" }, ease: "power2.out"
-        }, "-=0.12")
-        .from("#exhibits-host .flip-card, #exhibits-host .exhibit-card", {
-          y: 14, autoAlpha: 0, duration: 0.3, stagger: { each: 0.07, from: "start" }, ease: "power2.out"
-        }, "-=0.1")
-        .from("#orders-host .board-action", { x: -10, autoAlpha: 0, duration: 0.32, stagger: 0.06 }, "-=0.15");
-      var urgent = document.querySelector(".board-action.urgent");
+      this.forceRevealVisible();
+      if (!this.ok() || this.reduced) {
+        this.forceRevealVisible();
+        return;
+      }
+      var targets = this.revealTargets();
+      var sel = targets.join(", ");
+      var self = this;
+      try { gsap.set(sel, { autoAlpha: 1, opacity: 1, visibility: "visible" }); } catch (e0) {}
+      var tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+        onComplete: function () {
+          self.forceRevealVisible();
+          try { gsap.set(sel, { autoAlpha: 1, opacity: 1, clearProps: "opacity,visibility,transform,autoAlpha" }); } catch (e2) {}
+        }
+      });
+      this._revealTl = tl;
+      tl.fromTo(".board-stamp", { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.4 })
+        .fromTo(stamp || ".ruling-stamp-press", { scale: 2.1, rotation: -14, autoAlpha: 0 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: 0.5, ease: "back.out(2.2)" }, "-=0.18")
+        .fromTo("#board-headline", { y: 8, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.28 }, "-=0.12")
+        .fromTo("#board-meta:not(.is-empty)", { y: 6, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.22 }, "-=0.12")
+        .fromTo("#orders-host .action-chip", { y: 8, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.24, stagger: 0.05 }, "-=0.08")
+        .fromTo("#tactics-host .tactic-tile", { y: 12, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 0.28, stagger: { each: 0.05, from: "start" }, ease: "power2.out"
+        }, "-=0.05")
+        .fromTo("#exhibits-host .extra-checks", { y: 8, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.25 }, "-=0.1");
+      var urgent = document.querySelector(".action-chip.urgent");
       if (urgent) {
-        gsap.to(urgent, { scale: 1.02, duration: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut", delay: 0.6 });
+        gsap.to(urgent, { scale: 1.03, duration: 0.18, yoyo: true, repeat: 1, ease: "power1.inOut", delay: 0.45 });
       }
     }
   };
@@ -314,19 +366,6 @@
     }).join("") + "</div>";
   }
 
-  function wireFlipCards(root) {
-    (root || document).querySelectorAll(".flip-card").forEach(function (card) {
-      if (card.dataset.wired) return;
-      card.dataset.wired = "1";
-      card.addEventListener("click", function (e) {
-        if (e.target.closest("a")) return;
-        card.classList.toggle("is-flipped");
-      });
-      card.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.classList.toggle("is-flipped"); }
-      });
-    });
-  }
 
   function confBarHtml(conf) {
     if (conf == null || conf === "") return "";
@@ -632,14 +671,14 @@
     tone = tone || "neutral";
     var lines = label.split(" ");
     var tspan = lines.length > 1
-      ? '<tspan x="84" y="46">' + esc(lines[0]) + '</tspan><tspan x="84" y="62">' + esc(lines.slice(1).join(" ")) + "</tspan>"
-      : '<tspan x="84" y="54">' + esc(label) + "</tspan>";
+      ? '<tspan x="84" y="50">' + esc(lines[0]) + '</tspan><tspan x="84" y="72">' + esc(lines.slice(1).join(" ")) + "</tspan>"
+      : '<tspan x="84" y="62">' + esc(label) + "</tspan>";
     return (
-      '<div class="ruling-stamp-press" aria-hidden="true">' +
+      '<div class="ruling-stamp-press is-pressed" aria-hidden="true">' +
         '<svg viewBox="0 0 168 112" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(label) + ' stamp">' +
-          '<rect class="stamp-frame stamp-frame-' + esc(tone) + '" x="8" y="12" width="152" height="88" rx="8" fill="none" stroke-width="3" opacity=".55"/>' +
+          '<rect class="stamp-frame stamp-frame-' + esc(tone) + '" x="6" y="10" width="156" height="92" rx="10" fill="none" stroke-width="5"/>' +
           '<rect class="stamp-fill stamp-fill-' + esc(tone) + '" x="14" y="18" width="140" height="76" rx="6"/>' +
-          '<text class="stamp-text stamp-text-' + esc(tone) + '" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" font-weight="700" letter-spacing=".12em">' + tspan + "</text>" +
+          '<text class="stamp-text stamp-text-' + esc(tone) + '" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="15" font-weight="800" letter-spacing=".08em">' + tspan + "</text>" +
         "</svg>" +
       "</div>"
     );
@@ -675,11 +714,20 @@
     }
   }
 
-  function followupReplyComplete(data) {
-    if (!conversationPending) return true;
-    var agent = normalize(data.agentStatus);
-    if (agent === "running" || agent === "streaming") return false;
-    if (data.agentReply || data.followupReply) return true;
+  var INTERIM_REPLY_RE = /writing the explanation|writing your ruling|cred\s*a is writing|cred a is writing/i;
+
+  function isInterimText(text) {
+    return INTERIM_REPLY_RE.test(String(text || ""));
+  }
+
+  function extractFollowupAnswer(data) {
+    if (!data) return "";
+    var candidates = [
+      data.agentReply,
+      data.followupReply,
+      data.agentAnswer,
+      data.answerText
+    ];
     var turns = data.conversationTurns || [];
     var lastUser = -1;
     for (var i = turns.length - 1; i >= 0; i--) {
@@ -687,21 +735,31 @@
     }
     if (lastUser >= 0) {
       for (var j = lastUser + 1; j < turns.length; j++) {
-        var role = normalize(turns[j].role);
-        if (role !== "user" && (turns[j].text || "").trim()) return true;
+        if (normalize(turns[j].role) === "user") continue;
+        candidates.push(turns[j].text);
       }
     }
-    if (followupBaseline && (agent === "ready" || normalize(data.status) === "completed")) {
-      if ((data.headline || "") !== (followupBaseline.headline || "")) return true;
-      var explain = data.explanation || data.agentReasoning || "";
-      if (explain && explain !== (followupBaseline.explanation || "")) return true;
-      if ((data.evidence || []).length !== followupBaseline.evidenceLen) return true;
-      if (turns.length > followupBaseline.turnCount) return true;
+    for (var k = 0; k < candidates.length; k++) {
+      var t = String(candidates[k] || "").trim();
+      if (t && !isInterimText(t)) return t;
+    }
+    return "";
+  }
+
+  function followupReplyComplete(data) {
+    if (!conversationPending) return true;
+    var agent = normalize(data.agentStatus);
+    if (agent === "running" || agent === "streaming") return false;
+    var answer = extractFollowupAnswer(data);
+    if (answer) return true;
+    // READY with only interim headline / no assistant turn = keep polling
+    if (isInterimText(data.headline) || isInterimText(data.explanation) || isInterimText(data.agentReasoning)) {
+      return false;
     }
     return false;
   }
 
-  function ensureFollowupAssistantTurn(data) {
+  function ensureFollowupAssistantTurn(data, fallbackText) {
     var turns = (data.conversationTurns || []).slice();
     var lastUser = -1;
     for (var i = turns.length - 1; i >= 0; i--) {
@@ -709,10 +767,17 @@
     }
     if (lastUser < 0) return turns;
     for (var j = lastUser + 1; j < turns.length; j++) {
-      if (normalize(turns[j].role) !== "user" && (turns[j].text || "").trim()) return turns;
+      var existing = (turns[j].text || "").trim();
+      if (normalize(turns[j].role) !== "user" && existing && !isInterimText(existing)) return turns;
     }
-    var reply = (data.agentReply || data.followupReply || data.headline || data.explanation || data.agentReasoning || "").trim();
-    if (reply) turns.push({ role: "assistant", text: reply });
+    // Strip any interim assistant placeholders after the last user turn
+    turns = turns.filter(function (t, idx) {
+      if (idx <= lastUser) return true;
+      if (normalize(t.role) === "user") return true;
+      return !isInterimText(t.text);
+    });
+    var reply = extractFollowupAnswer(data) || String(fallbackText || "").trim();
+    if (reply && !isInterimText(reply)) turns.push({ role: "assistant", text: reply });
     return turns;
   }
 
@@ -733,11 +798,10 @@
 
   function consequenceFor(v, headline) {
     v = normalize(v);
-    if (headline) return headline;
-    if (v === "high_risk") return "Do not pay or share documents until this is cleared through official channels.";
-    if (v === "no_conflict_found") return "Nothing in the evidence conflicted with official sources — that is not proof the offer is authentic.";
-    if (v === "unverified") return "Creda could not gather enough official exhibits. Treat this as unresolved.";
-    return "Review the exhibits before you reply.";
+    if (v === "high_risk") return "Do not pay or share ID until you verify on the official careers site.";
+    if (v === "no_conflict_found") return "No conflict found — still verify the sender before you reply.";
+    if (v === "unverified") return "Not enough official proof — treat this as unresolved.";
+    return "Review the stamps and tiles before you reply.";
   }
 
   function saveSession() {
@@ -780,17 +844,49 @@
   }
 
   function showView(name) {
-    var views = { intake: $("view-intake"), wait: $("view-wait"), result: $("view-result") };
-    Object.keys(views).forEach(function (key) {
-      var on = name === key;
-      views[key].classList.toggle("hidden", !on);
-      views[key].setAttribute("aria-hidden", on ? "false" : "true");
-    });
+    // Two-pane workspace: intake stays visible on the left; wait/result swap on the right.
+    var intake = $("view-intake");
+    var wait = $("view-wait");
+    var result = $("view-result");
+    var empty = $("casefile-empty");
+    if (intake) {
+      intake.classList.remove("hidden");
+      intake.setAttribute("aria-hidden", "false");
+    }
+    if (wait) {
+      wait.classList.toggle("hidden", name !== "wait");
+      wait.setAttribute("aria-hidden", name === "wait" ? "false" : "true");
+    }
+    if (result) {
+      result.classList.toggle("hidden", name !== "result");
+      result.setAttribute("aria-hidden", name === "result" ? "false" : "true");
+    }
+    if (empty) {
+      var showEmpty = name === "intake";
+      empty.classList.toggle("hidden", !showEmpty);
+      empty.setAttribute("aria-hidden", showEmpty ? "false" : "true");
+    }
     document.body.classList.remove("view-bleed");
     document.body.classList.toggle("view-wide", name === "wait" || name === "result");
+    document.body.classList.toggle("has-case", name === "wait" || name === "result");
     if (name === "intake") CredaShieldArt.setFlowStep(0);
     else if (name === "wait") CredaShieldArt.setFlowStep(1);
     else if (name === "result") CredaShieldArt.setFlowStep(2);
+    // Keep Clear/Check/demos locked while case is running; unlock on result/intake
+    if (name === "wait") setIntakeBusy(true);
+    else setIntakeBusy(false);
+    var follow = $("btn-followup");
+    var fu = $("followup-input");
+    var report = $("btn-report");
+    if (follow) {
+      var followReady = name === "result" && !conversationPending;
+      follow.disabled = !followReady;
+      follow.textContent = conversationPending ? "Waiting…" : "Send";
+    }
+    if (fu) fu.disabled = name !== "result" || conversationPending;
+    if (report) report.disabled = name === "wait";
+    document.body.classList.toggle("ui-waiting", name === "wait" || conversationPending);
+    document.body.classList.toggle("ui-ready", name === "result" && !conversationPending);
     CredaMotion.enterView(name);
   }
 
@@ -917,6 +1013,33 @@
     syncSendButton();
   }
 
+
+  function setIntakeBusy(busy) {
+    ["btn-check", "btn-clear"].forEach(function (id) {
+      var el = $(id);
+      if (el) el.disabled = !!busy;
+    });
+    /* demo chips optional */
+    document.querySelectorAll(".demo-chip").forEach(function (chip) {
+      chip.disabled = !!busy;
+      chip.setAttribute("aria-disabled", busy ? "true" : "false");
+    });
+    var ta = $("offer-text");
+    if (ta) ta.readOnly = !!busy;
+    var health = $("health-label");
+    var pill = $("health-pill");
+    if (health) {
+      if (busy) {
+        health.textContent = "CHECKING";
+        if (pill) pill.setAttribute("data-state", "checking");
+      } else if ((health.textContent || "").toUpperCase() === "CHECKING") {
+        health.textContent = "Ready";
+        if (pill) pill.setAttribute("data-state", "ready");
+      }
+    }
+    if (!busy) syncSendButton();
+  }
+
   function syncSendButton() {
     var btn = $("btn-check");
     if (!btn) return;
@@ -926,6 +1049,8 @@
     var ready = textLen >= 12 || hasFiles || hasLinks;
     btn.classList.toggle("is-active", ready);
     btn.disabled = !ready;
+    var clearBtn = $("btn-clear");
+    if (clearBtn) clearBtn.disabled = !(textLen || hasFiles || hasLinks);
   }
 
   function autoResizeComposer() {
@@ -1058,23 +1183,31 @@
   }
 
   function tacticVectorSvg(key, title) {
+    // Lucide/Heroicons-style inline SVGs (MIT): wallet, message-circle, link, building, shield-alert, globe
     var hay = (key + " " + (title || "")).toLowerCase();
-    if (/fee|deposit|payment|upi|paytm/.test(hay)) {
-      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 10h4M7 14h2"/><line x1="16" y1="8" x2="20" y2="12"/><line x1="20" y1="8" x2="16" y2="12"/></svg>';
+    var atr = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    if (/fee|deposit|payment|upi|paytm|wallet|money|bank|kit|phonepe/.test(hay)) {
+      return '<svg ' + atr + '><path d="M19 7V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/><path d="M3 10h18"/><path d="M17 14h.01"/><rect x="15" y="12" width="6" height="6" rx="1"/></svg>';
     }
-    if (/telegram|whatsapp|signal|dm|channel/.test(hay)) {
-      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+    if (/telegram|whatsapp|signal|dm|channel|chat|message/.test(hay)) {
+      return '<svg ' + atr + '><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/></svg>';
     }
-    if (/form|enroll|google/.test(hay)) {
-      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>';
+    if (/vacancy|careers|link|url|http|redirect/.test(hay)) {
+      return '<svg ' + atr + '><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
     }
-    if (/domain|mailbox|email|gmail|sender/.test(hay)) {
-      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="5" width="8" height="6" rx="1"/><rect x="13" y="13" width="8" height="6" rx="1"/><path d="M11 8h2M11 16h2"/></svg>';
+    if (/employer|company|org|building|ats|official|brand/.test(hay)) {
+      return '<svg ' + atr + '><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>';
     }
-    if (/vacancy|careers|link|url/.test(hay)) {
-      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/><line x1="8" y1="16" x2="10" y2="14" stroke-dasharray="2 2"/></svg>';
+    if (/risk|alert|scam|threat|shield|warn|phishing/.test(hay)) {
+      return '<svg ' + atr + '><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>';
     }
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>';
+    if (/domain|mailbox|email|gmail|sender|web|site|globe|dns|whois/.test(hay)) {
+      return '<svg ' + atr + '><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>';
+    }
+    if (/form|enroll|google|doc/.test(hay)) {
+      return '<svg ' + atr + '><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>';
+    }
+    return '<svg ' + atr + '><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>';
   }
 
   function wireInputChannels() {
@@ -1139,7 +1272,7 @@
     });
     autoResizeComposer();
     syncParsedLinksFromText();
-    $("btn-attach").addEventListener("click", function () { input.click(); });
+    if ($("btn-attach") && input) $("btn-attach").addEventListener("click", function () { input.click(); });
     input.addEventListener("change", function () {
       addAttachmentFiles(input.files);
       input.value = "";
@@ -1235,16 +1368,42 @@
     return stream.slice(0, 800) + (stream.length > 800 ? "…" : "");
   }
 
+  function humanizePipelineLine(line) {
+    var s = String(line || "");
+    var lower = s.toLowerCase();
+    if (/^(file|signals|check|qwen)\b/i.test(s.trim())) {
+      s = s.replace(/^(file|signals|check|qwen)\b[:\s-]*/i, "");
+      lower = s.toLowerCase();
+    }
+    if (/file|intake|queued|opening/.test(lower)) return "Opening your case file…";
+    if (/ocr|screenshot|image|pdf/.test(lower)) return "Reading your screenshot…";
+    if (/signal|tactic|evidence|compared/.test(lower)) return "Pulling scam signals…";
+    if (/official|careers|ats|vacancy|employer/.test(lower)) return "Checking official careers listing…";
+    if (/qwen|weigh|judge|stream|inference/.test(lower)) return "Qwen weighing evidence…";
+    if (/writing|explanation|ruling|stamp|computed/.test(lower)) return "Stamping your ruling…";
+    return s || "Preparing the case file…";
+  }
+
   function pipelineWaitCopy(data) {
     var log = data.pipelineLog || [];
     var last = log.length ? String(log[log.length - 1]) : "";
     var agent = normalize(data.agentStatus);
     var verdict = normalize(data.verdict);
     var evidence = data.evidence || [];
+    var scene = CredaStageMachine.current;
     if (agent === "ready" && verdict && verdict !== "pending") return "Ruling ready — opening your result…";
-    if (last) return last;
-    if (data.agentProgress) return String(data.agentProgress);
-    if (evidence.length) return "Found " + evidence.length + " evidence signal(s) — Creda is writing your ruling…";
+    if (scene && CredaStageMachine.scenes[scene]) {
+      var sceneLabel = CredaStageMachine.scenes[scene].label;
+      if (WaitStoryboard.isRunning() && !WaitStoryboard.dwellComplete && scene === "stamp") {
+        return CredaStageMachine.scenes.qwen_weigh.label;
+      }
+      if (last) return humanizePipelineLine(last) || sceneLabel;
+      if (evidence.length && scene !== "stamp") return "Found " + evidence.length + " signal(s) — still checking…";
+      return sceneLabel;
+    }
+    if (last) return humanizePipelineLine(last);
+    if (data.agentProgress) return humanizePipelineLine(data.agentProgress);
+    if (evidence.length) return "Found " + evidence.length + " signal(s) — still checking…";
     return "Preparing the case file…";
   }
 
@@ -1265,7 +1424,11 @@
 
   function sceneFromPipeline(data) {
     var blob = (data.pipelineLog || []).join(" ").toLowerCase();
-    if (/writing|explanation|ruling|judge|computed/.test(blob)) return "stamp";
+    var agent = normalize(data.agentStatus);
+    if (/writing|explanation|ruling|judge|computed/.test(blob)) {
+      if (agent === "ready" || agent === "streaming") return "stamp";
+      return "qwen_weigh";
+    }
     if (/ocr|screenshot|extracted text|uploaded image/.test(blob)) return "ocr";
     if (/official|careers|ats|vacancy/.test(blob)) return "official_checks";
     if (/ats|vacancy|employer|tactic|official|evidence|compared/.test(blob)) return "evidence";
@@ -1473,7 +1636,7 @@
     var unc = data.unresolved || data.uncertainty || [];
     if (unc.length) blocks.push({ type: "uncertainty", props: { items: unc } });
 
-    var actions = data.nextActions || data.safeActions || [];
+    var actions = extractRawActions(data);
     if (actions.length) blocks.push({ type: "safe_actions", props: { items: actions } });
 
     var askItems = chipTaxonomy(data).ask;
@@ -1518,7 +1681,7 @@
       if (!text) return "";
       return (
         '<details class="glass-shell liquid-glass">' +
-          "<summary><span>Why Creda ruled this way</span><span aria-hidden=\"true\">▾</span></summary>" +
+          "<summary><span>Why Creda ruled this way</span><span aria-hidden=\"true\"></span></summary>" +
           '<div class="body">' + esc(text) + "</div>" +
         "</details>"
       );
@@ -1529,7 +1692,7 @@
       if (!items.length) return "";
       return (
         '<details class="glass-shell liquid-glass">' +
-          "<summary><span>" + esc(props.label || "What Creda checked") + "</span><span aria-hidden=\"true\">▾</span></summary>" +
+          "<summary><span>" + esc(props.label || "What Creda checked") + "</span><span aria-hidden=\"true\"></span></summary>" +
           '<div class="body"><ul style="margin:.35rem 0 0;padding-left:1.1rem">' + items.map(function (it) {
             var t = typeof it === "string" ? it : (it.label || it.text || "");
             return "<li>" + esc(t) + "</li>";
@@ -1540,39 +1703,19 @@
       var props = block.props || block.data || {};
       var items = props.items || [];
       if (!items.length) return "";
-      return items.map(function (item, idx) {
-        var claim = item.claimText || item.claim || theySaid(item, data);
-        var checked = (item.text || item.excerpt || humanizeEvidence(item) || "").trim();
-        if (!checked && item.sourceUrl) checked = "Matched against an official employer source.";
-        if (!checked && item.check) checked = "Check: " + String(item.check).replace(/_/g, " ") + " — " + outcomeStamp(item.outcome) + ".";
-        var hasBack = checked.length > 0;
+      return items.slice(0, 6).map(function (item, idx) {
+        var smoking = clipWords(item.text || item.excerpt || humanizeEvidence(item) || theySaid(item, data) || "", 12);
+        if (!smoking && item.check) smoking = clipWords(String(item.check).replace(/_/g, " "), 12);
         var tone = outcomeTone(item.outcome);
         var pin = "E" + (idx + 1);
-        var flipClass = hasBack ? " flip-card" : " exhibit-card";
         return (
-          '<div class="' + flipClass + ' tone-' + esc(tone) + '"' + (hasBack ? ' tabindex="0" aria-label="Exhibit ' + esc(pin) + ' — tap to flip"' : "") + ">" +
-            '<div class="flip-inner">' +
-              '<div class="flip-front">' +
-                '<div class="exhibit-head">' +
-                  '<div class="exhibit-claim">' + esc(claim) + "</div>" +
-                  '<span class="exhibit-pin">' + esc(pin) + "</span>" +
-                "</div>" +
-                '<div class="exhibit-meta">' +
-                  '<span class="pill ' + esc(normalize(item.outcome)) + '">' + esc(outcomeStamp(item.outcome)) + "</span>" +
-                  (item.tier != null ? '<span class="pill t' + esc(item.tier) + '">T' + esc(item.tier) + "</span>" : "") +
-                  (item.sourceUrl ? '<span class="pill source">SOURCE</span>' : "") +
-                  '<span class="pill match">' + esc(String(item.check || "MATCH").replace(/_/g, " ").toUpperCase()) + "</span>" +
-                "</div>" +
-                (hasBack ? '<span class="flip-hint">Why we trust this</span>' : "") +
-              "</div>" +
-              (hasBack ? (
-              '<div class="flip-back">' +
-                '<div class="pk">Why we trust this</div>' +
-                "<div>" + esc(checked) + "</div>" +
-                (item.sourceUrl ? '<div style="margin-top:.35rem"><a href="' + esc(item.sourceUrl) + '" target="_blank" rel="noopener noreferrer">Open source</a></div>' : "") +
-              "</div>"
-              ) : "") +
-            "</div>" +
+          '<div class="exhibit-slip tone-' + esc(tone) + '" aria-label="Exhibit ' + esc(pin) + '">' +
+            '<span class="exhibit-pin">' + esc(pin) + "</span>" +
+            '<span class="pill ' + esc(normalize(item.outcome)) + '">' + esc(outcomeStamp(item.outcome)) + "</span>" +
+            '<span class="exhibit-smoking">' + esc(smoking) + "</span>" +
+            (item.sourceUrl
+              ? '<a class="source-chip" href="' + esc(item.sourceUrl) + '" target="_blank" rel="noopener noreferrer">src</a>'
+              : '<span class="source-chip source-chip-muted">—</span>') +
           "</div>"
         );
       }).join("");
@@ -1674,7 +1817,7 @@
       return '<div class="conv-bubble ' + esc(role) + '"><div class="conv-role">' + esc(label) + "</div>" + esc((t.text || "").slice(0, 1200)) + "</div>";
     }).join("");
     if (pending) {
-      html += '<div class="conv-bubble assistant pending"><div class="conv-role">Creda</div>Thinking…</div>';
+      html += '<div class="conv-bubble assistant pending"><div class="conv-role">Creda</div>Creda is checking that domain…</div>';
     }
     return html + "</div>";
   }
@@ -1790,6 +1933,26 @@
     return [{ label: "Review exhibits before you reply", detail: "Share only what is needed through official channels.", tone: "neutral" }];
   }
 
+  function extractRawActions(data) {
+    var raw = data && data.nextActions;
+    if (raw && raw.length) return raw;
+    if (data && data.safeActions && data.safeActions.length) return data.safeActions;
+    var blocks = (data && data.agentPresentation && data.agentPresentation.blocks) || [];
+    for (var i = 0; i < blocks.length; i++) {
+      if (blocks[i].type !== "safe_actions") continue;
+      var props = blocks[i].props || blocks[i].data || {};
+      var items = props.items || [];
+      if (items.length) return items;
+    }
+    return [];
+  }
+
+  function clipWords(text, maxWords) {
+    var words = String(text || "").trim().split(/\s+/).filter(Boolean);
+    if (words.length <= maxWords) return words.join(" ");
+    return words.slice(0, maxWords).join(" ");
+  }
+
   function normalizeActions(raw, verdict) {
     var actions = (raw || []).map(function (a) {
       if (typeof a === "string") return { label: a.slice(0, 80), detail: defaultDetailForAction(a), tone: "primary" };
@@ -1831,21 +1994,28 @@
     if (!followupPollMode || !followupBaseline) return data;
     var agent = normalize(data.agentStatus);
     var verdict = normalize(data.verdict);
-    if (!conversationPending) return data;
-    if (!(agent === "running" || agent === "streaming" || verdict === "pending")) return data;
     var merged = Object.assign({}, data);
+    var interim = INTERIM_REPLY_RE;
+    var protect = conversationPending || agent === "running" || agent === "streaming" || verdict === "pending";
+    if (!extractRawActions(merged).length && followupBaseline.nextActions && followupBaseline.nextActions.length) {
+      merged.nextActions = followupBaseline.nextActions;
+    }
+    if ((!merged.headline || interim.test(String(merged.headline || ""))) && followupBaseline.headline) {
+      merged.headline = followupBaseline.headline;
+    }
+    if ((!merged.evidence || !merged.evidence.length) && followupBaseline.evidence && followupBaseline.evidence.length) {
+      merged.evidence = followupBaseline.evidence;
+    }
+    if ((!merged.tactics || !merged.tactics.length) && followupBaseline.tactics && followupBaseline.tactics.length) {
+      merged.tactics = followupBaseline.tactics;
+    }
+    if (!protect) return merged;
     merged.verdict = followupBaseline.verdict || merged.verdict;
-    merged.headline = followupBaseline.headline || merged.headline;
-    merged.nextActions = (followupBaseline.nextActions && followupBaseline.nextActions.length)
-      ? followupBaseline.nextActions
-      : merged.nextActions;
     if (followupBaseline.explanation) {
       merged.agentReasoning = followupBaseline.explanation;
       merged.explanation = followupBaseline.explanation;
     }
     if (followupBaseline.presentation) merged.agentPresentation = followupBaseline.presentation;
-    if (followupBaseline.evidence && followupBaseline.evidence.length) merged.evidence = followupBaseline.evidence;
-    if (followupBaseline.tactics && followupBaseline.tactics.length) merged.tactics = followupBaseline.tactics;
     merged.conversationTurns = data.conversationTurns || merged.conversationTurns;
     return merged;
   }
@@ -1853,50 +2023,161 @@
   function renderResult(data, opts) {
     opts = opts || {};
     data = mergeFollowupSnapshot(data);
-    data.nextActions = normalizeActions(data.nextActions || data.safeActions, data.verdict);
+    data.nextActions = normalizeActions(extractRawActions(data), data.verdict);
     lastData = data;
     document.body.setAttribute("data-verdict", normalize(data.verdict) || "");
 
     $("ruling-host").innerHTML = stampBoardHtml(data);
-    var headline = (data.headline || consequenceFor(data.verdict, null) || "").trim();
-    $("board-headline").textContent = headline;
 
+    var interimHeadline = INTERIM_REPLY_RE;
+    var rawHeadline = (data.headline || "").trim();
+    if (!rawHeadline || interimHeadline.test(rawHeadline)) {
+      rawHeadline = (followupBaseline && followupBaseline.headline) || stampLabel(data.verdict);
+    }
+    $("board-headline").textContent = clipWords(rawHeadline, 8);
+
+    // Optional one meta line (sender/domain) — never full URLs/email body
+    var metaEl = $("board-meta");
+    if (metaEl) {
+      var meta = "";
+      var claims = data.claims || [];
+      for (var ci = 0; ci < claims.length; ci++) {
+        var c = claims[ci] || {};
+        var ck = normalize(c.check || c.type || "");
+        if (/domain|mailbox|sender|email/.test(ck)) {
+          meta = clipWords(String(c.value || c.text || c.claim || ck).replace(/https?:\/\/\S+/gi, ""), 6);
+          break;
+        }
+      }
+      if (!meta && data.employer) meta = clipWords(String(data.employer), 6);
+      metaEl.textContent = meta;
+      metaEl.classList.toggle("is-empty", !meta);
+    }
+
+    var consequenceEl = $("board-consequence");
+    if (consequenceEl) consequenceEl.textContent = consequenceFor(data.verdict, null);
+
+    // Action chips IMMEDIATELY under stamp/meta (2–3)
+    if (followupBaseline && followupBaseline.nextActions && followupBaseline.nextActions.length) {
+      var looksGeneric = data.nextActions.length <= 1 && /wait for the agent|review the stamps|review exhibits/i.test((data.nextActions[0] && data.nextActions[0].label) || "");
+      if (!extractRawActions(data).length || looksGeneric) data.nextActions = followupBaseline.nextActions;
+    }
+    var actionList = (data.nextActions || []).slice(0, 3);
+    $("orders-host").innerHTML = '<div class="action-chips">' + actionList.map(function (a) {
+      var urgent = a.tone === "urgent" || a.tone === "high_risk" ? " urgent" : "";
+      return '<button type="button" class="action-chip' + urgent + '" tabindex="-1">' + esc(clipWords(a.label, 4)) + "</button>";
+    }).join("") + "</div>";
+
+    // Build ≤6 tiles: icon + 2-word label + ONE fact
     var blocks = synthesizeBlocks(data);
-    var by = blocksByType(blocks);
     var tacticItems = collectTacticItems(blocks);
     if (!tacticItems.length && data.tactics && data.tactics.length) tacticItems = data.tactics;
-    tacticItems = tacticItems.slice(0, 5);
-    $("tactics-host").innerHTML = tacticItems.map(function (item) {
-      var title = item.title || item.display_name || item.type || "Pattern";
-      var guide = item.guidance || item.user_guidance || item.detail || "";
-      var line = guide ? String(title).replace(/_/g, " ") + " — " + guide : String(title).replace(/_/g, " ");
-      if (line.length > 140) line = line.slice(0, 137) + "…";
-      return '<div class="tactic-line">' + esc(line) + "</div>";
-    }).join("");
+    if (!tacticItems.length && data.matchedTactics && data.matchedTactics.length) {
+      tacticItems = data.matchedTactics.map(function (t) {
+        return typeof t === "string" ? { title: t, guidance: "" } : t;
+      });
+    }
+    var exhibitSeed = dedupeExhibits(evidenceHighlightItems(data), 12);
+    if (tacticItems.length < 3 && exhibitSeed.length) {
+      exhibitSeed.forEach(function (ev) {
+        if (tacticItems.length >= 6) return;
+        tacticItems.push({
+          title: ev.check || "Signal",
+          guidance: ev.text || ev.claimText || "",
+          sourceUrl: ev.sourceUrl,
+          outcome: ev.outcome
+        });
+      });
+    }
+    if (!tacticItems.length && followupBaseline && followupBaseline.tactics && followupBaseline.tactics.length) {
+      tacticItems = followupBaseline.tactics;
+    }
 
-    var exhibitItems = dedupeExhibits(evidenceHighlightItems(data), 6);
-    $("exhibits-host").innerHTML = exhibitItems.length
-      ? BLOCK_RENDERERS.evidence_highlights({ props: { items: exhibitItems } }, data)
-      : "";
+    var visibleTiles = tacticItems.slice(0, 6);
+    var overflow = Math.max(0, tacticItems.length - 6) + Math.max(0, exhibitSeed.length - visibleTiles.length);
 
-    $("orders-host").innerHTML = data.nextActions.map(function (a) {
-      var urgent = a.tone === "urgent" || a.tone === "high_risk" ? " urgent" : "";
-      return '<div class="board-action' + urgent + '"><strong>' + esc(a.label) + "</strong><span>" + esc(a.detail) + "</span></div>";
-    }).join("");
+    function twoWordLabel(title) {
+      var words = String(title || "Signal").replace(/_/g, " ").trim().split(/\s+/).filter(Boolean);
+      if (!words.length) return "Signal";
+      if (words.length === 1) return words[0].slice(0, 14);
+      return (words[0] + " " + words[1]).slice(0, 18);
+    }
 
-    var turns = (data.conversationTurns && data.conversationTurns.length)
-      ? ensureFollowupAssistantTurn(data)
-      : optimisticTurns;
-    $("conversation-host").innerHTML = renderConversationHtml(turns, conversationPending);
+    $("tactics-host").innerHTML = '<div class="tile-grid tile-grid-3x2">' + visibleTiles.map(function (item) {
+      var title = item.title || item.display_name || item.type || item.tactic_id || item.check || "Pattern";
+      var label = twoWordLabel(title);
+      var fact = clipWords(item.guidance || item.user_guidance || item.detail || item.matched_text || item.text || label, 8);
+      var key = (item.tactic_id || item.tacticId || title || "").toLowerCase();
+      var chip = item.sourceUrl
+        ? '<a class="source-chip" href="' + esc(item.sourceUrl) + '" target="_blank" rel="noopener noreferrer">src</a>'
+        : '<span class="source-chip source-chip-muted">src</span>';
+      return (
+        '<div class="tactic-tile tone-' + esc(outcomeTone(item.outcome || data.verdict)) + '">' +
+          '<div class="tactic-tile-icon">' + tacticVectorSvg(key, title) + "</div>" +
+          '<div class="tactic-label">' + esc(label) + "</div>" +
+          '<p class="tactic-gun">' + esc(fact) + "</p>" +
+          chip +
+        "</div>"
+      );
+    }).join("") + "</div>";
 
+    // Extra signals collapse — never dump essays/URLs/email body on canvas
+    var extra = exhibitSeed.slice(visibleTiles.length);
+    if (!extra.length && overflow > 0) extra = exhibitSeed.slice(0, Math.min(6, overflow));
+    if (extra.length) {
+      $("exhibits-host").innerHTML =
+        '<details class="extra-checks"><summary>+' + extra.length + ' checks</summary>' +
+        '<div class="extra-checks-body">' +
+        BLOCK_RENDERERS.evidence_highlights({ props: { items: extra.slice(0, 8) } }, data) +
+        "</div></details>";
+    } else {
+      $("exhibits-host").innerHTML = "";
+    }
+
+    // Long reasoning collapsed only
     var judgmentHost = $("judgment-host");
     var researchHost = $("research-host");
-    if (judgmentHost) judgmentHost.innerHTML = "";
+    var why = (data.agentReasoning || data.explanation || "").trim();
+    if (judgmentHost) {
+      judgmentHost.classList.remove("hidden");
+      judgmentHost.innerHTML = why
+        ? '<details class="why-collapsed"><summary>Why Creda ruled this way</summary><div class="why-body">' + esc(clipWords(why, 80)) + (why.split(/\s+/).length > 80 ? "…" : "") + "</div></details>"
+        : "";
+    }
     if (researchHost) researchHost.innerHTML = "";
 
-    wireFlipCards($("exhibits-host"));
+    var turns;
+    if (data.conversationTurns && data.conversationTurns.length) {
+      turns = ensureFollowupAssistantTurn(data);
+    } else if (optimisticTurns && optimisticTurns.length) {
+      turns = ensureFollowupAssistantTurn(
+        Object.assign({}, data, { conversationTurns: optimisticTurns }),
+        conversationPending ? "" : extractFollowupAnswer(data)
+      );
+    } else {
+      turns = [];
+    }
+    // Never leave interim "writing the explanation" as a final assistant bubble
+    if (!conversationPending) {
+      turns = ensureFollowupAssistantTurn(
+        Object.assign({}, data, { conversationTurns: turns }),
+        extractFollowupAnswer(data)
+      );
+      var last = turns.length ? turns[turns.length - 1] : null;
+      if (last && normalize(last.role) !== "user" && isInterimText(last.text)) {
+        turns = turns.slice(0, -1);
+      }
+    }
+    $("conversation-host").innerHTML = renderConversationHtml(turns, conversationPending);
+
     renderStickyUrgent(data);
-    if (!opts.skipReveal) requestAnimationFrame(function () { CredaMotion.resultReveal(); });
+    // Reset opacity/visibility before every reveal so 2nd/3rd cases never stay ghosted
+    CredaMotion.forceRevealVisible();
+    if (!opts.skipReveal) {
+      requestAnimationFrame(function () { CredaMotion.resultReveal(); });
+    } else {
+      CredaMotion.forceRevealVisible();
+    }
   }
 
   async function pollOnce() {
@@ -1910,9 +2191,25 @@
       if (followupReplyComplete(data)) {
         stopPolling();
         conversationPending = false;
-        optimisticTurns = [];
         followupPollMode = false;
+        var answer = extractFollowupAnswer(data);
+        optimisticTurns = ensureFollowupAssistantTurn(
+          Object.assign({}, data, {
+            conversationTurns: (data.conversationTurns && data.conversationTurns.length)
+              ? data.conversationTurns
+              : optimisticTurns
+          }),
+          answer
+        );
+        data.conversationTurns = optimisticTurns;
+        var fb = $("btn-followup");
+        if (fb) { fb.disabled = false; fb.textContent = "Send"; }
+        var fi = $("followup-input");
+        if (fi) fi.disabled = false;
+        document.body.classList.remove("ui-waiting");
+        document.body.classList.add("ui-ready");
         renderResult(data);
+        optimisticTurns = [];
         return;
       }
       renderResult(data, { skipReveal: true });
@@ -1920,8 +2217,38 @@
         stopPolling();
         conversationPending = false;
         followupPollMode = false;
-        showError("followup-error", { code: "POLL_TIMEOUT", message: "Timed out waiting for Creda's reply." });
+        var timeoutMsg = "I couldn't verify that domain yet";
+        var baseTurns = (data.conversationTurns && data.conversationTurns.length)
+          ? data.conversationTurns.slice()
+          : (optimisticTurns || []).slice();
+        // Drop interim assistant stubs, then append honest timeout
+        var lu = -1;
+        for (var ti = baseTurns.length - 1; ti >= 0; ti--) {
+          if (normalize(baseTurns[ti].role) === "user") { lu = ti; break; }
+        }
+        var cleaned = [];
+        for (var tj = 0; tj < baseTurns.length; tj++) {
+          if (tj > lu && normalize(baseTurns[tj].role) !== "user" && isInterimText(baseTurns[tj].text)) continue;
+          cleaned.push(baseTurns[tj]);
+        }
+        var hasReal = false;
+        for (var tk = lu + 1; tk < cleaned.length; tk++) {
+          if (normalize(cleaned[tk].role) !== "user" && (cleaned[tk].text || "").trim() && !isInterimText(cleaned[tk].text)) {
+            hasReal = true; break;
+          }
+        }
+        if (!hasReal) cleaned.push({ role: "assistant", text: timeoutMsg });
+        data.conversationTurns = cleaned;
+        optimisticTurns = cleaned;
+        var fb2 = $("btn-followup");
+        if (fb2) { fb2.disabled = false; fb2.textContent = "Send"; }
+        var fi2 = $("followup-input");
+        if (fi2) fi2.disabled = false;
+        document.body.classList.remove("ui-waiting");
+        document.body.classList.add("ui-ready");
+        showError("followup-error", { code: "POLL_TIMEOUT", message: timeoutMsg + " — prior ruling kept." });
         renderResult(data, { skipReveal: true });
+        optimisticTurns = [];
         return;
       }
       pollTimer = setTimeout(function () { pollOnce().catch(function () {}); }, POLL_MS);
@@ -2016,7 +2343,7 @@
 
   async function submitCase() {
     showError("intake-error", "");
-    $("btn-check").disabled = true;
+    setIntakeBusy(true);
     try {
       var uploaded = await uploadPendingAttachments();
       caseHadAttachment = uploaded.length > 0 || pendingAttachments.length > 0;
@@ -2033,9 +2360,9 @@
       startPolling();
     } catch (e) {
       showError("intake-error", e, { focusId: "offer-text", onRetry: submitCase });
-    } finally {
-      $("btn-check").disabled = false;
+      setIntakeBusy(false);
     }
+    // On success startPolling→showView("wait") keeps intake busy
   }
 
   async function sendFollowup(presetText) {
@@ -2044,6 +2371,7 @@
     if (!q) { showError("followup-error", "Type a question first.", { focusId: "followup-input" }); return; }
     if (!session.caseId || !session.token) { showError("followup-error", "No active case.", { onRetry: resetToIntake }); return; }
     $("btn-followup").disabled = true;
+    $("btn-followup").textContent = "Waiting…";
     optimisticTurns = (lastData && lastData.conversationTurns) ? lastData.conversationTurns.slice() : [];
     optimisticTurns.push({ role: "user", text: q });
     followupBaseline = {
@@ -2086,7 +2414,10 @@
       optimisticTurns = [];
       showError("followup-error", e, { focusId: "followup-input", onRetry: function () { sendFollowup(q); } });
     } finally {
-      $("btn-followup").disabled = false;
+      if (!conversationPending) {
+        $("btn-followup").disabled = false;
+        $("btn-followup").textContent = "Send";
+      }
     }
   }
 

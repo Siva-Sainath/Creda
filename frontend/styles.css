@@ -368,7 +368,7 @@
     }
     @keyframes stampFillReveal {
       0% { opacity: 0; }
-      100% { opacity: .12; }
+      100% { opacity: 1; }
     }
     @keyframes stampTextReveal {
       0% { opacity: 0; transform: translateY(4px); }
@@ -378,7 +378,7 @@
       .ruling-stamp-press.is-pressed .stamp-frame,
       .ruling-stamp-press.is-pressed .stamp-fill,
       .ruling-stamp-press.is-pressed .stamp-text { animation: none; opacity: 1; transform: none; }
-      .ruling-stamp-press .stamp-fill { opacity: .12; }
+      .ruling-stamp-press .stamp-fill { opacity: 1; }
     }
     .stream-line-shimmer {
       background: linear-gradient(90deg, transparent, rgba(21,94,239,.18), transparent);
@@ -1478,7 +1478,8 @@
     body.creda-v58 .send-btn:disabled { opacity: .45; cursor: not-allowed; }
     body.creda-v58 .send-btn.is-active { background: var(--blue); border-color: var(--blue); }
     body.creda-v58 .composer-safety {
-      margin: -.25rem 0 0; font-size: .74rem; color: var(--muted);
+      margin: .55rem 0 0; font-size: .74rem; color: var(--muted);
+      position: relative; z-index: 1;
     }
     body.creda-v58 .demo-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
     body.creda-v58 .demo-chip {
@@ -1544,25 +1545,78 @@
       font-size: .78rem; cursor: pointer; padding: 0;
     }
     body.creda-v58 .board-stamp-host { display: flex; justify-content: flex-start; }
-    body.creda-v58 .board-stamp .ruling-stamp-press svg { width: 168px; height: auto; }
+    body.creda-v58 .board-stamp .ruling-stamp-press { width: 200px; height: 132px; }
+    body.creda-v58 .board-stamp .ruling-stamp-press svg { width: 200px; height: auto; }
     body.creda-v58 .board-headline {
-      margin: 0; font-size: clamp(1.1rem, 3vw, 1.35rem); line-height: 1.35;
+      margin: .35rem 0 0; font-size: clamp(1.2rem, 2.6vw, 1.55rem); line-height: 1.25;
+      font-weight: 800; white-space: normal; overflow: visible; text-overflow: unset;
     }
-    body.creda-v58 .board-tactics { display: grid; gap: .35rem; }
-    body.creda-v58 .tactic-line {
-      padding: .45rem .6rem; border-left: 3px solid var(--blue);
-      background: rgba(239,244,255,.55); border-radius: 0 8px 8px 0;
-      font-size: .8rem; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    body.creda-v58 .board-consequence {
+      margin: .4rem 0 0; font-size: .95rem; line-height: 1.4; color: var(--muted);
+      white-space: normal; max-width: 36rem;
     }
-    body.creda-v58 .board-exhibits { display: grid; gap: .5rem; }
-    body.creda-v58 .board-actions { display: grid; gap: .45rem; }
-    body.creda-v58 .board-action {
-      padding: .55rem .65rem; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    body.creda-v58 .board-tactics { margin-top: .9rem; }
+    body.creda-v58 .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+      gap: .65rem;
     }
-    body.creda-v58 .board-action strong { display: block; font-size: .82rem; margin-bottom: .15rem; }
-    body.creda-v58 .board-action span { font-size: .76rem; color: var(--muted); line-height: 1.4; }
-    body.creda-v58 .board-action.urgent { border-color: #fecdca; background: #fef3f2; }
-    body.creda-v58 .board-action.urgent strong { color: var(--risk); }
+    body.creda-v58 .tactic-tile {
+      min-height: 118px; padding: .7rem .7rem .65rem;
+      border: 1px solid var(--line); border-radius: 14px; background: #fff;
+      display: flex; flex-direction: column; gap: .4rem;
+      box-shadow: 0 1px 0 rgba(15,36,51,.04);
+    }
+    body.creda-v58 .tactic-tile-icon { color: var(--ink); }
+    body.creda-v58 .tactic-tile-icon svg { width: 28px; height: 28px; display: block; }
+    body.creda-v58 .tactic-gun {
+      margin: 0; font-size: .78rem; font-weight: 650; line-height: 1.3; color: var(--ink);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    body.creda-v58 .tactic-tile.tone-risk { box-shadow: inset 3px 0 0 #B42318; }
+    body.creda-v58 .tactic-tile.tone-safe { box-shadow: inset 3px 0 0 #087443; }
+    body.creda-v58 .tactic-tile.tone-warn { box-shadow: inset 3px 0 0 #9A6700; }
+    body.creda-v58 .source-chip {
+      margin-top: auto; align-self: flex-start;
+      display: inline-flex; padding: .12rem .45rem; border-radius: 999px;
+      border: 1px solid rgba(21,94,239,.25); background: #eff4ff; color: #155eef;
+      font-size: .62rem; font-weight: 700; font-family: var(--mono); text-decoration: none;
+    }
+    body.creda-v58 .source-chip-muted {
+      border-color: var(--line); background: #f4f6f8; color: var(--muted);
+    }
+    body.creda-v58 .board-exhibits {
+      display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .75rem;
+    }
+    body.creda-v58 .exhibit-slip {
+      display: inline-flex; align-items: center; gap: .35rem;
+      max-width: 100%; padding: .35rem .55rem; border-radius: 999px;
+      border: 1px solid var(--line); background: #fafbfc; font-size: .72rem;
+    }
+    body.creda-v58 .exhibit-slip .exhibit-smoking {
+      max-width: 18rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    body.creda-v58 .exhibit-slip .exhibit-pin {
+      font-family: var(--mono); font-size: .62rem; font-weight: 700; color: var(--muted);
+    }
+    body.creda-v58 .board-actions { margin-top: .75rem; }
+    body.creda-v58 .action-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+    body.creda-v58 .action-chip {
+      border: 1.5px solid var(--ink); background: #fff; color: var(--ink);
+      border-radius: 999px; padding: .45rem .85rem; font-size: .78rem; font-weight: 700;
+      cursor: default;
+    }
+    body.creda-v58 .action-chip.urgent {
+      border-color: #B42318; background: #B42318; color: #fff;
+    }
+    body.creda-v58 .why-collapsed {
+      margin-top: .85rem; border: 1px dashed var(--line); border-radius: 10px; padding: .35rem .65rem;
+      background: rgba(255,255,255,.6);
+    }
+    body.creda-v58 .why-collapsed summary {
+      cursor: pointer; font-size: .78rem; font-weight: 650; color: var(--muted);
+    }
+    body.creda-v58 .why-body { margin-top: .4rem; font-size: .78rem; line-height: 1.45; color: var(--ink); }
     body.creda-v58 .board-thread .conv-thread { display: grid; gap: .45rem; }
     body.creda-v58 .board-thread .conv-bubble {
       padding: .5rem .65rem; border-radius: 10px; font-size: .8rem; line-height: 1.45;
@@ -1573,14 +1627,16 @@
       font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
       color: var(--muted); margin-bottom: .2rem;
     }
-    body.creda-v58 .stamp-fill-risk { fill: #FEE4E2; }
-    body.creda-v58 .stamp-text-risk { fill: #912018; }
+    body.creda-v58 .stamp-fill-risk { fill: #B42318; }
+    body.creda-v58 .stamp-text-risk { fill: #fff; }
+    body.creda-v58 .stamp-frame-risk { stroke: #7A150F; }
     body.creda-v58 .stamp-frame-risk { stroke: #F04438; }
     body.creda-v58 .stamp-fill-safe { fill: #D1FADF; }
     body.creda-v58 .stamp-text-safe { fill: #05603A; }
     body.creda-v58 .stamp-frame-safe { stroke: #12B76A; }
-    body.creda-v58 .stamp-fill-warn { fill: #FEF0C7; }
-    body.creda-v58 .stamp-text-warn { fill: #7A2E0E; }
+    body.creda-v58 .stamp-fill-warn { fill: #9A6700; }
+    body.creda-v58 .stamp-text-warn { fill: #fff; }
+    body.creda-v58 .stamp-frame-warn { stroke: #7A5200; }
     body.creda-v58 .stamp-frame-warn { stroke: #F79009; }
     body.creda-v58 .stamp-fill-neutral { fill: #EFF4FF; }
     body.creda-v58 .stamp-text-neutral { fill: #155EEF; }
@@ -1590,7 +1646,6 @@
     body.creda-v58 #attachment-gallery,
     body.creda-v58 #wait-pipeline,
     body.creda-v58 #stream-body,
-    body.creda-v58 #judgment-host:not(:empty),
     body.creda-v58 #research-host:not(:empty) { display: none !important; }
     
     /* v59/v60: Two-pane workspace layout */
@@ -1610,7 +1665,7 @@
     /* T6: Design tokens */
     body.creda-v58 {
       --header-h: 3.5rem;
-      --workspace-max: min(1400px, calc(100vw - 2rem));
+      --workspace-max: min(1600px, calc(100vw - 1rem));
       --gutter: clamp(1rem, 3vw, 2rem);
     }
     
@@ -1643,11 +1698,12 @@
        use flex-grow with no flex-shrink protection on siblings */
     @media (min-width: 1024px) {
       body.creda-v58 .composer-card {
-        /* grow but cap at a sensible max so chips/telegram remain visible */
-        max-height: 55vh;
+        max-height: min(40vh, 300px);
+        flex: 0 1 auto;
       }
       body.creda-v58 .composer-card textarea {
-        max-height: calc(55vh - 120px);
+        max-height: calc(min(40vh, 300px) - 96px);
+        min-height: 110px;
       }
       /* Static items below composer: don't shrink */
       body.creda-v58 .composer-safety,
@@ -1673,8 +1729,9 @@
     
     @media (min-width: 1024px) {
       body.creda-v58 .workspace {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-        gap: 1.5rem;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+        gap: 1.15rem;
+        height: 100%;
       }
     }
     
@@ -1932,3 +1989,431 @@
       body.creda-v58 .tactic-line { white-space: normal; }
       body.creda-v58 .prestream-step { font-size: .6rem; padding: .35rem .15rem; }
     }
+
+    body.creda-v58 .casefile-empty {
+      flex: 1; display: flex; align-items: stretch; justify-content: stretch; padding: 0; min-height: 100%;
+    }
+    body.creda-v58 .casefile-guide {
+      flex: 1; display: flex; flex-direction: column; gap: .55rem;
+      padding: 1.2rem 1.3rem; border: 1px solid var(--line); border-radius: 16px;
+      background: linear-gradient(180deg, #fff, #f7f9fb);
+    }
+    body.creda-v58 .casefile-empty-kicker {
+      margin: 0; font-size: .7rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--blue);
+    }
+    body.creda-v58 .casefile-guide-steps {
+      margin: .2rem 0 0; padding-left: 1.1rem; display: grid; gap: .4rem;
+      font-size: .84rem; color: var(--ink); line-height: 1.35;
+    }
+    body.creda-v58 .casefile-empty-hint { margin-top: auto; font-size: .76rem; color: var(--muted); }
+
+    /* v61: neutralize any leftover flip CSS so unused rules cannot affect layout */
+    body.creda-v58 .flip-card, body.creda-v58 .flip-inner, body.creda-v58 .flip-front, body.creda-v58 .flip-back {
+      transform: none !important; transition: none !important;
+    }
+    @media (min-width: 1024px) {
+      body.creda-v58 #view-result:not(.hidden) { flex: 1; display: flex; flex-direction: column; min-height: 100%; }
+      body.creda-v58 .result-board { flex: 1; }
+      body.creda-v58 #judgment-host:not(:empty) { display: block !important; }
+    }
+
+
+/* v61 VT/HIBP grammar */
+body.creda-v58 .board-meta {
+  margin: .25rem 0 0; font-size: .78rem; color: var(--muted); font-family: var(--mono);
+  letter-spacing: .02em; min-height: 1.1em;
+}
+body.creda-v58 .board-meta.is-empty { display: none; }
+body.creda-v58 .visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+body.creda-v58 .result-board {
+  display: grid; gap: .65rem; align-content: start;
+}
+body.creda-v58 .board-actions { margin-top: .15rem; order: unset; }
+body.creda-v58 .tile-grid-3x2 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .55rem;
+}
+@media (max-width: 900px) {
+  body.creda-v58 .tile-grid-3x2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+body.creda-v58 .tactic-tile {
+  min-height: 112px; padding: .65rem .7rem;
+  border-radius: 12px; border: 1px solid var(--line); background: #fff;
+  display: flex; flex-direction: column; gap: .28rem;
+}
+body.creda-v58 .tactic-label {
+  font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--muted);
+}
+body.creda-v58 .tactic-gun {
+  margin: 0; font-size: .8rem; font-weight: 650; line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+body.creda-v58 .action-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+body.creda-v58 .action-chip {
+  border: 1.5px solid var(--ink); background: #fff; border-radius: 999px;
+  padding: .4rem .8rem; font-size: .76rem; font-weight: 700; cursor: default;
+}
+body.creda-v58 .action-chip.urgent { border-color: #B42318; background: #B42318; color: #fff; }
+body.creda-v58 .extra-checks {
+  margin-top: .25rem; border: 1px dashed var(--line); border-radius: 10px; padding: .35rem .6rem;
+  background: rgba(255,255,255,.55);
+}
+body.creda-v58 .extra-checks summary {
+  cursor: pointer; font-size: .74rem; font-weight: 700; color: var(--muted);
+}
+body.creda-v58 .extra-checks-body { margin-top: .45rem; display: flex; flex-wrap: wrap; gap: .35rem; }
+body.creda-v58 .board-stamp .ruling-stamp-press { width: 220px; height: 146px; }
+body.creda-v58 .board-stamp .ruling-stamp-press svg { width: 220px; height: auto; }
+
+/* v61 reveal safety + fill pane */
+body.creda-v58 #view-result:not(.hidden) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+body.creda-v58 .result-board {
+  min-height: 100%;
+  align-content: start;
+  padding-bottom: 1.25rem;
+}
+body.creda-v58 #orders-host,
+body.creda-v58 #tactics-host,
+body.creda-v58 #board-headline,
+body.creda-v58 #board-meta,
+body.creda-v58 .board-stamp-host {
+  visibility: visible;
+}
+@media (min-width: 1024px) {
+  body.creda-v58 .pane-casefile {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  body.creda-v58 .pane-casefile #view-result:not(.hidden) {
+    flex: 1;
+    overflow-y: auto;
+  }
+  body.creda-v58 .tile-grid-3x2 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  /* Keep telegram/demos reachable at 1280x656 */
+  body.creda-v58 .composer-card {
+    max-height: min(36vh, 260px) !important;
+    flex: 0 1 auto !important;
+  }
+  body.creda-v58 .demo-chips,
+  body.creda-v58 .telegram-row {
+    flex-shrink: 0;
+  }
+}
+
+
+/* v62 button + arrow cleanup */
+body.creda-v58 .send-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  min-height: 2.35rem; padding: .45rem .95rem;
+}
+body.creda-v58 .send-btn svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+body.creda-v58 .send-btn:disabled {
+  opacity: .42; cursor: not-allowed; filter: grayscale(.15);
+  box-shadow: none; transform: none;
+}
+body.creda-v58 .send-btn:not(:disabled):hover { transform: translateY(-1px); }
+body.creda-v58 .btn:disabled,
+body.creda-v58 .btn-ghost:disabled {
+  opacity: .45; cursor: not-allowed;
+}
+body.creda-v58 .explain-caption {
+  font-size: .78rem; color: var(--muted); letter-spacing: 0;
+}
+body.creda-v58 details summary::-webkit-details-marker { display: none; }
+body.creda-v58 details summary { list-style: none; }
+
+
+/* v62 app-wide control states */
+body.creda-v58 .demo-chip:disabled,
+body.creda-v58 .demo-chip[aria-disabled="true"] {
+  opacity: .45; cursor: not-allowed; pointer-events: none;
+}
+body.creda-v58 .attach-btn:disabled { opacity: .45; cursor: not-allowed; }
+body.creda-v58 #offer-text[readonly] { opacity: .85; cursor: default; }
+
+
+/* ========== v62 glass-vectors (on top of v62b-controls) ========== */
+html, body.creda-v62 { height: 100%; }
+body.creda-v62 {
+  overflow: hidden;
+  --glass: rgba(255,255,255,.62);
+  --glass-strong: rgba(255,255,255,.78);
+  --glass-border: rgba(255,255,255,.72);
+  --glass-edge: rgba(15,36,51,.08);
+  --glass-blur: 18px;
+  --glass-shadow: 0 8px 32px rgba(15,36,51,.05), 0 1px 0 rgba(255,255,255,.9) inset;
+}
+body.creda-v62 .pane-intake,
+body.creda-v62 .pane-casefile,
+body.creda-v62 #view-intake,
+body.creda-v62 #view-result:not(.hidden),
+body.creda-v62 .composer-card textarea {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15,36,51,.18) transparent;
+}
+body.creda-v62 .pane-intake::-webkit-scrollbar,
+body.creda-v62 .pane-casefile::-webkit-scrollbar,
+body.creda-v62 #view-intake::-webkit-scrollbar,
+body.creda-v62 #view-result:not(.hidden)::-webkit-scrollbar,
+body.creda-v62 .composer-card textarea::-webkit-scrollbar { width: 6px; height: 6px; }
+body.creda-v62 .pane-intake::-webkit-scrollbar-thumb,
+body.creda-v62 .pane-casefile::-webkit-scrollbar-thumb,
+body.creda-v62 #view-intake::-webkit-scrollbar-thumb,
+body.creda-v62 #view-result:not(.hidden)::-webkit-scrollbar-thumb,
+body.creda-v62 .composer-card textarea::-webkit-scrollbar-thumb {
+  background: rgba(15,36,51,.18); border-radius: 99px;
+}
+body.creda-v62 .pane-intake::-webkit-scrollbar-button,
+body.creda-v62 .pane-casefile::-webkit-scrollbar-button,
+body.creda-v62 #view-intake::-webkit-scrollbar-button,
+body.creda-v62 #view-result:not(.hidden)::-webkit-scrollbar-button {
+  display: none; width: 0; height: 0;
+}
+@media (min-width: 1024px) {
+  body.creda-v62 .shell { height: 100dvh; max-height: 100dvh; overflow: hidden; }
+  body.creda-v62 main, body.creda-v62 .workspace { overflow: hidden; }
+  body.creda-v62 .pane-intake { overflow: hidden; }
+  body.creda-v62 .pane-intake #view-intake { overflow-y: auto; overflow-x: hidden; min-height: 0; flex: 1; }
+  body.creda-v62 .pane-casefile { overflow: hidden; }
+  body.creda-v62 .pane-casefile #view-result:not(.hidden),
+  body.creda-v62 .pane-casefile #view-wait:not(.hidden),
+  body.creda-v62 .pane-casefile #casefile-empty:not(.hidden) {
+    overflow-y: auto; overflow-x: hidden; min-height: 0; flex: 1;
+  }
+}
+body.creda-v62 .glass-pane {
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  background: rgba(255,255,255,.38);
+  backdrop-filter: blur(14px) saturate(1.35);
+  -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  box-shadow: var(--glass-shadow);
+  padding: .65rem .75rem;
+}
+body.creda-v62 .glass-panel {
+  background: var(--glass) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.45);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.45);
+  border: 1px solid var(--glass-edge) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+body.creda-v62 .composer-card.glass-panel {
+  border-radius: 16px !important;
+  border-width: 1.5px !important;
+  border-color: rgba(15,36,51,.12) !important;
+}
+body.creda-v62 .tactic-tile {
+  background: rgba(255,255,255,.72) !important;
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  border: 1px solid rgba(15,36,51,.08) !important;
+  box-shadow: 0 4px 16px rgba(15,36,51,.04), inset 0 1px 0 rgba(255,255,255,.85);
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+body.creda-v62 .tactic-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(15,36,51,.07), inset 0 1px 0 rgba(255,255,255,.9);
+}
+body.creda-v62 .tactic-tile-icon {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.85);
+  border: 1px solid rgba(15,36,51,.06);
+  color: var(--ink);
+}
+body.creda-v62 .tactic-tile-icon svg { width: 18px; height: 18px; }
+body.creda-v62 .tactic-tile.tone-risk .tactic-tile-icon { color: var(--risk); background: rgba(180,35,24,.06); }
+body.creda-v62 .tactic-tile.tone-safe .tactic-tile-icon { color: var(--safe); background: rgba(8,116,67,.06); }
+body.creda-v62 .tactic-tile.tone-warn .tactic-tile-icon { color: var(--warn); background: rgba(154,103,0,.08); }
+body.creda-v62 .action-chip {
+  background: rgba(255,255,255,.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+body.creda-v62 .casefile-guide.glass-panel {
+  border-radius: 16px !important;
+  background: linear-gradient(165deg, rgba(255,255,255,.78), rgba(247,249,251,.65)) !important;
+}
+body.creda-v62 .followup-composer.glass-panel { border-radius: 14px !important; }
+body.creda-v62 .topbar {
+  background: rgba(243,241,236,.72);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border-bottom: 1px solid rgba(15,36,51,.06);
+}
+body.creda-v62 .btn:disabled:hover,
+body.creda-v62 .send-btn:disabled:hover,
+body.creda-v62 .btn-ghost:disabled:hover,
+body.creda-v62 .demo-chip:disabled:hover {
+  transform: none !important; box-shadow: none !important;
+}
+body.creda-v62 #btn-followup:disabled { opacity: .5; cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) {
+  body.creda-v62 .tactic-tile { transition: none; }
+  body.creda-v62 .tactic-tile:hover { transform: none; }
+}
+
+
+/* ========== v63 reveal + followup UI polish ========== */
+/* Thin / overlay scrollbars; only scroll when content overflows */
+body.creda-v62 .pane-intake,
+body.creda-v62 .pane-casefile,
+body.creda-v62 #view-intake,
+body.creda-v62 #view-result:not(.hidden),
+body.creda-v62 #view-wait:not(.hidden) {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15,36,51,.2) transparent;
+  scrollbar-gutter: auto;
+}
+body.creda-v62 .pane-intake,
+body.creda-v62 .pane-casefile {
+  overflow: hidden; /* outer panes never show thick bars */
+}
+@media (min-width: 1024px) {
+  body.creda-v62 .pane-intake #view-intake,
+  body.creda-v62 .pane-casefile #view-result:not(.hidden),
+  body.creda-v62 .pane-casefile #view-wait:not(.hidden),
+  body.creda-v62 .pane-casefile #casefile-empty:not(.hidden) {
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+  }
+}
+body.creda-v62 .pane-intake #view-intake::-webkit-scrollbar,
+body.creda-v62 .pane-casefile #view-result:not(.hidden)::-webkit-scrollbar,
+body.creda-v62 .pane-casefile #view-wait:not(.hidden)::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+body.creda-v62 .pane-intake #view-intake::-webkit-scrollbar-thumb,
+body.creda-v62 .pane-casefile #view-result:not(.hidden)::-webkit-scrollbar-thumb {
+  background: rgba(15,36,51,.18);
+  border-radius: 99px;
+}
+body.creda-v62 .pane-intake #view-intake::-webkit-scrollbar-button,
+body.creda-v62 .pane-casefile #view-result:not(.hidden)::-webkit-scrollbar-button {
+  display: none; width: 0; height: 0;
+}
+
+/* Stamp must not block "Check another" */
+body.creda-v58 .result-toolbar {
+  position: relative;
+  z-index: 6;
+}
+body.creda-v58 .board-stamp-host,
+body.creda-v58 .board-stamp {
+  position: relative;
+  z-index: 1;
+  pointer-events: none; /* stamp is decorative */
+  max-width: min(240px, 55vw);
+}
+body.creda-v58 .board-stamp .ruling-stamp-press,
+body.creda-v58 .board-stamp .ruling-stamp-press svg {
+  max-width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+body.creda-v58 #btn-new,
+body.creda-v58 .result-toolbar .btn-text {
+  position: relative;
+  z-index: 7;
+  pointer-events: auto;
+}
+
+/* Why Creda ruled must not overlap tactic tiles */
+body.creda-v58 #judgment-host,
+body.creda-v58 .why-collapsed {
+  position: relative;
+  z-index: 2;
+  clear: both;
+  margin-top: 1rem;
+  max-width: 100%;
+}
+body.creda-v58 #tactics-host {
+  position: relative;
+  z-index: 1;
+  margin-bottom: .35rem;
+}
+body.creda-v58 #judgment-host:not(:empty) {
+  display: block;
+  margin-top: 1.1rem;
+  padding-top: .15rem;
+}
+
+/* Health pill CHECKING state during in-flight Check */
+body.creda-v58 .health-pill[data-state="checking"] #health-label,
+body.creda-v58.ui-waiting #health-label {
+  letter-spacing: .06em;
+  font-weight: 700;
+}
+body.creda-v58 .health-pill[data-state="checking"] .dot {
+  background: #155eef;
+  box-shadow: 0 0 0 3px rgba(21,94,239,.18);
+}
+
+/* Reveal safety: never leave ghosted board chrome */
+body.creda-v58 .board-stamp,
+body.creda-v58 .board-stamp-host,
+body.creda-v58 #board-headline,
+body.creda-v58 #board-meta,
+body.creda-v58 #orders-host .action-chip,
+body.creda-v58 #tactics-host .tactic-tile,
+body.creda-v58 #exhibits-host .extra-checks,
+body.creda-v58 #judgment-host .why-collapsed {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.creda-v58 .board-stamp,
+  body.creda-v58 .ruling-stamp-press,
+  body.creda-v58 #board-headline,
+  body.creda-v58 #board-meta,
+  body.creda-v58 #orders-host .action-chip,
+  body.creda-v58 #tactics-host .tactic-tile {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+}
+
+
+/* v64 intake clean */
+body.creda-v58 .composer-toolbar {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: .5rem; margin-top: .5rem; padding-top: .5rem;
+}
+body.creda-v58 .composer-actions { display: flex; gap: .45rem; align-items: center; }
+body.creda-v58 .composer-safety {
+  margin: .65rem 0 .5rem; padding: 0; clear: both;
+  font-size: .78rem; color: var(--muted); line-height: 1.35;
+  position: relative; z-index: 1;
+}
+body.creda-v58 .demo-chips { display: none !important; }
+body.creda-v58 .attach-plus, body.creda-v58 #btn-attach { display: none !important; }
+body.creda-v58 .telegram-chip {
+  display: inline-flex; align-items: center; gap: .45rem;
+  max-width: 11rem; margin: .35rem 0 .75rem; padding: .45rem .75rem;
+  border: 1.5px solid #229ED9; border-radius: 999px; background: #fff;
+  color: #229ED9; font-weight: 650; font-size: .84rem; text-decoration: none;
+  box-shadow: 0 1px 0 rgba(15,36,51,.04);
+}
+body.creda-v58 .telegram-chip:hover { background: #F0F9FF; color: #0B7FB8; }
+body.creda-v58 .telegram-chip:focus-visible { outline: 2px solid #229ED9; outline-offset: 2px; }
+body.creda-v58 .telegram-chip svg { flex-shrink: 0; color: #229ED9; }
+body.creda-v58 .intake-explain { display: none !important; }
+body.creda-v58 .composer-card { overflow: visible; }
+
+/* v64 hide drop */
+body.creda-v58 .drop-overlay { display: none !important; }
