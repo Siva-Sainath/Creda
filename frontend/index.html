@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Creda — verify a job offer against official sources before you reply." />
   <title>Creda — Verify offers</title>
-  <meta name="creda-build" content="baseten-20260919-v70-conversation-pending-fix" />
+  <meta name="creda-build" content="baseten-20260919-v71-visual-polish" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -67,6 +67,36 @@
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                 <span>Telegram</span>
               </a>
+
+              <div class="how-it-works" aria-hidden="true">
+                <p class="how-it-works-kicker">How Creda checks an offer</p>
+                <div class="how-steps">
+                  <div class="how-step">
+                    <span class="how-step-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M6 4h9l3 3v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+                    </span>
+                    <span class="how-step-label">Read the message</span>
+                  </div>
+                  <span class="how-step-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  <div class="how-step">
+                    <span class="how-step-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.75"/><path d="M20 20l-4.35-4.35" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+                    </span>
+                    <span class="how-step-label">Cross-check official sources</span>
+                  </div>
+                  <span class="how-step-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  <div class="how-step">
+                    <span class="how-step-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3M12 6l-7 2.5V12c0 4.5 3.2 8.4 7 9.5 3.8-1.1 7-5 7-9.5V8.5L12 6Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M9.5 12.2l1.8 1.8L15 10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="how-step-label">Stamp a ruling</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </div>
@@ -75,15 +105,46 @@
 
           <div class="casefile-empty" id="casefile-empty" aria-label="How Creda works">
             <div class="casefile-guide glass-panel">
+              <div class="casefile-empty-hero" aria-hidden="true">
+                <svg viewBox="0 0 96 96" fill="none">
+                  <circle cx="48" cy="48" r="46" fill="var(--blue-bg)"/>
+                  <path d="M48 20l22 8v18c0 15-9.5 26.5-22 30-12.5-3.5-22-15-22-30V28l22-8Z" fill="#fff" stroke="var(--blue)" stroke-width="2.5" stroke-linejoin="round"/>
+                  <path d="M38 47l7 7 15-15" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
               <p class="casefile-empty-kicker">Case file</p>
               <p class="casefile-empty-title">What Creda shows here</p>
               <p class="casefile-empty-text">After you press Check, this pane fills with a stamped ruling, tactic tiles, evidence exhibits, and next steps — all from official sources.</p>
-              <ol class="casefile-guide-steps">
-                <li><strong>Stamp</strong> — HIGH RISK / NOT ENOUGH PROOF / NO CONFLICT</li>
-                <li><strong>Why this is a scam</strong> — up to 6 tactic tiles with source chips</li>
-                <li><strong>Exhibits</strong> — flat evidence cards (facts on the face)</li>
-                <li><strong>Orders</strong> — what to do next</li>
-              </ol>
+              <div class="casefile-guide-grid">
+                <div class="guide-tile">
+                  <span class="guide-tile-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M8 12l3 3 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  <span class="guide-tile-title">Stamp</span>
+                  <span class="guide-tile-text">HIGH RISK / NOT ENOUGH PROOF / NO CONFLICT</span>
+                </div>
+                <div class="guide-tile">
+                  <span class="guide-tile-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5.2-3.5 9.7-8 11-4.5-1.3-8-5.8-8-11V5l8-3Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>
+                  </span>
+                  <span class="guide-tile-title">Why this is a scam</span>
+                  <span class="guide-tile-text">Up to 6 tactic tiles with source chips</span>
+                </div>
+                <div class="guide-tile">
+                  <span class="guide-tile-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M6 4h9l3 3v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M9 10h6M9 14h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+                  </span>
+                  <span class="guide-tile-title">Exhibits</span>
+                  <span class="guide-tile-text">Flat evidence cards — facts on the face</span>
+                </div>
+                <div class="guide-tile">
+                  <span class="guide-tile-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  <span class="guide-tile-title">Orders</span>
+                  <span class="guide-tile-text">What to do next</span>
+                </div>
+              </div>
               <p class="casefile-empty-hint">Paste a recruiter message on the left, then press Check.</p>
             </div>
           </div>
