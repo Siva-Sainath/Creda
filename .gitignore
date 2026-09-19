@@ -1,0 +1,28 @@
+# OS and editor
+.DS_Store
+.idea/
+.vscode/
+.kiro/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Node / frontend build artifacts
+node_modules/
+frontend/dist/
+frontend/deploy.zip
+
+# Local caches and scratch
+.skills-cache/
+work/
+*.log
+.env
+.env.*
+
+# Private training and review data
+data/private/

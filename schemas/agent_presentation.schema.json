@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CredaAgentPresentation",
+  "type": "object",
+  "required": ["version", "headline", "explanation", "safeActions", "followUpQuestions"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "headline": {
+      "type": "object",
+      "required": ["title", "subtitle"],
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "subtitle": { "type": "string", "maxLength": 400 }
+      }
+    },
+    "explanation": {
+      "type": "object",
+      "required": ["text"],
+      "properties": { "text": { "type": "string", "maxLength": 1800 } }
+    },
+    "evidenceHighlights": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["check", "text"],
+        "properties": {
+          "check": { "type": "string" },
+          "text": { "type": "string", "maxLength": 500 },
+          "tier": { "type": ["integer", "string"] },
+          "outcome": { "type": "string", "enum": ["conflict", "clear", "unverified"] }
+        }
+      }
+    },
+    "tacticHighlights": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["tacticId", "title", "guidance"],
+        "properties": {
+          "tacticId": { "type": "string" },
+          "title": { "type": "string" },
+          "guidance": { "type": "string", "maxLength": 500 }
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "properties": {
+        "items": { "type": "array", "maxItems": 5, "items": { "type": "string", "maxLength": 300 } }
+      }
+    },
+    "safeActions": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["label", "detail"],
+        "properties": {
+          "label": { "type": "string", "maxLength": 80 },
+          "detail": { "type": "string", "maxLength": 300 },
+          "tone": { "type": "string", "enum": ["urgent", "primary", "neutral"] }
+        }
+      }
+    },
+    "followUpQuestions": {
+      "type": "array",
+      "maxItems": 3,
+      "items": { "type": "string", "maxLength": 300 }
+    }
+  }
+}

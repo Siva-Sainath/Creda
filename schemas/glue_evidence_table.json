@@ -1,0 +1,242 @@
+{
+  "Table": {
+    "Name": "creda_evidence",
+    "StorageDescriptor": {
+      "Columns": [
+        {
+          "Name": "evidence_id",
+          "Type": "string"
+        },
+        {
+          "Name": "record_type",
+          "Type": "string"
+        },
+        {
+          "Name": "source_id",
+          "Type": "string"
+        },
+        {
+          "Name": "source_url",
+          "Type": "string"
+        },
+        {
+          "Name": "canonical_url",
+          "Type": "string"
+        },
+        {
+          "Name": "source_domain",
+          "Type": "string"
+        },
+        {
+          "Name": "publisher",
+          "Type": "string"
+        },
+        {
+          "Name": "evidence_tier",
+          "Type": "string"
+        },
+        {
+          "Name": "country",
+          "Type": "string"
+        },
+        {
+          "Name": "applicant_country",
+          "Type": "string"
+        },
+        {
+          "Name": "employment_country",
+          "Type": "string"
+        },
+        {
+          "Name": "remote_scope",
+          "Type": "string"
+        },
+        {
+          "Name": "language",
+          "Type": "string"
+        },
+        {
+          "Name": "title",
+          "Type": "string"
+        },
+        {
+          "Name": "employer_claimed",
+          "Type": "string"
+        },
+        {
+          "Name": "employer_canonical_domain",
+          "Type": "string"
+        },
+        {
+          "Name": "recruiter_name_claimed",
+          "Type": "string"
+        },
+        {
+          "Name": "recruiter_contact_channel",
+          "Type": "string"
+        },
+        {
+          "Name": "sender_domain",
+          "Type": "string"
+        },
+        {
+          "Name": "role_title",
+          "Type": "string"
+        },
+        {
+          "Name": "employment_type",
+          "Type": "string"
+        },
+        {
+          "Name": "salary_text",
+          "Type": "string"
+        },
+        {
+          "Name": "payment_requested",
+          "Type": "string"
+        },
+        {
+          "Name": "payment_amount",
+          "Type": "string"
+        },
+        {
+          "Name": "payment_currency",
+          "Type": "string"
+        },
+        {
+          "Name": "payment_method",
+          "Type": "string"
+        },
+        {
+          "Name": "requested_documents",
+          "Type": "string"
+        },
+        {
+          "Name": "urgency_claims",
+          "Type": "string"
+        },
+        {
+          "Name": "equipment_purchase_claim",
+          "Type": "string"
+        },
+        {
+          "Name": "visa_or_relocation_claim",
+          "Type": "string"
+        },
+        {
+          "Name": "extracted_claims",
+          "Type": "string"
+        },
+        {
+          "Name": "scam_pattern_tags",
+          "Type": "string"
+        },
+        {
+          "Name": "original_text",
+          "Type": "string"
+        },
+        {
+          "Name": "normalized_text",
+          "Type": "string"
+        },
+        {
+          "Name": "label",
+          "Type": "string"
+        },
+        {
+          "Name": "label_provenance",
+          "Type": "string"
+        },
+        {
+          "Name": "label_confidence",
+          "Type": "string"
+        },
+        {
+          "Name": "human_review_status",
+          "Type": "string"
+        },
+        {
+          "Name": "content_hash",
+          "Type": "string"
+        },
+        {
+          "Name": "near_duplicate_group",
+          "Type": "string"
+        },
+        {
+          "Name": "campaign_group",
+          "Type": "string"
+        },
+        {
+          "Name": "derived_from_emscad",
+          "Type": "string"
+        },
+        {
+          "Name": "published_at",
+          "Type": "string"
+        },
+        {
+          "Name": "observed_at",
+          "Type": "string"
+        },
+        {
+          "Name": "last_verified_at",
+          "Type": "string"
+        },
+        {
+          "Name": "next_verification_at",
+          "Type": "string"
+        },
+        {
+          "Name": "expires_at",
+          "Type": "string"
+        },
+        {
+          "Name": "verification_status",
+          "Type": "string"
+        },
+        {
+          "Name": "lifecycle_status",
+          "Type": "string"
+        },
+        {
+          "Name": "supersedes_evidence_id",
+          "Type": "string"
+        },
+        {
+          "Name": "raw_s3_uri",
+          "Type": "string"
+        },
+        {
+          "Name": "curated_s3_uri",
+          "Type": "string"
+        },
+        {
+          "Name": "pii_redaction_status",
+          "Type": "string"
+        },
+        {
+          "Name": "processing_version",
+          "Type": "string"
+        },
+        {
+          "Name": "evaluation_eligible",
+          "Type": "string"
+        },
+        {
+          "Name": "evaluation_partition",
+          "Type": "string"
+        }
+      ],
+      "Location": "s3://creda-data/curated/evidence.parquet",
+      "InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+      "OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+    },
+    "PartitionKeys": [
+      {
+        "Name": "source_id",
+        "Type": "string"
+      }
+    ]
+  }
+}
