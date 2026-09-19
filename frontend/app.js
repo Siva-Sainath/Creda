@@ -28,45 +28,45 @@
   var CredaStageMachine = {
     current: null,
     scenes: {
-      intake: { id: "scene-intake", label: "Opening your case…" },
-      evidence: { id: "scene-evidence", label: "Checking official sources…" },
+      intake: { id: "scene-intake", label: "Opening your case file…" },
+      evidence: { id: "scene-evidence", label: "Pulling scam signals…" },
       ocr: { id: "scene-ocr", label: "Reading your screenshot…" },
-      official_checks: { id: null, label: "Checking official careers listing…", official: true },
-      stamp: { id: "scene-stamp", label: "Writing the ruling…" }
+      official_checks: { id: "scene-evidence", label: "Checking official careers listing…" },
+      qwen_weigh: { id: "scene-qwen", label: "Qwen weighing evidence…" },
+      stamp: { id: "scene-stamp", label: "Stamping your ruling…" }
     },
-    sceneIds: ["scene-intake", "scene-evidence", "scene-ocr", "scene-stamp"],
+    sceneIds: ["scene-intake", "scene-evidence", "scene-ocr", "scene-qwen", "scene-stamp"],
     forceScene: function (key, data) {
       var meta = this.scenes[key];
       if (!meta) return;
       if (this.current === key) return;
       this.current = key;
-      var self = this;
       this.sceneIds.forEach(function (id) {
         var el = document.getElementById(id);
-        if (el) el.classList.toggle("is-off", !meta.id || id !== meta.id);
+        if (el) el.classList.toggle("is-off", id !== meta.id);
       });
-      var officialWrap = $("official-checks");
-      if (officialWrap) officialWrap.classList.toggle("is-off", !meta.official);
       var title = $("wait-title");
       var sub = $("wait-subtitle");
       if (title) title.textContent = meta.label;
-      if (sub) sub.textContent = (data && (data.agentProgress || data.stage)) || meta.label;
+      if (sub) sub.textContent = pipelineWaitCopy(data || {}) || meta.label;
+      updatePrestreamRail(key);
       if (!CredaMotion.ok() || CredaMotion.reduced) return;
       if (meta.id) {
         var active = document.getElementById(meta.id);
         if (active) gsap.fromTo(active, { opacity: 0.35, y: 8 }, { opacity: 1, y: 0, duration: 0.42, ease: "power2.out" });
       }
-      if (meta.official && officialWrap) {
-        gsap.fromTo(officialWrap, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
-      }
       if (key === "intake") {
         gsap.fromTo("#stage-sheet", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" });
         gsap.fromTo("#stage-folder-tab", { scale: 1 }, { scale: 1.08, duration: 0.25, yoyo: true, repeat: 1, transformOrigin: "50% 100%" });
       }
-      if (key === "evidence") {
-        gsap.fromTo("#stage-magnifier", { y: 0 }, { y: -6, duration: 2.4, repeat: -1, yoyo: true, ease: "sine.inOut" });
-        gsap.fromTo(["#stage-slip-1", "#stage-slip-2"], { x: 24, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, stagger: 0.08, ease: "power2.out" });
-        gsap.to("#stage-check-1", { opacity: 1, duration: 0.2, delay: 0.3 });
+      if (key === "evidence" || key === "official_checks") {
+        gsap.fromTo("#scene-evidence circle", { scale: 0.9 }, { scale: 1, duration: 0.35, ease: "back.out(2)", transformOrigin: "50% 50%" });
+      }
+      if (key === "ocr") {
+        gsap.fromTo(".scan-line", { y1: 28, y2: 28 }, { y1: 72, y2: 72, duration: 1.2, repeat: 2, ease: "sine.inOut" });
+      }
+      if (key === "qwen_weigh") {
+        gsap.fromTo("#scene-qwen circle", { scale: 0.88, opacity: 0.5 }, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(1.8)", transformOrigin: "50% 50%" });
       }
       if (key === "stamp") {
         gsap.fromTo("#stage-stamp-press", { scale: 0.92, y: -4 }, {
@@ -98,7 +98,7 @@
       this.lastPollData = null;
       this.sequence = ["intake", "evidence"];
       if (caseHadAttachment) this.sequence.push("ocr");
-      this.sequence.push("official_checks", "stamp");
+      this.sequence.push("official_checks", "qwen_weigh", "stamp");
       this.stepIndex = 0;
       this._playStep();
     },
@@ -106,7 +106,6 @@
       if (!this.running) return;
       var key = this.sequence[this.stepIndex];
       CredaStageMachine.forceScene(key, this.lastPollData || {});
-      updateWaitRail(key, this.stepIndex, this.sequence.length);
       var self = this;
       clearTimeout(this.stepTimer);
       this.stepTimer = setTimeout(function () {
@@ -197,8 +196,9 @@
       gsap.from(".intake-kicker", { y: 8, autoAlpha: 0, duration: 0.35, delay: 0.08, ease: ease });
       gsap.from("#hero-title", { y: 14, autoAlpha: 0, duration: 0.4, delay: 0.1, ease: ease });
       gsap.from(".intake-lede", { y: 10, autoAlpha: 0, duration: 0.38, delay: 0.14, ease: ease });
-      gsap.from(".composer-hero", { y: 20, autoAlpha: 0, duration: 0.45, delay: 0.18, ease: ease });
-      gsap.from(".intake-secondary", { y: 8, autoAlpha: 0, duration: 0.35, delay: 0.28, ease: ease });
+      gsap.from(".composer-card", { y: 20, autoAlpha: 0, duration: 0.45, delay: 0.18, ease: ease });
+      gsap.from(".telegram-row", { y: 8, autoAlpha: 0, duration: 0.35, delay: 0.28, ease: ease });
+      gsap.from(".intake-explain", { y: 6, autoAlpha: 0, duration: 0.32, delay: 0.34, ease: ease });
     },
     startHintCycle: function () {
       var host = document.getElementById("hint-cycle");
@@ -253,10 +253,10 @@
       var el = name === "wait" ? "#view-wait" : name === "result" ? "#view-result" : "#view-intake";
       gsap.fromTo(el, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out" });
       if (name === "wait") {
-        gsap.from(".browser", { scale: 0.98, autoAlpha: 0, duration: 0.5, ease: "back.out(1.4)" });
-        gsap.from(".stage-rail .stage", {
-          y: 8, autoAlpha: 0, duration: 0.35, stagger: 0.05, ease: "power2.out", delay: 0.08
+        gsap.from(".prestream-rail .prestream-step", {
+          y: 8, autoAlpha: 0, duration: 0.35, stagger: 0.06, ease: "power2.out", delay: 0.08
         });
+        gsap.from(".stage-canvas", { scale: 0.98, autoAlpha: 0, duration: 0.5, ease: "back.out(1.4)" });
       }
     },
     pulseStage: function (idx) {
@@ -282,19 +282,17 @@
       var stamp = document.querySelector(".ruling-stamp-press");
       if (stamp) stamp.classList.add("is-pressed");
       var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.from(".ruling", { y: 24, autoAlpha: 0, duration: 0.5 })
+      tl.from(".board-stamp", { y: 16, autoAlpha: 0, duration: 0.45 })
         .from(stamp, { scale: 2.2, rotation: -18, autoAlpha: 0, duration: 0.55, ease: "back.out(2.2)" }, "-=0.2")
-        .from("#judgment-host .glass-shell, #research-host .glass-shell", {
-          y: 12, autoAlpha: 0, duration: 0.4, stagger: 0.06
-        }, "-=0.15")
+        .from("#board-headline", { y: 10, autoAlpha: 0, duration: 0.35 }, "-=0.15")
+        .from("#tactics-host .tactic-line", {
+          y: 10, autoAlpha: 0, duration: 0.28, stagger: { each: 0.06, from: "start" }, ease: "power2.out"
+        }, "-=0.12")
         .from("#exhibits-host .flip-card, #exhibits-host .exhibit-card", {
-          y: 18, autoAlpha: 0, duration: 0.32, stagger: { each: 0.08, from: "start" }, ease: "power2.out"
+          y: 14, autoAlpha: 0, duration: 0.3, stagger: { each: 0.07, from: "start" }, ease: "power2.out"
         }, "-=0.1")
-        .from("#tactics-host .tactic-tile", {
-          y: 12, autoAlpha: 0, duration: 0.28, stagger: { each: 0.07, from: "start" }, ease: "power2.out"
-        }, "-=0.15")
-        .from("#orders-host .order", { x: -10, autoAlpha: 0, duration: 0.35, stagger: 0.06 }, "-=0.2");
-      var urgent = document.querySelector(".order.urgent");
+        .from("#orders-host .board-action", { x: -10, autoAlpha: 0, duration: 0.32, stagger: 0.06 }, "-=0.15");
+      var urgent = document.querySelector(".board-action.urgent");
       if (urgent) {
         gsap.to(urgent, { scale: 1.02, duration: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut", delay: 0.6 });
       }
@@ -630,7 +628,8 @@
     return "REVIEW";
   }
 
-  function rulingStampPressHtml(label) {
+  function rulingStampPressHtml(label, tone) {
+    tone = tone || "neutral";
     var lines = label.split(" ");
     var tspan = lines.length > 1
       ? '<tspan x="84" y="46">' + esc(lines[0]) + '</tspan><tspan x="84" y="62">' + esc(lines.slice(1).join(" ")) + "</tspan>"
@@ -638,27 +637,41 @@
     return (
       '<div class="ruling-stamp-press" aria-hidden="true">' +
         '<svg viewBox="0 0 168 112" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(label) + ' stamp">' +
-          '<rect class="stamp-frame" x="8" y="12" width="152" height="88" rx="8" fill="none" stroke="currentColor" stroke-width="3" opacity=".4"/>' +
-          '<rect class="stamp-fill" x="14" y="18" width="140" height="76" rx="6" fill="currentColor" opacity=".12"/>' +
-          '<text class="stamp-text" text-anchor="middle" fill="currentColor" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" font-weight="700" letter-spacing=".12em">' + tspan + "</text>" +
+          '<rect class="stamp-frame stamp-frame-' + esc(tone) + '" x="8" y="12" width="152" height="88" rx="8" fill="none" stroke-width="3" opacity=".55"/>' +
+          '<rect class="stamp-fill stamp-fill-' + esc(tone) + '" x="14" y="18" width="140" height="76" rx="6"/>' +
+          '<text class="stamp-text stamp-text-' + esc(tone) + '" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" font-weight="700" letter-spacing=".12em">' + tspan + "</text>" +
         "</svg>" +
       "</div>"
     );
   }
 
-  function updateWaitRail(sceneKey, stepIndex, totalSteps) {
-    var sceneToStage = { intake: 0, evidence: 1, ocr: 1, official_checks: 2, stamp: 3 };
-    var active = sceneToStage[sceneKey] != null ? sceneToStage[sceneKey] : 0;
-    var rail = $("stage-rail");
+  function stampBoardHtml(data) {
+    var v = normalize(data.verdict);
+    var tone = verdictTone(v);
+    var stampWord = stampLabel(v);
+    return '<div class="board-stamp ruling-stamp-wrap ' + esc(tone) + '">' + rulingStampPressHtml(stampWord, tone) + "</div>";
+  }
+
+  function updatePrestreamRail(sceneKey) {
+    var sceneToStep = { intake: "file", evidence: "signals", ocr: "signals", official_checks: "check", qwen_weigh: "qwen", stamp: "qwen" };
+    var order = ["file", "signals", "check", "qwen"];
+    var activeStep = sceneToStep[sceneKey] || "file";
+    var activeIdx = order.indexOf(activeStep);
+    var rail = $("prestream-rail");
     if (!rail) return;
-    rail.innerHTML = STAGES.map(function (name, i) {
-      var cls = i < active ? "done" : i === active ? "active" : "pending";
-      return '<div class="stage ' + cls + '">' + esc(name) + "</div>";
-    }).join("");
-    rail.style.setProperty("--rail-progress", (((active + 1) / STAGES.length) * 100) + "%");
-    if (active !== lastActiveStage) {
-      lastActiveStage = active;
-      CredaMotion.pulseStage(active);
+    rail.querySelectorAll(".prestream-step").forEach(function (el) {
+      var step = el.getAttribute("data-step");
+      var idx = order.indexOf(step);
+      el.classList.toggle("is-done", idx >= 0 && idx < activeIdx);
+      el.classList.toggle("is-active", idx === activeIdx);
+      el.classList.toggle("is-pending", idx > activeIdx);
+    });
+    if (activeIdx !== lastActiveStage) {
+      lastActiveStage = activeIdx;
+      if (CredaMotion.ok() && !CredaMotion.reduced) {
+        var stepEl = rail.querySelector('.prestream-step[data-step="' + activeStep + '"]');
+        if (stepEl) gsap.fromTo(stepEl, { scale: 0.92 }, { scale: 1, duration: 0.35, ease: "back.out(2)" });
+      }
     }
   }
 
@@ -878,60 +891,29 @@
 
   function renderAttachmentChips() {
     var row = $("attachment-row");
-    var gallery = $("attachment-gallery");
-    var dropPanel = $("drop-panel");
-    var dropEmpty = $("drop-panel-empty");
+    if (!row) return;
     if (!pendingAttachments.length) {
-      if (row) {
-        row.innerHTML = "";
-        row.classList.add("hidden");
-      }
-      if (gallery) gallery.innerHTML = "";
-      if (dropPanel) dropPanel.classList.remove("has-files");
-      if (dropEmpty) dropEmpty.classList.remove("hidden");
+      row.innerHTML = "";
+      row.classList.add("hidden");
       syncSendButton();
       return;
     }
-    if (row) {
-      row.classList.remove("hidden");
-      row.innerHTML = pendingAttachments.map(function (item) {
-        var thumb = item.preview
-          ? '<img src="' + item.preview + '" alt="" />'
-          : "PDF";
-        return '<span class="attach-chip" data-id="' + esc(item.id) + '">' +
-          '<span class="attach-thumb">' + thumb + "</span>" +
-          '<span class="attach-name">' + esc(item.file.name) + "</span>" +
-          '<button type="button" class="attach-remove" data-remove="' + esc(item.id) + '" aria-label="Remove ' + esc(item.file.name) + '">×</button>' +
-          "</span>";
-      }).join("");
-      row.querySelectorAll("[data-remove]").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          removeAttachment(btn.getAttribute("data-remove"));
-        });
+    row.classList.remove("hidden");
+    row.innerHTML = pendingAttachments.map(function (item) {
+      var thumb = item.preview
+        ? '<img src="' + item.preview + '" alt="" />'
+        : "PDF";
+      return '<span class="attach-chip" data-id="' + esc(item.id) + '">' +
+        '<span class="attach-thumb">' + thumb + "</span>" +
+        '<span class="attach-name">' + esc(item.file.name) + "</span>" +
+        '<button type="button" class="attach-remove" data-remove="' + esc(item.id) + '" aria-label="Remove ' + esc(item.file.name) + '">×</button>' +
+        "</span>";
+    }).join("");
+    row.querySelectorAll("[data-remove]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        removeAttachment(btn.getAttribute("data-remove"));
       });
-    }
-    if (gallery) {
-      gallery.innerHTML = pendingAttachments.map(function (item) {
-        var thumb = item.preview
-          ? '<img src="' + item.preview + '" alt="" />'
-          : "PDF";
-        var kind = (item.file.type || "").indexOf("pdf") >= 0 ? "PDF document" : "Image";
-        return '<div class="attach-card" data-id="' + esc(item.id) + '">' +
-          '<div class="attach-card-thumb">' + thumb + "</div>" +
-          '<div><div class="attach-card-name">' + esc(item.file.name) + '</div>' +
-          '<div class="attach-card-type">' + esc(kind) + "</div></div>" +
-          '<button type="button" class="attach-remove" data-remove="' + esc(item.id) + '" aria-label="Remove ' + esc(item.file.name) + '">×</button>' +
-          "</div>";
-      }).join("");
-      gallery.querySelectorAll("[data-remove]").forEach(function (btn) {
-        btn.addEventListener("click", function (e) {
-          e.stopPropagation();
-          removeAttachment(btn.getAttribute("data-remove"));
-        });
-      });
-    }
-    if (dropPanel) dropPanel.classList.add("has-files");
-    if (dropEmpty) dropEmpty.classList.add("hidden");
+    });
     syncSendButton();
   }
 
@@ -964,14 +946,13 @@
 
   function renderParsedLinks() {
     var host = $("parsed-links");
-    var panel = $("parsed-links-panel");
-    if (!host || !panel) return;
+    if (!host) return;
     if (!parsedLinks.length) {
       host.innerHTML = "";
-      panel.classList.add("hidden");
+      host.classList.add("hidden");
       return;
     }
-    panel.classList.remove("hidden");
+    host.classList.remove("hidden");
     host.innerHTML = parsedLinks.map(function (url, idx) {
       var short = url.replace(/^https?:\/\//i, "");
       if (short.length > 42) short = short.slice(0, 39) + "…";
@@ -1140,7 +1121,6 @@
     var shell = $("composer-shell");
     var input = $("file-input");
     var ta = $("offer-text");
-    var dropPanel = $("drop-panel");
     ta.addEventListener("input", function () {
       syncParsedLinksFromText();
       autoResizeComposer();
@@ -1165,19 +1145,6 @@
       input.value = "";
     });
     wireDropTarget(shell, "drop-overlay");
-    wireDropTarget(dropPanel, null);
-    if (dropPanel) {
-      dropPanel.addEventListener("click", function (e) {
-        if (e.target.closest("[data-remove]")) return;
-        input.click();
-      });
-      dropPanel.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          input.click();
-        }
-      });
-    }
   }
 
   function stopPolling() {
@@ -1399,18 +1366,12 @@
       WaitStoryboard.onPoll(data);
     } else {
       var liveScene = sceneFromPipeline(data);
-      if (liveScene) CredaStageMachine.forceScene(liveScene, data);
+      if (liveScene && liveScene !== "stamp") CredaStageMachine.forceScene(liveScene, data);
+      else updatePrestreamRail(CredaStageMachine.current || "intake");
     }
-    updateWaitTelemetry(data);
-    renderWaitPipeline(data);
-    renderOfficialChecks(data);
-    renderStageRail(data);
+    var statusEl = $("official-status");
+    if (statusEl) statusEl.textContent = pipelineWaitCopy(data);
     renderLiveExhibits(data);
-    var rack = document.querySelector(".signal-rack");
-    if (rack && CredaMotion.signalTween) {
-      if (normalize(data.status) === "completed" && normalize(data.agentStatus) === "ready") CredaMotion.signalTween.pause();
-      else CredaMotion.signalTween.play();
-    }
   }
 
   function humanizeEvidence(ev) {
@@ -1539,7 +1500,7 @@
       return (
         '<div class="ruling judgment-shell liquid-glass ' + esc(tone) + '">' +
           '<div class="stamp-row">' +
-            rulingStampPressHtml(stampWord) +
+            rulingStampPressHtml(stampWord, tone) +
             '<div class="stamp-meta">' +
               (exhibitCount ? '<span class="micro-metric">EXHIBITS ' + esc(exhibitCount) + "</span>" : "") +
               '<span class="micro-metric verdict-chip">' + esc(stampWord) + "</span>" +
@@ -1809,78 +1770,131 @@
     }).join("");
   }
 
-  function normalizeActions(raw) {
-    return (raw || []).map(function (a) {
-      if (typeof a === "string") return { label: a.slice(0, 80), detail: "", tone: "primary" };
+  function defaultDetailForAction(label) {
+    if (/do not pay|don't pay|never pay/i.test(label)) return "Stop replying until you verify on the employer official careers site.";
+    if (/verify|official/i.test(label)) return "Open the employer careers page directly instead of using links from the message.";
+    return "Take this step before sending money or personal documents.";
+  }
+
+  function defaultActionsForVerdict(verdict) {
+    var v = normalize(verdict);
+    if (v === "high_risk") {
+      return [{ label: "Do not pay or send documents", detail: "Stop replying until you verify on the employer official careers site.", tone: "urgent" }];
+    }
+    if (v === "no_conflict_found") {
+      return [{ label: "Still verify the sender", detail: "No conflict found does not prove the offer is authentic.", tone: "primary" }];
+    }
+    if (v === "unverified") {
+      return [{ label: "Treat as unresolved", detail: "Creda could not gather enough official exhibits.", tone: "warn" }];
+    }
+    return [{ label: "Review exhibits before you reply", detail: "Share only what is needed through official channels.", tone: "neutral" }];
+  }
+
+  function normalizeActions(raw, verdict) {
+    var actions = (raw || []).map(function (a) {
+      if (typeof a === "string") return { label: a.slice(0, 80), detail: defaultDetailForAction(a), tone: "primary" };
+      var label = a.label || a.title || a.action || "Next step";
       return {
-        label: a.label || a.title || a.action || "Next step",
-        detail: a.detail || a.description || "",
+        label: label,
+        detail: a.detail || a.description || defaultDetailForAction(label),
         tone: a.tone || a.urgency || "neutral"
       };
     }).filter(function (a) { return a.label; });
+    if (!actions.length) actions = defaultActionsForVerdict(verdict);
+    return actions.slice(0, 5);
+  }
+
+  function dedupeExhibits(items, max) {
+    var seen = {};
+    var out = [];
+    (items || []).forEach(function (item) {
+      var text = (item.text || item.excerpt || humanizeEvidence(item) || "").trim();
+      var key = String(item.check || "evidence") + "|" + text.slice(0, 96);
+      if (seen[key]) return;
+      seen[key] = true;
+      out.push(item);
+    });
+    return out.slice(0, max || 6);
+  }
+
+  function collectTacticItems(blocks) {
+    var items = [];
+    (blocks || []).forEach(function (b) {
+      if (b.type !== "tactic_highlights") return;
+      var props = b.props || b.data || {};
+      items = items.concat(props.items || []);
+    });
+    return items;
   }
 
   function mergeFollowupSnapshot(data) {
     if (!followupPollMode || !followupBaseline) return data;
-    if (normalize(data.verdict) !== "pending" && data.agentStatus === "READY") return data;
+    var agent = normalize(data.agentStatus);
+    var verdict = normalize(data.verdict);
+    if (!conversationPending) return data;
+    if (!(agent === "running" || agent === "streaming" || verdict === "pending")) return data;
     var merged = Object.assign({}, data);
-    if (followupBaseline.verdict) merged.verdict = followupBaseline.verdict;
-    if (followupBaseline.headline) merged.headline = followupBaseline.headline;
-    if (followupBaseline.nextActions && followupBaseline.nextActions.length) merged.nextActions = followupBaseline.nextActions;
+    merged.verdict = followupBaseline.verdict || merged.verdict;
+    merged.headline = followupBaseline.headline || merged.headline;
+    merged.nextActions = (followupBaseline.nextActions && followupBaseline.nextActions.length)
+      ? followupBaseline.nextActions
+      : merged.nextActions;
     if (followupBaseline.explanation) {
       merged.agentReasoning = followupBaseline.explanation;
       merged.explanation = followupBaseline.explanation;
     }
     if (followupBaseline.presentation) merged.agentPresentation = followupBaseline.presentation;
     if (followupBaseline.evidence && followupBaseline.evidence.length) merged.evidence = followupBaseline.evidence;
+    if (followupBaseline.tactics && followupBaseline.tactics.length) merged.tactics = followupBaseline.tactics;
+    merged.conversationTurns = data.conversationTurns || merged.conversationTurns;
     return merged;
   }
 
   function renderResult(data, opts) {
     opts = opts || {};
     data = mergeFollowupSnapshot(data);
-    if (data.nextActions) data.nextActions = normalizeActions(data.nextActions);
+    data.nextActions = normalizeActions(data.nextActions || data.safeActions, data.verdict);
     lastData = data;
     document.body.setAttribute("data-verdict", normalize(data.verdict) || "");
+
+    $("ruling-host").innerHTML = stampBoardHtml(data);
+    var headline = (data.headline || consequenceFor(data.verdict, null) || "").trim();
+    $("board-headline").textContent = headline;
+
     var blocks = synthesizeBlocks(data);
     var by = blocksByType(blocks);
+    var tacticItems = collectTacticItems(blocks);
+    if (!tacticItems.length && data.tactics && data.tactics.length) tacticItems = data.tactics;
+    tacticItems = tacticItems.slice(0, 5);
+    $("tactics-host").innerHTML = tacticItems.map(function (item) {
+      var title = item.title || item.display_name || item.type || "Pattern";
+      var guide = item.guidance || item.user_guidance || item.detail || "";
+      var line = guide ? String(title).replace(/_/g, " ") + " — " + guide : String(title).replace(/_/g, " ");
+      if (line.length > 140) line = line.slice(0, 137) + "…";
+      return '<div class="tactic-line">' + esc(line) + "</div>";
+    }).join("");
 
-    function renderType(type, hostId, join) {
-      var list = by[type] || [];
-      var html = list.map(function (b) {
-        var fn = BLOCK_RENDERERS[type];
-        return fn ? fn(b, data) : "";
-      }).filter(Boolean).join(join || "");
-      $(hostId).innerHTML = html || "";
-    }
+    var exhibitItems = dedupeExhibits(evidenceHighlightItems(data), 6);
+    $("exhibits-host").innerHTML = exhibitItems.length
+      ? BLOCK_RENDERERS.evidence_highlights({ props: { items: exhibitItems } }, data)
+      : "";
 
-    // Always ensure judgment explanation exists from agentReasoning if explanation block empty
-    if (!(by.explanation && by.explanation.length) && data.agentReasoning) {
-      by.explanation = [{ type: "explanation", props: { text: data.agentReasoning } }];
-    }
+    $("orders-host").innerHTML = data.nextActions.map(function (a) {
+      var urgent = a.tone === "urgent" || a.tone === "high_risk" ? " urgent" : "";
+      return '<div class="board-action' + urgent + '"><strong>' + esc(a.label) + "</strong><span>" + esc(a.detail) + "</span></div>";
+    }).join("");
 
-    renderType("verdict_banner", "ruling-host");
-    if (!$("ruling-host").innerHTML) {
-      $("ruling-host").innerHTML = BLOCK_RENDERERS.verdict_banner({ props: {} }, data);
-    }
-    renderType("explanation", "judgment-host");
-    renderType("research_status", "research-host");
-    renderType("evidence_highlights", "exhibits-host");
-    renderType("tactic_highlights", "tactics-host");
-    renderType("uncertainty", "uncertainty-host");
-    renderType("safe_actions", "orders-host");
-    renderChipRows(data);
     var turns = (data.conversationTurns && data.conversationTurns.length)
       ? ensureFollowupAssistantTurn(data)
       : optimisticTurns;
     $("conversation-host").innerHTML = renderConversationHtml(turns, conversationPending);
-    renderEvidenceDock(data);
+
+    var judgmentHost = $("judgment-host");
+    var researchHost = $("research-host");
+    if (judgmentHost) judgmentHost.innerHTML = "";
+    if (researchHost) researchHost.innerHTML = "";
 
     wireFlipCards($("exhibits-host"));
-    var tacticsWrap = $("tactics-wrap");
-    var uncWrap = $("uncertainty-wrap");
-    if (tacticsWrap) tacticsWrap.classList.toggle("hidden", !$("tactics-host").innerHTML.trim());
-    if (uncWrap) uncWrap.open = !!$("uncertainty-host").innerHTML.trim();
     renderStickyUrgent(data);
     if (!opts.skipReveal) requestAnimationFrame(function () { CredaMotion.resultReveal(); });
   }
@@ -1962,7 +1976,9 @@
       lastLiveExhibitCount = 0;
       lastStreamBody = "";
       lastActiveStage = -1;
-      renderOfficialChecks({ evidence: [], pipelineLog: ["Case accepted"] });
+      var statusEl = $("official-status");
+      if (statusEl) statusEl.textContent = "Case accepted — preparing your file…";
+      updatePrestreamRail("intake");
     }
     pollOnce().catch(function (e) {
       stopPolling();
@@ -2034,9 +2050,10 @@
       verdict: (lastData && lastData.verdict) || "",
       headline: (lastData && lastData.headline) || "",
       explanation: (lastData && (lastData.explanation || lastData.agentReasoning)) || "",
-      nextActions: normalizeActions((lastData && lastData.nextActions) || []),
+      nextActions: normalizeActions((lastData && lastData.nextActions) || [], lastData && lastData.verdict),
       presentation: (lastData && lastData.agentPresentation) || null,
       evidence: (lastData && lastData.evidence) ? lastData.evidence.slice() : [],
+      tactics: lastData ? collectTacticItems(synthesizeBlocks(lastData)) : [],
       evidenceLen: (lastData && lastData.evidence && lastData.evidence.length) || 0,
       turnCount: (lastData && lastData.conversationTurns && lastData.conversationTurns.length) || 0
     };
