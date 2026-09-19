@@ -26,3 +26,9 @@ work/
 
 # Private training and review data
 data/private/
+
+# Large ETL outputs (regenerate with scripts/run_etl.py)
+data/curated/evidence.jsonl
+data/curated/evidence.parquet
+data/raw/cafc_fraud_reports/
+data/raw/emscad/
