@@ -1,0 +1,15 @@
+# Qwen3-4B-Instruct Q4_K_M baked at build time (~2.5 GB). CPU-optimized llama.cpp server flags.
+FROM ghcr.io/ggml-org/llama.cpp:server
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
+    && mkdir -p /models \
+    && curl --fail --location --retry 5 --retry-delay 3 \
+      -o /models/Qwen3-4B-Q4_K_M.gguf \
+      https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf \
+    && apt-get purge -y curl \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# -c 2048 context (compact prompts), -t 4 threads, -b 256 prefill batch, --parallel 1 slot
+CMD ["-m", "/models/Qwen3-4B-Q4_K_M.gguf", "--host", "0.0.0.0", "--port", "8080", "-c", "2048", "-t", "4", "-b", "256", "--parallel", "1", "-n", "256", "--jinja"]

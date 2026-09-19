@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creda judge worker (SageMaker VLM backend).
+Parameters:
+  ImageUri: {Type: String}
+  CasesTableName: {Type: String}
+  QwenQueueUrl: {Type: String}
+  QwenQueueArn: {Type: String}
+  EvidenceBucketName: {Type: String}
+  SageMakerEndpointName: {Type: String, Default: creda-qwen-judge}
+  JudgeBackend: {Type: String, Default: sagemaker, AllowedValues: [sagemaker, llama]}
+  LlamaImageUri: {Type: String, Default: ''}
+  VpcId: {Type: AWS::EC2::VPC::Id}
+  SubnetIds: {Type: List<AWS::EC2::Subnet::Id>}
+Conditions:
+  UseLlama: !Equals [!Ref JudgeBackend, llama]
+Resources:
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties: {ClusterName: creda-qwen-cpu}
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: {LogGroupName: /ecs/creda-qwen-cpu, RetentionInDays: 7}
+  TaskSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Creda judge worker egress
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: {Version: '2012-10-17', Statement: [{Effect: Allow, Principal: {Service: ecs-tasks.amazonaws.com}, Action: 'sts:AssumeRole'}]}
+      ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy]
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: {Version: '2012-10-17', Statement: [{Effect: Allow, Principal: {Service: ecs-tasks.amazonaws.com}, Action: 'sts:AssumeRole'}]}
+      Policies:
+        - PolicyName: CredaJudgeWorkerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - {Effect: Allow, Action: ['dynamodb:GetItem', 'dynamodb:UpdateItem'], Resource: !Sub 'arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CasesTableName}'}
+              - {Effect: Allow, Action: ['sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:GetQueueAttributes'], Resource: !Ref QwenQueueArn}
+              - {Effect: Allow, Action: ['sagemaker:InvokeEndpoint', 'sagemaker:InvokeEndpointWithResponseStream'], Resource: !Sub 'arn:${AWS::Partition}:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/*'}
+              - {Effect: Allow, Action: ['s3:GetObject', 's3:HeadObject'], Resource: !Sub 'arn:${AWS::Partition}:s3:::${EvidenceBucketName}/cases/uploads/*'}
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: creda-qwen-cpu
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: !If [UseLlama, '4096', '512']
+      Memory: !If [UseLlama, '8192', '1024']
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      RuntimePlatform: {CpuArchitecture: X86_64, OperatingSystemFamily: LINUX}
+      ContainerDefinitions:
+        - !If
+          - UseLlama
+          - Name: llama-server
+            Image: !Ref LlamaImageUri
+            Essential: true
+            PortMappings:
+              - {ContainerPort: 8080, Protocol: tcp}
+            LogConfiguration: {LogDriver: awslogs, Options: {awslogs-group: /ecs/creda-qwen-cpu, awslogs-region: !Ref AWS::Region, awslogs-stream-prefix: llama}}
+          - !Ref AWS::NoValue
+        - Name: strands-worker
+          Image: !Ref ImageUri
+          Essential: true
+          DependsOn: !If [UseLlama, [{ContainerName: llama-server, Condition: START}], !Ref AWS::NoValue]
+          Environment:
+            - {Name: CASES_TABLE_NAME, Value: !Ref CasesTableName}
+            - {Name: QWEN_QUEUE_URL, Value: !Ref QwenQueueUrl}
+            - {Name: JUDGE_BACKEND, Value: !Ref JudgeBackend}
+            - {Name: SAGEMAKER_ENDPOINT_NAME, Value: !Ref SageMakerEndpointName}
+            - {Name: EVIDENCE_BUCKET, Value: !Ref EvidenceBucketName}
+            - {Name: AWS_REGION, Value: !Ref AWS::Region}
+            - {Name: LLAMA_URL, Value: 'http://127.0.0.1:8080/v1/chat/completions'}
+            - {Name: QWEN_MAX_TOKENS, Value: '256'}
+            - {Name: QWEN_INFER_TIMEOUT_S, Value: '120'}
+          LogConfiguration: {LogDriver: awslogs, Options: {awslogs-group: /ecs/creda-qwen-cpu, awslogs-region: !Ref AWS::Region, awslogs-stream-prefix: strands}}
+  Service:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: creda-qwen-cpu
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref TaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      DeploymentConfiguration: {MaximumPercent: 100, MinimumHealthyPercent: 0}
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups: [!Ref TaskSecurityGroup]
+Outputs:
+  ClusterName: {Value: !Ref Cluster}
+  ServiceName: {Value: !GetAtt Service.Name}

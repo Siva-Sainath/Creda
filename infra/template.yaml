@@ -1,0 +1,200 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Creda — Strands + Bedrock recruitment verification (judge-ready)
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: anthropic.claude-3-5-haiku-20241022-v1:0
+  StrandsLayerArn:
+    Type: String
+    Default: ""
+  DailyIngestSchedule:
+    Type: String
+    Default: cron(0 6 * * ? *)
+
+Conditions:
+  UseStrandsLayer: !Not [!Equals [!Ref StrandsLayerArn, ""]]
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [arm64]
+    Timeout: 60
+    MemorySize: 512
+    Environment:
+      Variables:
+        DATA_BUCKET: !Ref CredaDataBucket
+        CASES_TABLE: !Ref CredaTable
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        PATTERN_VERSION: v1
+
+Resources:
+  CredaDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  CredaTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  CaseQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 150
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt CaseDLQ.Arn
+        maxReceiveCount: 3
+
+  CaseDLQ:
+    Type: AWS::SQS::Queue
+
+  CredaHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+      CorsConfiguration:
+        AllowOrigins: ["*"]
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: [Content-Type, X-Case-Token]
+
+  IntakeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/intake/
+      Handler: app.handler
+      Environment:
+        Variables:
+          CASE_QUEUE_URL: !Ref CaseQueue
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CredaTable
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt CaseQueue.QueueName
+        - S3ReadPolicy:
+            BucketName: !Ref CredaDataBucket
+      Events:
+        Health:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaHttpApi
+            Path: /health
+            Method: GET
+        CreateCase:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaHttpApi
+            Path: /cases
+            Method: POST
+        GetCase:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaHttpApi
+            Path: /cases/{caseId}
+            Method: GET
+        Coverage:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaHttpApi
+            Path: /coverage
+            Method: GET
+        Tactics:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaHttpApi
+            Path: /tactics
+            Method: GET
+        ReportScam:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CredaHttpApi
+            Path: /reports/scam
+            Method: POST
+
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/worker/
+      Handler: handler.handler
+      Timeout: 120
+      MemorySize: 1024
+      Layers: !If
+        - UseStrandsLayer
+        - [!Ref StrandsLayerArn]
+        - !Ref AWS::NoValue
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CredaTable
+        - S3ReadPolicy:
+            BucketName: !Ref CredaDataBucket
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+              Resource: "*"
+      Events:
+        CaseQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt CaseQueue.Arn
+            BatchSize: 1
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
+  IngestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/ingest/
+      Handler: handler.handler
+      Timeout: 300
+      MemorySize: 512
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CredaTable
+        - S3CrudPolicy:
+            BucketName: !Ref CredaDataBucket
+      Events:
+        DailyIngest:
+          Type: Schedule
+          Properties:
+            Schedule: !Ref DailyIngestSchedule
+            Name: CredaDailyIngest
+            Description: Refresh allowlisted T1 sources daily
+            Enabled: true
+
+Outputs:
+  ApiUrl:
+    Description: Creda API — point frontend VITE_API_URL here
+    Value: !Sub https://${CredaHttpApi}.execute-api.${AWS::Region}.amazonaws.com/prod
+  DataBucketName:
+    Description: Upload deploy/bundle via scripts/upload_deploy_bundle.py
+    Value: !Ref CredaDataBucket
+  CasesTableName:
+    Value: !Ref CredaTable
+  HealthCheck:
+    Description: Must return dataReady=true before judges demo
+    Value: !Sub https://${CredaHttpApi}.execute-api.${AWS::Region}.amazonaws.com/prod/health

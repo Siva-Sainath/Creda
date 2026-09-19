@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "creda"
+resolve_s3 = true
+s3_prefix = "creda"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "BedrockModelId=anthropic.claude-3-5-haiku-20241022-v1:0"
+
+# Optional: official Strands layer for your region (arm64, py3.12)
+# parameter_overrides = "... StrandsLayerArn=arn:aws:lambda:us-east-1:856699698935:layer:strands-agents-py3_12-arm64:2"

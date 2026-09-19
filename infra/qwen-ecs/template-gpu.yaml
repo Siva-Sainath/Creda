@@ -1,0 +1,174 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creda GPU judge — g4dn.xlarge + vLLM Qwen3-VL (~$0.579/hr ap-south-1). ASG desired=1 warm idle.
+
+Parameters:
+  WorkerImageUri: {Type: String}
+  CasesTableName: {Type: String}
+  QwenQueueUrl: {Type: String}
+  QwenQueueArn: {Type: String}
+  EvidenceBucketName: {Type: String}
+  VpcId: {Type: AWS::EC2::VPC::Id}
+  SubnetIds: {Type: List<AWS::EC2::Subnet::Id>}
+  VllmModel: {Type: String, Default: Qwen/Qwen3-VL-4B-Instruct}
+  JudgeBackend: {Type: String, Default: vllm}
+  InstanceType: {Type: String, Default: g4dn.xlarge}
+
+Resources:
+  GpuCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: creda-qwen-gpu
+      CapacityProviders: [!Ref GpuCapacityProvider]
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: !Ref GpuCapacityProvider
+          Weight: 1
+
+  GpuLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: {LogGroupName: /ecs/creda-qwen-gpu, RetentionInDays: 7}
+
+  GpuInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement: [{Effect: Allow, Principal: {Service: ec2.amazonaws.com}, Action: 'sts:AssumeRole'}]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  GpuInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: {Roles: [!Ref GpuInstanceRole]}
+
+  GpuLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: creda-qwen-gpu-lt
+      LaunchTemplateData:
+        ImageId: !Sub '{{resolve:ssm:/aws/service/ecs/optimized-ami/amazon-linux-2/gpu/recommended}}'
+        InstanceType: !Ref InstanceType
+        IamInstanceProfile: {Arn: !GetAtt GpuInstanceProfile.Arn}
+        SecurityGroupIds: [!Ref GpuInstanceSecurityGroup]
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo ECS_CLUSTER=${GpuCluster} >> /etc/ecs/ecs.config
+            echo ECS_ENABLE_GPU_SUPPORT=true >> /etc/ecs/ecs.config
+
+  GpuInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Creda GPU ECS instances
+      VpcId: !Ref VpcId
+      SecurityGroupEgress: [{IpProtocol: -1, CidrIp: 0.0.0.0/0}]
+
+  GpuAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: creda-qwen-gpu-asg
+      MinSize: 1
+      MaxSize: 1
+      DesiredCapacity: 1
+      VPCZoneIdentifier: !Ref SubnetIds
+      LaunchTemplate: {LaunchTemplateId: !Ref GpuLaunchTemplate, Version: !GetAtt GpuLaunchTemplate.LatestVersionNumber}
+      NewInstancesProtectedFromScaleIn: true
+
+  GpuCapacityProvider:
+    Type: AWS::ECS::CapacityProvider
+    Properties:
+      Name: creda-qwen-gpu-cp
+      AutoScalingGroupProvider:
+        AutoScalingGroupArn: !Ref GpuAutoScalingGroup
+        ManagedScaling: {Status: ENABLED, TargetCapacity: 100}
+        ManagedTerminationProtection: ENABLED
+
+  GpuExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement: [{Effect: Allow, Principal: {Service: ecs-tasks.amazonaws.com}, Action: 'sts:AssumeRole'}]
+      ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy]
+
+  GpuTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement: [{Effect: Allow, Principal: {Service: ecs-tasks.amazonaws.com}, Action: 'sts:AssumeRole'}]
+      Policies:
+        - PolicyName: CredaGpuJudgeAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - {Effect: Allow, Action: ['dynamodb:GetItem', 'dynamodb:UpdateItem'], Resource: !Sub 'arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CasesTableName}'}
+              - {Effect: Allow, Action: ['sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:GetQueueAttributes'], Resource: !Ref QwenQueueArn}
+              - {Effect: Allow, Action: ['s3:GetObject', 's3:HeadObject'], Resource: !Sub 'arn:${AWS::Partition}:s3:::${EvidenceBucketName}/cases/uploads/*'}
+
+  GpuTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: creda-qwen-gpu
+      RequiresCompatibilities: [EC2]
+      NetworkMode: bridge
+      ExecutionRoleArn: !GetAtt GpuExecutionRole.Arn
+      TaskRoleArn: !GetAtt GpuTaskRole.Arn
+      ContainerDefinitions:
+        - Name: vllm
+          Image: vllm/vllm-openai:latest
+          Essential: true
+          ResourceRequirements: [{Type: GPU, Value: '1'}]
+          PortMappings: [{ContainerPort: 8000, HostPort: 8000, Protocol: tcp}]
+          Environment:
+            - {Name: VLLM_WORKER_MULTIPROC_METHOD, Value: spawn}
+          Command:
+            - --model
+            - !Ref VllmModel
+            - --dtype
+            - float16
+            - --max-model-len
+            - '8192'
+            - --gpu-memory-utilization
+            - '0.85'
+            - --max-num-seqs
+            - '2'
+            - --port
+            - '8000'
+            - --served-model-name
+            - qwen-vl
+          LogConfiguration:
+            LogDriver: awslogs
+            Options: {awslogs-group: /ecs/creda-qwen-gpu, awslogs-region: !Ref AWS::Region, awslogs-stream-prefix: vllm}
+        - Name: strands-worker
+          Image: !Ref WorkerImageUri
+          Essential: true
+          DependsOn: [{ContainerName: vllm, Condition: START}]
+          Environment:
+            - {Name: CASES_TABLE_NAME, Value: !Ref CasesTableName}
+            - {Name: QWEN_QUEUE_URL, Value: !Ref QwenQueueUrl}
+            - {Name: JUDGE_BACKEND, Value: !Ref JudgeBackend}
+            - {Name: EVIDENCE_BUCKET, Value: !Ref EvidenceBucketName}
+            - {Name: AWS_REGION, Value: !Ref AWS::Region}
+            - {Name: QWEN_MAX_TOKENS, Value: '200'}
+            - {Name: QWEN_INFER_TIMEOUT_S, Value: '180'}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options: {awslogs-group: /ecs/creda-qwen-gpu, awslogs-region: !Ref AWS::Region, awslogs-stream-prefix: worker}
+
+  GpuService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: creda-qwen-gpu
+      Cluster: !Ref GpuCluster
+      TaskDefinition: !Ref GpuTaskDefinition
+      DesiredCount: 1
+      CapacityProviderStrategy:
+        - CapacityProvider: !Ref GpuCapacityProvider
+          Weight: 1
+      DeploymentConfiguration: {MaximumPercent: 100, MinimumHealthyPercent: 0}
+
+Outputs:
+  ClusterName: {Value: !Ref GpuCluster}
+  ServiceName: {Value: !GetAtt GpuService.Name}
+  AutoScalingGroup: {Value: !Ref GpuAutoScalingGroup}
