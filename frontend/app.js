@@ -23,19 +23,19 @@
   var optimisticTurns = [];
   var conversationPending = false;
   var followupBaseline = null;
-  var caseHadAttachment = false;
+  var followupGraceStartedAt = 0;
+  var FOLLOWUP_GRACE_MS = 8000;
 
   var CredaStageMachine = {
     current: null,
     scenes: {
       intake: { id: "scene-intake", label: "Opening your case file…" },
       evidence: { id: "scene-evidence", label: "Pulling scam signals…" },
-      ocr: { id: "scene-ocr", label: "Reading your screenshot…" },
-      official_checks: { id: "scene-evidence", label: "Checking official careers listing…" },
-      qwen_weigh: { id: "scene-qwen", label: "Qwen weighing evidence…" },
+      official_checks: { id: "scene-careers", label: "Checking official careers listing…" },
+      qwen_weigh: { id: "scene-qwen", label: "Weighing the evidence…" },
       stamp: { id: "scene-stamp", label: "Stamping your ruling…" }
     },
-    sceneIds: ["scene-intake", "scene-evidence", "scene-ocr", "scene-qwen", "scene-stamp"],
+    sceneIds: ["scene-intake", "scene-evidence", "scene-careers", "scene-qwen", "scene-stamp"],
     forceScene: function (key, data) {
       var meta = this.scenes[key];
       if (!meta) return;
@@ -63,11 +63,11 @@
         gsap.fromTo("#stage-sheet", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" });
         gsap.fromTo("#stage-folder-tab", { scale: 1 }, { scale: 1.08, duration: 0.25, yoyo: true, repeat: 1, transformOrigin: "50% 100%" });
       }
-      if (key === "evidence" || key === "official_checks") {
-        gsap.fromTo("#scene-evidence circle", { scale: 0.9 }, { scale: 1, duration: 0.35, ease: "back.out(2)", transformOrigin: "50% 50%" });
+      if (key === "evidence") {
+        gsap.fromTo("#evidence-pulse", { scale: 0.9, opacity: 0.5 }, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)", transformOrigin: "50% 50%" });
       }
-      if (key === "ocr") {
-        gsap.fromTo(".scan-line", { y1: 28, y2: 28 }, { y1: 72, y2: 72, duration: 1.2, repeat: 2, ease: "sine.inOut" });
+      if (key === "official_checks") {
+        gsap.fromTo("#scene-careers", { opacity: 0.4, y: 6 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
       }
       if (key === "qwen_weigh") {
         gsap.fromTo("#scene-qwen circle", { scale: 0.88, opacity: 0.5 }, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(1.8)", transformOrigin: "50% 50%" });
@@ -87,7 +87,7 @@
   };
 
   var WaitStoryboard = {
-    MIN_MS: 700,
+    MIN_MS: 1400,
     running: false,
     sequence: [],
     stepIndex: 0,
@@ -100,15 +100,19 @@
       this.readyData = null;
       this.dwellComplete = false;
       this.lastPollData = null;
-      this.sequence = ["intake", "evidence"];
-      if (caseHadAttachment) this.sequence.push("ocr");
-      this.sequence.push("official_checks", "qwen_weigh", "stamp");
+      this.sequence = ["intake", "evidence", "official_checks", "qwen_weigh", "stamp"];
       this.stepIndex = 0;
       this._playStep();
     },
     _playStep: function () {
       if (!this.running) return;
       var key = this.sequence[this.stepIndex];
+      if (key === "stamp" && !this.readyData) {
+        CredaStageMachine.forceScene("qwen_weigh", this.lastPollData || {});
+        var selfWait = this;
+        this.stepTimer = setTimeout(function () { selfWait._playStep(); }, 400);
+        return;
+      }
       CredaStageMachine.forceScene(key, this.lastPollData || {});
       var self = this;
       clearTimeout(this.stepTimer);
@@ -119,15 +123,6 @@
           self._playStep();
         } else {
           self.dwellComplete = true;
-          if (!self.readyData) {
-            CredaStageMachine.forceScene("qwen_weigh", self.lastPollData || {});
-            self.stepTimer = setTimeout(function () {
-              if (!self.running) return;
-              CredaStageMachine.forceScene("stamp", self.lastPollData || {});
-              self._tryFinish();
-            }, self.MIN_MS);
-            return;
-          }
           self._tryFinish();
         }
       }, this.MIN_MS);
@@ -137,6 +132,12 @@
     },
     markReady: function (data) {
       this.readyData = data;
+      var stampIdx = this.sequence.indexOf("stamp");
+      if (stampIdx >= 0 && this.stepIndex < stampIdx && this.running) {
+        this.stepIndex = stampIdx;
+        clearTimeout(this.stepTimer);
+        this._playStep();
+      }
       this._tryFinish();
     },
     _tryFinish: function () {
@@ -180,34 +181,24 @@
     signalTween: null,
     hintTimer: null,
     hintIndex: 0,
-    HINTS: [
-      "Paste the full email — who sent it, subject line, and every link.",
-      "Paste a Telegram DM word for word, or open CredaShield on Telegram.",
-      "Or write: “A friend forwarded me this Amazon offer on Telegram…”",
-      "Only have a photo? Tap + or drop a screenshot of the message.",
-      "Creda reads text and images — sender, employer, and links are inferred."
-    ],
     init: function () {
-      var host = document.getElementById("hint-cycle");
-      if (host && !host.textContent) host.textContent = this.HINTS[0];
       if (!this.ok()) return;
       var self = this;
       gsap.matchMedia().add("(prefers-reduced-motion: reduce)", function () {
         self.reduced = true;
-        if (self.signalTween) self.signalTween.pause();
-        if (self.hintTimer) clearInterval(self.hintTimer);
       });
       this.pageLoad();
-      this.startHintCycle();
-      this.startSignalRack();
     },
     pageLoad: function () {
       if (!this.ok() || this.reduced) return;
       var ease = "cubic-bezier(.22,1,.36,1)";
-      gsap.from(".topbar", { y: 10, autoAlpha: 0, duration: 0.38, ease: ease });
-      gsap.from(".pane-intake > *", { y: 14, autoAlpha: 0, duration: 0.4, stagger: 0.05, delay: 0.06, ease: ease });
-      gsap.from(".casefile-guide", { y: 16, autoAlpha: 0, duration: 0.45, delay: 0.18, ease: ease });
-      gsap.from(".demo-chip", { y: 8, autoAlpha: 0, duration: 0.3, stagger: 0.04, delay: 0.28, ease: ease });
+      var targets = [".topbar", ".pane-intake > *", ".casefile-guide"];
+      targets.forEach(function (sel) {
+        gsap.fromTo(sel, { y: 12, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 0.4, stagger: 0.05, ease: ease,
+          onComplete: function () { gsap.set(sel, { clearProps: "opacity,transform,autoAlpha" }); }
+        });
+      });
     },
     startHintCycle: function () {
       var host = document.getElementById("hint-cycle");
@@ -262,10 +253,16 @@
       var el = name === "wait" ? "#view-wait" : name === "result" ? "#view-result" : "#view-intake";
       gsap.fromTo(el, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out" });
       if (name === "wait") {
-        gsap.from(".prestream-rail .prestream-step", {
-          y: 8, autoAlpha: 0, duration: 0.35, stagger: 0.06, ease: "power2.out", delay: 0.08
-        });
-        gsap.from(".stage-canvas", { scale: 0.98, autoAlpha: 0, duration: 0.5, ease: "back.out(1.4)" });
+        gsap.fromTo(".prestream-rail .prestream-step",
+          { y: 8, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.35, stagger: 0.06, ease: "power2.out", delay: 0.08,
+            onComplete: function () { gsap.set(".prestream-rail .prestream-step", { clearProps: "opacity,transform,autoAlpha" }); }
+          });
+        gsap.fromTo(".stage-canvas",
+          { scale: 0.98, autoAlpha: 0 },
+          { scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out(1.4)",
+            onComplete: function () { gsap.set(".stage-canvas", { clearProps: "opacity,transform,autoAlpha" }); }
+          });
       }
     },
     pulseStage: function (idx) {
@@ -282,9 +279,11 @@
     },
     slipIn: function (nodes) {
       if (!this.ok() || this.reduced || !nodes || !nodes.length) return;
-      gsap.from(nodes, {
-        x: -16, autoAlpha: 0, duration: 0.42, stagger: 0.08, ease: "power3.out"
-      });
+      gsap.fromTo(nodes,
+        { x: -16, autoAlpha: 0 },
+        { x: 0, autoAlpha: 1, duration: 0.42, stagger: 0.08, ease: "power3.out",
+          onComplete: function () { gsap.set(nodes, { clearProps: "opacity,transform,autoAlpha" }); }
+        });
     },
     revealTargets: function () {
       return [
@@ -627,17 +626,15 @@
   function renderStreamError(err, ctx) {
     ctx = Object.assign({
       onRetry: function () {
-        $("stream-body").innerHTML = '<span class="shimmer">Reconnecting…</span>';
+        var statusEl = $("official-status");
+        if (statusEl) statusEl.textContent = "Reconnecting…";
         pollOnce().catch(function (e) { renderStreamError(e, ctx); });
       },
       lastErr: err
     }, ctx || {});
-    var spec = toAppError(err);
-    var copy = errorCopy(spec);
-    var details = err && err.status ? ("Status " + err.status + ". " + (err.message || "")) : (err && err.message) || "";
-    $("stream-body").innerHTML =
-      '<div class="stream-error" role="alert">' + buildErrorCardHtml(spec, copy, details) + "</div>";
-    wireErrorCard($("stream-body"), spec, ctx);
+    showError("result-error", err, ctx);
+    var statusEl = $("official-status");
+    if (statusEl) statusEl.textContent = (err && err.message) ? err.message : "Connection issue — retrying…";
   }
 
   function normalize(v) { return String(v || "").toLowerCase(); }
@@ -749,14 +746,19 @@
   function followupReplyComplete(data) {
     if (!conversationPending) return true;
     var agent = normalize(data.agentStatus);
-    if (agent === "running" || agent === "streaming") return false;
-    var answer = extractFollowupAnswer(data);
-    if (answer) return true;
-    // READY with only interim headline / no assistant turn = keep polling
-    if (isInterimText(data.headline) || isInterimText(data.explanation) || isInterimText(data.agentReasoning)) {
+    if (agent === "running" || agent === "streaming") {
+      followupGraceStartedAt = 0;
       return false;
     }
-    return false;
+    var answer = extractFollowupAnswer(data);
+    if (answer) {
+      followupGraceStartedAt = 0;
+      return true;
+    }
+    if (!followupGraceStartedAt) followupGraceStartedAt = Date.now();
+    if (Date.now() - followupGraceStartedAt < FOLLOWUP_GRACE_MS) return false;
+    followupGraceStartedAt = 0;
+    return true;
   }
 
   function ensureFollowupAssistantTurn(data, fallbackText) {
@@ -874,7 +876,7 @@
     else if (name === "result") CredaShieldArt.setFlowStep(2);
     // Keep Clear/Check/demos locked while case is running; unlock on result/intake
     if (name === "wait") setIntakeBusy(true);
-    else setIntakeBusy(false);
+    else if (!conversationPending) setIntakeBusy(false);
     var follow = $("btn-followup");
     var fu = $("followup-input");
     var report = $("btn-report");
@@ -1019,11 +1021,6 @@
       var el = $(id);
       if (el) el.disabled = !!busy;
     });
-    /* demo chips optional */
-    document.querySelectorAll(".demo-chip").forEach(function (chip) {
-      chip.disabled = !!busy;
-      chip.setAttribute("aria-disabled", busy ? "true" : "false");
-    });
     var ta = $("offer-text");
     if (ta) ta.readOnly = !!busy;
     var health = $("health-label");
@@ -1044,13 +1041,11 @@
     var btn = $("btn-check");
     if (!btn) return;
     var textLen = ($("offer-text").value || "").trim().length;
-    var hasFiles = pendingAttachments.length > 0;
-    var hasLinks = parsedLinks.length > 0;
-    var ready = textLen >= 12 || hasFiles || hasLinks;
+    var ready = textLen >= 12;
     btn.classList.toggle("is-active", ready);
     btn.disabled = !ready;
     var clearBtn = $("btn-clear");
-    if (clearBtn) clearBtn.disabled = !(textLen || hasFiles || hasLinks);
+    if (clearBtn) clearBtn.disabled = !textLen;
   }
 
   function autoResizeComposer() {
@@ -1111,7 +1106,6 @@
     });
     pendingAttachments = [];
     renderAttachmentChips();
-    $("file-input").value = "";
     showError("intake-error", "");
     autoResizeComposer();
   }
@@ -1157,25 +1151,16 @@
     return uploaded;
   }
 
-  function buildPayload(uploadedAttachments) {
+  function buildPayload() {
     var offerText = $("offer-text").value.trim();
-    if (!offerText && (!uploadedAttachments || !uploadedAttachments.length)) {
-      throw new Error("Add a message or attach a screenshot.");
-    }
-    if (offerText && offerText.length < 12 && (!uploadedAttachments || !uploadedAttachments.length)) {
+    if (!offerText || offerText.length < 12) {
       throw new Error("Paste the complete email or message, including sender and any links.");
     }
     var payload = {
-      offerText: offerText || "[Multimodal intake]",
+      offerText: offerText,
       locale: "en-IN",
       sourceChannel: "web"
     };
-    if (uploadedAttachments && uploadedAttachments.length) {
-      payload.attachments = uploadedAttachments;
-      if (uploadedAttachments[0] && uploadedAttachments[0].s3Key) {
-        payload.screenshotKey = uploadedAttachments[0].s3Key;
-      }
-    }
     var links = parsedLinks.concat(collectLinkInputs()).concat(extractUrls(offerText));
     links = links.filter(function (u, i) { return links.indexOf(u) === i; }).slice(0, 5);
     if (links.length) payload.links = links;
@@ -1252,7 +1237,6 @@
 
   function wireComposer() {
     var shell = $("composer-shell");
-    var input = $("file-input");
     var ta = $("offer-text");
     ta.addEventListener("input", function () {
       syncParsedLinksFromText();
@@ -1272,12 +1256,6 @@
     });
     autoResizeComposer();
     syncParsedLinksFromText();
-    if ($("btn-attach") && input) $("btn-attach").addEventListener("click", function () { input.click(); });
-    input.addEventListener("change", function () {
-      addAttachmentFiles(input.files);
-      input.value = "";
-    });
-    wireDropTarget(shell, "drop-overlay");
   }
 
   function stopPolling() {
@@ -1992,30 +1970,22 @@
 
   function mergeFollowupSnapshot(data) {
     if (!followupPollMode || !followupBaseline) return data;
-    var agent = normalize(data.agentStatus);
-    var verdict = normalize(data.verdict);
     var merged = Object.assign({}, data);
     var interim = INTERIM_REPLY_RE;
-    var protect = conversationPending || agent === "running" || agent === "streaming" || verdict === "pending";
-    if (!extractRawActions(merged).length && followupBaseline.nextActions && followupBaseline.nextActions.length) {
-      merged.nextActions = followupBaseline.nextActions;
-    }
-    if ((!merged.headline || interim.test(String(merged.headline || ""))) && followupBaseline.headline) {
+    merged.verdict = followupBaseline.verdict || merged.verdict;
+    if (followupBaseline.headline && (!merged.headline || interim.test(String(merged.headline || "")))) {
       merged.headline = followupBaseline.headline;
     }
-    if ((!merged.evidence || !merged.evidence.length) && followupBaseline.evidence && followupBaseline.evidence.length) {
-      merged.evidence = followupBaseline.evidence;
-    }
-    if ((!merged.tactics || !merged.tactics.length) && followupBaseline.tactics && followupBaseline.tactics.length) {
-      merged.tactics = followupBaseline.tactics;
-    }
-    if (!protect) return merged;
-    merged.verdict = followupBaseline.verdict || merged.verdict;
     if (followupBaseline.explanation) {
-      merged.agentReasoning = followupBaseline.explanation;
       merged.explanation = followupBaseline.explanation;
+      merged.agentReasoning = followupBaseline.explanation;
     }
     if (followupBaseline.presentation) merged.agentPresentation = followupBaseline.presentation;
+    if (followupBaseline.evidence && followupBaseline.evidence.length) merged.evidence = followupBaseline.evidence;
+    if (followupBaseline.tactics && followupBaseline.tactics.length) merged.tactics = followupBaseline.tactics;
+    if (followupBaseline.nextActions && followupBaseline.nextActions.length) {
+      if (!extractRawActions(merged).length) merged.nextActions = followupBaseline.nextActions;
+    }
     merged.conversationTurns = data.conversationTurns || merged.conversationTurns;
     return merged;
   }
@@ -2023,6 +1993,13 @@
   function renderResult(data, opts) {
     opts = opts || {};
     data = mergeFollowupSnapshot(data);
+    if (opts.followupOnly) {
+      var turnsOnly = (data.conversationTurns && data.conversationTurns.length)
+        ? ensureFollowupAssistantTurn(data, extractFollowupAnswer(data))
+        : optimisticTurns;
+      $("conversation-host").innerHTML = renderConversationHtml(turnsOnly, conversationPending);
+      return;
+    }
     data.nextActions = normalizeActions(extractRawActions(data), data.verdict);
     lastData = data;
     document.body.setAttribute("data-verdict", normalize(data.verdict) || "");
@@ -2193,6 +2170,7 @@
         conversationPending = false;
         followupPollMode = false;
         var answer = extractFollowupAnswer(data);
+        if (!answer) answer = "Couldn't verify that yet — the ruling above still stands.";
         optimisticTurns = ensureFollowupAssistantTurn(
           Object.assign({}, data, {
             conversationTurns: (data.conversationTurns && data.conversationTurns.length)
@@ -2212,7 +2190,7 @@
         optimisticTurns = [];
         return;
       }
-      renderResult(data, { skipReveal: true });
+      renderResult(data, { skipReveal: true, followupOnly: true });
       if (Date.now() - pollStartedAt > POLL_MAX_MS) {
         stopPolling();
         conversationPending = false;
@@ -2345,9 +2323,7 @@
     showError("intake-error", "");
     setIntakeBusy(true);
     try {
-      var uploaded = await uploadPendingAttachments();
-      caseHadAttachment = uploaded.length > 0 || pendingAttachments.length > 0;
-      var payload = buildPayload(uploaded);
+      var payload = buildPayload();
       var data = await apiFetch("/cases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2387,6 +2363,7 @@
     };
     conversationPending = true;
     followupPollMode = true;
+    followupGraceStartedAt = 0;
     $("conversation-host").innerHTML = renderConversationHtml(optimisticTurns, true);
     showView("result");
     try {
@@ -2477,7 +2454,7 @@
     conversationPending = false;
     followupBaseline = null;
     optimisticTurns = [];
-    caseHadAttachment = false;
+    followupGraceStartedAt = 0;
     CredaStageMachine.reset();
     WaitStoryboard.reset();
     lastActiveStage = -1;
@@ -2501,17 +2478,6 @@
     $("btn-followup").addEventListener("click", function () { sendFollowup(); });
     $("followup-input").addEventListener("keydown", function (e) {
       if (e.key === "Enter") sendFollowup();
-    });
-    document.querySelectorAll(".demo-chip[data-demo]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var ta = $("offer-text");
-        if (ta) {
-          ta.value = btn.getAttribute("data-demo") || "";
-          syncParsedLinksFromText();
-          autoResizeComposer();
-          ta.focus();
-        }
-      });
     });
     $("btn-report").addEventListener("click", function () { toggleReportPanel(true); });
     $("btn-report-cancel").addEventListener("click", function () { toggleReportPanel(false); });
