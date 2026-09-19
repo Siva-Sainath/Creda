@@ -1,0 +1,5 @@
+# Worker (Strands) — omit if using official Strands Lambda layer
+strands-agents>=1.40.0
+boto3>=1.34.0
+
+# Intake + ingest only need boto3 (provided by Lambda runtime)
