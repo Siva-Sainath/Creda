@@ -35,7 +35,9 @@ CREDA_JUDGE_BACKEND=sagemaker CREDA_QWEN_TAG="creda-$(date +%Y%m%d%H%M%S)" bash 
 
 echo "==> Amplify UI"
 cd "$ROOT/frontend"
-sed "s|__CREDA_API_URL__|$API|g" index.html > dist/index.html
+mkdir -p dist
+cp index.html styles.css app.js dist/
+sed -i '' "s|__CREDA_API_URL__|$API|g" dist/app.js
 DEPLOY=$(aws amplify create-deployment --app-id d32sg54oqu2gcb --branch-name main --region ap-south-1 --profile "$AWS_PROFILE" --output json)
 JOB=$(echo "$DEPLOY" | jq -r .jobId)
 URL=$(echo "$DEPLOY" | jq -r .zipUploadUrl)

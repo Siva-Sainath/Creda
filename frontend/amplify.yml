@@ -11,7 +11,7 @@ frontend:
             echo "CREDA_API_URL is not set; using known API fallback"
             export CREDA_API_URL="https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com"
           fi
-        - sed -i "s|__CREDA_API_URL__|${CREDA_API_URL}|g" index.html
+        - sed -i "s|__CREDA_API_URL__|${CREDA_API_URL}|g" app.js
   artifacts:
     baseDirectory: .
     files:
