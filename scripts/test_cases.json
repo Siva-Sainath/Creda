@@ -1,0 +1,309 @@
+{
+  "version": "2026-09-19",
+  "description": "Creda live regression catalog — varied prompts + follow-ups. No UI demo chips; run via scripts against API or website.",
+  "followupPool": {
+    "sender": [
+      "Is a free Gmail sender normal for this employer?",
+      "Why does the sender domain matter if the job sounds real?",
+      "Would official HR use ProtonMail or WhatsApp for hiring?"
+    ],
+    "payment": [
+      "Should I ever pay a registration or training fee before joining?",
+      "Is it normal to pay via UPI, gift card, or crypto for a job?",
+      "What should I do if they ask for a security deposit?"
+    ],
+    "links": [
+      "Should I click a bit.ly link from a recruiter?",
+      "Why is a Google Form a warning sign for employer hiring?",
+      "Is a Telegram interview invite trustworthy?"
+    ],
+    "verify": [
+      "What is the safest way to verify this offer?",
+      "What should I screenshot before reporting this?",
+      "What details should I ask for before sharing salary expectations?"
+    ],
+    "ats": [
+      "Does this job ID appear on the employer official careers feed?",
+      "What else should I verify before I apply?",
+      "Can I trust this if the careers link matches but the sender is Gmail?"
+    ]
+  },
+  "cases": [
+    {
+      "id": "anthropic-laptop-deposit",
+      "channels": ["api", "ui"],
+      "tags": ["high_risk", "impersonation", "payment", "telegram"],
+      "expectVerdict": "high_risk",
+      "followupTags": ["sender", "payment"],
+      "payload": {
+        "offerText": "Hi, Anthropic AI Safety team here. You passed the screen. Transfer $450 laptop security deposit to anthropic-onboarding@proton.me before we ship equipment. Interview was on Telegram @AnthropicHire.",
+        "employerHint": "Anthropic",
+        "senderEmail": "anthropic-onboarding@proton.me",
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "flipkart-whatsapp-kit",
+      "channels": ["api", "ui"],
+      "tags": ["high_risk", "india", "whatsapp", "payment"],
+      "expectVerdict": "high_risk",
+      "followupTags": ["payment", "verify"],
+      "payload": {
+        "offerText": "Flipkart hiring for WFH catalog tagging. Salary 35k/month. Buy starter kit Rs 2499 on PhonePe to hr.flipkart.wfh@gmail.com. Training on WhatsApp group only.",
+        "employerHint": "Flipkart",
+        "locale": "en-IN"
+      }
+    },
+    {
+      "id": "tcs-registration-fee",
+      "channels": ["api", "ui"],
+      "tags": ["high_risk", "india", "tcs", "payment"],
+      "expectVerdict": "high_risk",
+      "followupTags": ["payment", "sender"],
+      "payload": {
+        "offerText": "TCS campus offer letter attached. Pay Rs 8500 document verification and background check to tcs-onboarding@yahoo.com via UPI before joining Chennai office.",
+        "employerHint": "TCS",
+        "senderEmail": "tcs-onboarding@yahoo.com",
+        "locale": "en-IN"
+      }
+    },
+    {
+      "id": "infosys-laptop-security",
+      "channels": ["api", "ui"],
+      "tags": ["high_risk", "india", "infosys", "payment"],
+      "expectVerdict": "high_risk",
+      "followupTags": ["payment", "verify"],
+      "payload": {
+        "offerText": "Infosys selected you for Java Developer. Laptop security deposit Rs 12000 refundable after 6 months. Pay to infosys.hr.recruit@gmail.com. Interview completed on Telegram.",
+        "employerHint": "Infosys",
+        "locale": "en-IN"
+      }
+    },
+    {
+      "id": "hcl-telegram-interview",
+      "channels": ["api"],
+      "tags": ["india", "hcl", "telegram"],
+      "followupTags": ["links", "verify"],
+      "payload": {
+        "offerText": "HCL Technologies urgent hiring. Complete interview on Telegram https://t.me/hcl_fasthire — HR will send offer same day. No experience needed, training fee waived if you join this week.",
+        "employerHint": "HCL",
+        "links": ["https://t.me/hcl_fasthire"],
+        "locale": "en-IN"
+      }
+    },
+    {
+      "id": "razorpay-fake-offer",
+      "channels": ["api"],
+      "tags": ["india", "fintech", "impersonation"],
+      "followupTags": ["sender", "verify"],
+      "payload": {
+        "offerText": "Razorpay fintech analyst role. Send PAN and Aadhaar to razorpay-talent@outlook.com for compliance. Start in 3 days. Salary 22 LPA.",
+        "employerHint": "Razorpay",
+        "senderEmail": "razorpay-talent@outlook.com",
+        "locale": "en-IN"
+      }
+    },
+    {
+      "id": "coinbase-typosquat-crypto",
+      "channels": ["api", "ui"],
+      "tags": ["typosquat", "crypto", "kyc"],
+      "followupTags": ["links", "verify"],
+      "payload": {
+        "offerText": "Coinbase Remote Compliance Analyst. Salary paid in USDC weekly. Complete KYC at https://coinbase-careers-verify.net/form and send passport scan to compliance@coinbase-careers-verify.net",
+        "employerHint": "Coinbase",
+        "links": ["https://coinbase-careers-verify.net/form"],
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "revolut-eu-remote-scam",
+      "channels": ["api", "ui"],
+      "tags": ["eu", "crypto", "remote"],
+      "followupTags": ["payment", "sender"],
+      "payload": {
+        "offerText": "Revolut Operations Associate — 100% remote from Bucharest. €90/hour paid in Bitcoin. Buy €200 onboarding voucher before contract signing. Contact revolut.hr.team@protonmail.com",
+        "employerHint": "Revolut",
+        "locale": "en-GB"
+      }
+    },
+    {
+      "id": "nl-data-entry-wire",
+      "channels": ["api"],
+      "tags": ["eu", "remote", "wire"],
+      "followupTags": ["payment", "verify"],
+      "payload": {
+        "offerText": "Amsterdam Logistics BV — remote data entry, €65/hour. Wire €350 equipment insurance to IBAN before first shift. Recruiter only reachable on WhatsApp +31 6 1234 5678.",
+        "employerHint": "Amsterdam Logistics",
+        "locale": "en-GB"
+      }
+    },
+    {
+      "id": "meta-gift-card-equipment",
+      "channels": ["api", "ui"],
+      "tags": ["impersonation", "gift_card", "payment"],
+      "expectVerdict": "high_risk",
+      "followupTags": ["payment", "sender"],
+      "payload": {
+        "offerText": "Meta Reality Labs offer. Purchase $500 Apple gift cards for home office equipment reimbursement — send codes to meta-onboarding@icloud.com before equipment ships.",
+        "employerHint": "Meta",
+        "senderEmail": "meta-onboarding@icloud.com",
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "deloitte-form-bitly",
+      "channels": ["api", "ui"],
+      "tags": ["high_risk", "india", "google_form", "shortener"],
+      "expectVerdict": "high_risk",
+      "followupTags": ["links", "payment"],
+      "payload": {
+        "offerText": "Deloitte USI campus shortlist. Register: https://bit.ly/deloitte-usi-2026 then fill https://docs.google.com/forms/d/e/1FAIpQLSdeloitte/viewform. Pay Rs 999 background verification to deloitte.hr@gmail.com",
+        "employerHint": "Deloitte",
+        "links": [
+          "https://bit.ly/deloitte-usi-2026",
+          "https://docs.google.com/forms/d/e/1FAIpQLSdeloitte/viewform"
+        ],
+        "locale": "en-IN"
+      }
+    },
+    {
+      "id": "anthropic-official-greenhouse",
+      "channels": ["api"],
+      "tags": ["ats", "legit_probe"],
+      "followupTags": ["ats", "verify"],
+      "payload": {
+        "offerText": "Anthropic is hiring Account Executive, AI Native. Official listing: https://job-boards.greenhouse.io/anthropic/jobs/4461450008. No fees. Apply through careers site only.",
+        "employerHint": "Anthropic",
+        "links": ["https://job-boards.greenhouse.io/anthropic/jobs/4461450008"],
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "figma-greenhouse-legit",
+      "channels": ["api"],
+      "tags": ["ats", "legit_probe"],
+      "followupTags": ["ats"],
+      "payload": {
+        "offerText": "Figma Product Designer opening. Apply via official board — no fees. Role link shared by recruiter.",
+        "employerHint": "Figma",
+        "links": ["https://job-boards.greenhouse.io/figma/jobs/5630673004"],
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "coinbase-greenhouse-legit",
+      "channels": ["api"],
+      "tags": ["ats", "legit_probe"],
+      "followupTags": ["ats"],
+      "payload": {
+        "offerText": "Coinbase Accelerations Programs Intern — apply on official careers site. No upfront payment.",
+        "employerHint": "Coinbase",
+        "links": ["https://boards.greenhouse.io/coinbase/jobs/8175363"],
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "notion-linkedin-vague",
+      "channels": ["api", "ui"],
+      "tags": ["linkedin", "vague"],
+      "followupTags": ["verify", "ats"],
+      "payload": {
+        "offerText": "LinkedIn InMail from Notion Talent: We loved your profile for a remote PM role. Reply with your salary expectation — interview tomorrow on Google Meet, no prep needed.",
+        "employerHint": "Notion",
+        "messageType": "linkedin_dm",
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "spotify-gmail-mismatch",
+      "channels": ["api"],
+      "tags": ["gmail", "domain_mismatch"],
+      "followupTags": ["sender", "verify"],
+      "payload": {
+        "offerText": "Spotify Backend Engineer offer. Start date next Monday. Contract copy attached — confirm at spotify.contracts.team@gmail.com. Listing mentioned https://jobs.lever.co/spotify",
+        "employerHint": "Spotify",
+        "senderEmail": "spotify.contracts.team@gmail.com",
+        "links": ["https://jobs.lever.co/spotify"],
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "airbnb-fee-scam",
+      "channels": ["api"],
+      "tags": ["impersonation", "payment"],
+      "expectVerdict": "high_risk",
+      "followupTags": ["payment", "sender"],
+      "payload": {
+        "offerText": "Airbnb Trust & Safety analyst role. Pay $299 background check fee to airbnb.hr.verify@gmail.com before access badge is issued.",
+        "employerHint": "Airbnb",
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "mongodb-greenhouse",
+      "channels": ["api"],
+      "tags": ["ats"],
+      "followupTags": ["ats"],
+      "payload": {
+        "offerText": "MongoDB is hiring. Official Greenhouse posting below. No registration fees.",
+        "employerHint": "MongoDB",
+        "links": ["https://boards.greenhouse.io/mongodb/jobs/6205599"],
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "whatsapp-protonmail-data-entry",
+      "channels": ["api", "ui"],
+      "tags": ["whatsapp", "vague"],
+      "followupTags": ["sender", "verify"],
+      "payload": {
+        "offerText": "Got this on WhatsApp: Remote data entry for EU client, 18 LPA. Send resume to hiring@protonmail.com. Start Monday.",
+        "locale": "en-IN"
+      }
+    },
+    {
+      "id": "passport-upfront-kyc",
+      "channels": ["api"],
+      "tags": ["identity", "kyc"],
+      "followupTags": ["verify", "payment"],
+      "payload": {
+        "offerText": "Global staffing firm — send passport, bank statements, and SSN scan before interview slot is confirmed. Recruiter: verify.jobs@mail.ru",
+        "locale": "en-US"
+      }
+    },
+    {
+      "id": "ocr-screenshot-intake",
+      "channels": ["api"],
+      "tags": ["multimodal", "ocr"],
+      "type": "ocr_upload",
+      "fixture": "scripts/fixtures/ocr_scam_offer.png",
+      "followupTags": ["payment", "links"],
+      "payload": {
+        "offerText": "Screenshot of suspicious job message attached.",
+        "locale": "en-IN"
+      }
+    }
+  ],
+  "apiOnly": [
+    {
+      "id": "short-input-rejected",
+      "type": "reject",
+      "payload": { "offerText": "hi" },
+      "expectHttp": 400
+    },
+    {
+      "id": "report-scam-intake",
+      "type": "report",
+      "payload": {
+        "reportText": "Regression test: user reports missed Flipkart kit scam seen on WhatsApp.",
+        "notes": "automated test_live_suite"
+      },
+      "expectField": { "reviewStatus": "PENDING_REVIEW" }
+    },
+    {
+      "id": "upload-url-jpeg",
+      "type": "upload_url",
+      "contentType": "image/jpeg"
+    }
+  ]
+}
