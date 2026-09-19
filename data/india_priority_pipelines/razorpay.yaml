@@ -1,0 +1,23 @@
+employer_key: razorpay
+display_name: Razorpay
+scam_target_priority: high
+regions: [india]
+official_domains: [razorpay.com]
+india_careers_url: https://razorpay.com/jobs/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: startup_hire
+    label: Razorpay hiring
+    stages: [apply_careers_site, interview, offer, onboarding]
+    allowed_channels: [email @razorpay.com, razorpay.com/jobs]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://razorpay.com/jobs/
+vacancy_source: custom_portal
+sources:
+  - url: https://razorpay.com/jobs/
+    tier: T1

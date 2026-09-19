@@ -1,0 +1,23 @@
+employer_key: microsoft
+display_name: Microsoft
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [microsoft.com, careers.microsoft.com]
+india_careers_url: https://careers.microsoft.com/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview, sensitive_documents_early]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: standard
+    label: Microsoft hiring
+    stages: [apply_careers_site, screening, interview_loop, offer, onboarding]
+    allowed_channels: [email @microsoft.com, careers.microsoft.com]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://careers.microsoft.com/
+vacancy_source: custom_portal
+sources:
+  - url: https://careers.microsoft.com/
+    tier: T1

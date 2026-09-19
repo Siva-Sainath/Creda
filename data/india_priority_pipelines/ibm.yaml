@@ -1,0 +1,23 @@
+employer_key: ibm
+display_name: IBM
+scam_target_priority: high
+regions: [india, global]
+official_domains: [ibm.com, careers.ibm.com]
+india_careers_url: https://www.ibm.com/careers
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: standard
+    label: IBM hiring
+    stages: [apply_careers_site, screening, interview, offer, onboarding]
+    allowed_channels: [email @ibm.com, careers.ibm.com]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://www.ibm.com/careers/us-en/fraud-alert/
+vacancy_source: custom_portal
+sources:
+  - url: https://www.ibm.com/careers/us-en/fraud-alert/
+    tier: T1

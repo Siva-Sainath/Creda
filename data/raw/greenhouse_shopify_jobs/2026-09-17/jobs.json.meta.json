@@ -1,0 +1,9 @@
+{
+  "source_id": "greenhouse_shopify_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/coinbase/jobs",
+  "canonical_url": "https://boards-api.greenhouse.io/v1/boards/coinbase/jobs",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "1f81a8c3fbdfcbf8b4de8de86aae69635b972d64c5a270756676114e3348a257",
+  "bytes": 251802,
+  "http_status": 200
+}

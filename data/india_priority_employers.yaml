@@ -1,0 +1,23 @@
+version: 1
+updated_at: '2026-09-17'
+description: Tier A employers most impersonated in India job recruitment scams
+
+employers:
+  - tcs
+  - infosys
+  - wipro
+  - hcl
+  - cognizant
+  - tech_mahindra
+  - accenture
+  - capgemini
+  - amazon
+  - google
+  - microsoft
+  - ibm
+  - oracle
+  - flipkart
+  - razorpay
+  - freshworks
+  - zoho
+  - kpmg

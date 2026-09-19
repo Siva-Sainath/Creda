@@ -1,0 +1,314 @@
+[
+  {
+    "employer_key": "amazon",
+    "aliases": [
+      "amazon",
+      "amazon india",
+      "amazon jobs",
+      "aws hiring"
+    ]
+  },
+  {
+    "employer_key": "google",
+    "aliases": [
+      "google",
+      "alphabet",
+      "google india",
+      "google careers"
+    ]
+  },
+  {
+    "employer_key": "microsoft",
+    "aliases": [
+      "microsoft",
+      "msft",
+      "microsoft india"
+    ]
+  },
+  {
+    "employer_key": "meta",
+    "aliases": [
+      "meta",
+      "facebook",
+      "instagram hiring"
+    ]
+  },
+  {
+    "employer_key": "apple",
+    "aliases": [
+      "apple",
+      "apple india"
+    ]
+  },
+  {
+    "employer_key": "netflix",
+    "aliases": [
+      "netflix"
+    ]
+  },
+  {
+    "employer_key": "adobe",
+    "aliases": [
+      "adobe"
+    ]
+  },
+  {
+    "employer_key": "salesforce",
+    "aliases": [
+      "salesforce",
+      "sfdc"
+    ]
+  },
+  {
+    "employer_key": "oracle",
+    "aliases": [
+      "oracle",
+      "oracle india"
+    ]
+  },
+  {
+    "employer_key": "ibm",
+    "aliases": [
+      "ibm",
+      "ibm india"
+    ]
+  },
+  {
+    "employer_key": "cisco",
+    "aliases": [
+      "cisco"
+    ]
+  },
+  {
+    "employer_key": "intel",
+    "aliases": [
+      "intel"
+    ]
+  },
+  {
+    "employer_key": "nvidia",
+    "aliases": [
+      "nvidia"
+    ]
+  },
+  {
+    "employer_key": "tcs",
+    "aliases": [
+      "tcs",
+      "tata consultancy services",
+      "tata group hiring"
+    ]
+  },
+  {
+    "employer_key": "infosys",
+    "aliases": [
+      "infosys",
+      "infosys limited",
+      "infosys careers"
+    ]
+  },
+  {
+    "employer_key": "wipro",
+    "aliases": [
+      "wipro",
+      "wipro limited"
+    ]
+  },
+  {
+    "employer_key": "hcl",
+    "aliases": [
+      "hcl",
+      "hcltech",
+      "hcl technologies"
+    ]
+  },
+  {
+    "employer_key": "cognizant",
+    "aliases": [
+      "cognizant",
+      "cognizant india"
+    ]
+  },
+  {
+    "employer_key": "tech_mahindra",
+    "aliases": [
+      "tech mahindra",
+      "techmahindra"
+    ]
+  },
+  {
+    "employer_key": "accenture",
+    "aliases": [
+      "accenture",
+      "accenture india"
+    ]
+  },
+  {
+    "employer_key": "capgemini",
+    "aliases": [
+      "capgemini"
+    ]
+  },
+  {
+    "employer_key": "kpmg",
+    "aliases": [
+      "kpmg",
+      "kpmg india"
+    ]
+  },
+  {
+    "employer_key": "amex",
+    "aliases": [
+      "amex",
+      "american express"
+    ]
+  },
+  {
+    "employer_key": "valero",
+    "aliases": [
+      "valero"
+    ]
+  },
+  {
+    "employer_key": "netapp",
+    "aliases": [
+      "netapp"
+    ]
+  },
+  {
+    "employer_key": "stripe",
+    "aliases": [
+      "stripe"
+    ]
+  },
+  {
+    "employer_key": "coinbase",
+    "aliases": [
+      "coinbase"
+    ]
+  },
+  {
+    "employer_key": "figma",
+    "aliases": [
+      "figma"
+    ]
+  },
+  {
+    "employer_key": "databricks",
+    "aliases": [
+      "databricks"
+    ]
+  },
+  {
+    "employer_key": "discord",
+    "aliases": [
+      "discord"
+    ]
+  },
+  {
+    "employer_key": "airbnb",
+    "aliases": [
+      "airbnb"
+    ]
+  },
+  {
+    "employer_key": "anthropic",
+    "aliases": [
+      "anthropic",
+      "claude ai hiring"
+    ]
+  },
+  {
+    "employer_key": "datadog",
+    "aliases": [
+      "datadog"
+    ]
+  },
+  {
+    "employer_key": "mongodb",
+    "aliases": [
+      "mongodb"
+    ]
+  },
+  {
+    "employer_key": "cloudflare",
+    "aliases": [
+      "cloudflare"
+    ]
+  },
+  {
+    "employer_key": "vercel",
+    "aliases": [
+      "vercel"
+    ]
+  },
+  {
+    "employer_key": "reddit",
+    "aliases": [
+      "reddit"
+    ]
+  },
+  {
+    "employer_key": "twilio",
+    "aliases": [
+      "twilio"
+    ]
+  },
+  {
+    "employer_key": "lyft",
+    "aliases": [
+      "lyft"
+    ]
+  },
+  {
+    "employer_key": "instacart",
+    "aliases": [
+      "instacart"
+    ]
+  },
+  {
+    "employer_key": "spotify",
+    "aliases": [
+      "spotify"
+    ]
+  },
+  {
+    "employer_key": "notion",
+    "aliases": [
+      "notion"
+    ]
+  },
+  {
+    "employer_key": "uber",
+    "aliases": [
+      "uber",
+      "uber india"
+    ]
+  },
+  {
+    "employer_key": "flipkart",
+    "aliases": [
+      "flipkart",
+      "flipkart careers"
+    ]
+  },
+  {
+    "employer_key": "razorpay",
+    "aliases": [
+      "razorpay"
+    ]
+  },
+  {
+    "employer_key": "freshworks",
+    "aliases": [
+      "freshworks"
+    ]
+  },
+  {
+    "employer_key": "zoho",
+    "aliases": [
+      "zoho",
+      "zoho corp"
+    ]
+  }
+]

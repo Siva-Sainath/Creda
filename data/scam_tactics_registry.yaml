@@ -1,0 +1,162 @@
+version: 1
+updated_at: '2026-09-17'
+# Dynamic tactic registry. Add entries via: python scripts/register_scam_tactic.py
+# Rebuild: python scripts/run_etl.py && python scripts/build_deploy_bundle.py
+
+tactics:
+  - tactic_id: fee_or_deposit_request
+    display_name: Upfront fee or security deposit
+    severity: high
+    regions: [global, india, us, au]
+    category: payment
+    detection_regex:
+      - '\b(fee|fees|deposit|registration charge|security deposit|training fee|processing fee)\b'
+      - '\b(pay (?:inr|rs|₹|usd|\$)|upi|paytm|phonepe|gpay)\b'
+    user_guidance: Legitimate employers do not charge application, training, or registration fees.
+    first_seen: '2012'
+    last_updated: '2026-09-17'
+    source_ids: [amazon_recruitment_fraud_policy, i4c_handbook_2025, cyberdost_job_fraud_tips]
+    active: true
+
+  - tactic_id: free_mailbox_sender
+    display_name: Offer from free email (Gmail, Outlook, Yahoo)
+    severity: medium
+    regions: [global, india]
+    category: channel
+    detection_regex:
+      - '@(gmail|googlemail|outlook|hotmail|yahoo|rediffmail|proton)\.'
+    user_guidance: Large employers typically email from their own company domain, not free webmail.
+    first_seen: '2014'
+    last_updated: '2026-09-17'
+    source_ids: [amazon_recruitment_fraud_policy, tcs_recruitment_fraud_policy, kpmg_recruitment_fraud_policy]
+    active: true
+
+  - tactic_id: whatsapp_telegram_interview
+    display_name: Interview or offer via WhatsApp or Telegram
+    severity: high
+    regions: [global, india, au]
+    category: channel
+    detection_regex:
+      - '\b(whatsapp|whats app|telegram|signal messenger|t\.me/)\b'
+    user_guidance: Official hiring teams rarely conduct interviews only on messaging apps.
+    first_seen: '2020'
+    last_updated: '2026-09-17'
+    source_ids: [i4c_handbook_2025, nasc_job_scam_fusion_report_2025, kpmg_recruitment_fraud_policy]
+    active: true
+
+  - tactic_id: captcha_task_scam
+    display_name: CAPTCHA or task-boosting job scam
+    severity: high
+    regions: [india]
+    category: task_fraud
+    detection_regex:
+      - '\b(captcha filling|task scam|product boosting|commission task|click task|like and earn)\b'
+    user_guidance: Jobs that pay for CAPTCHA clicks or product boosting are a known 2024–2025 scam pattern in India.
+    first_seen: '2024'
+    last_updated: '2026-09-17'
+    source_ids: [i4c_captcha_advisory_2025]
+    active: true
+
+  - tactic_id: fake_check_reimbursement
+    display_name: Fake check or overpayment reimbursement
+    severity: high
+    regions: [global, us]
+    category: payment
+    detection_regex:
+      - '\b(fake check|mobile deposit|overpayment|send back|reimburse|cheque)\b'
+    user_guidance: Never return money from a check an employer asks you to deposit.
+    first_seen: '2018'
+    last_updated: '2026-09-17'
+    source_ids: [ic3_annual_report_2024, cyberdost_job_fraud_tips, ftc_job_scams]
+    active: true
+
+  - tactic_id: crypto_gift_card_payment
+    display_name: Payment via crypto or gift cards
+    severity: high
+    regions: [global, au]
+    category: payment
+    detection_regex:
+      - '\b(bitcoin|usdt|crypto|gift card|google play card|steam card)\b'
+    user_guidance: Real employers do not ask for gift cards or cryptocurrency for hiring.
+    first_seen: '2019'
+    last_updated: '2026-09-17'
+    source_ids: [nasc_job_scam_fusion_report_2025, ic3_annual_report_2024]
+    active: true
+
+  - tactic_id: identity_banking_before_offer
+    display_name: Bank or ID documents requested before formal offer
+    severity: high
+    regions: [global, india]
+    category: documents
+    detection_regex:
+      - '\b(bank account|aadhaar|aadhar|pan card|passport copy|ifsc|routing number|otp)\b'
+    user_guidance: Be cautious if sensitive documents are requested before a verified interview process.
+    first_seen: '2016'
+    last_updated: '2026-09-17'
+    source_ids: [kpmg_recruitment_fraud_policy, cyberdost_job_fraud_tips]
+    active: true
+
+  - tactic_id: equipment_purchase_scam
+    display_name: Buy your own laptop or equipment upfront
+    severity: high
+    regions: [global]
+    category: payment
+    detection_regex:
+      - '\b(purchase.*laptop|buy.*equipment|vendor.*laptop|workstation.*fee)\b'
+    user_guidance: Scammers often ask candidates to buy equipment from a specific vendor.
+    first_seen: '2017'
+    last_updated: '2026-09-17'
+    source_ids: [amazon_recruitment_fraud_policy, ic3_annual_report_2024]
+    active: true
+
+  - tactic_id: urgency_pressure
+    display_name: Artificial urgency or limited slots
+    severity: medium
+    regions: [global]
+    category: social_engineering
+    detection_regex:
+      - '\b(urgent|immediately|limited slots|final call|act now|deadline today|only \d+ day)\b'
+    user_guidance: Pressure to pay or decide quickly is a common scam tactic.
+    first_seen: '2014'
+    last_updated: '2026-09-17'
+    source_ids: [amazon_recruitment_fraud_policy, i4c_fake_job_sms_advisory]
+    active: true
+
+  - tactic_id: impersonation_big_tech
+    display_name: Impersonation of well-known tech brand
+    severity: medium
+    regions: [global, india]
+    category: impersonation
+    detection_regex:
+      - '\b(amazon hr|google careers|microsoft hiring|tcs careers|infosys careers|wipro hr)\b'
+    user_guidance: Verify the employer through official careers sites, not only the message text.
+    first_seen: '2015'
+    last_updated: '2026-09-17'
+    source_ids: [linkedin_job_scam_guidance, scamwatch_au_job_scams]
+    active: true
+
+  - tactic_id: overseas_agent_fee
+    display_name: Unauthorized overseas placement agent fee
+    severity: high
+    regions: [india, overseas]
+    category: payment
+    detection_regex:
+      - '\b(recruiting agent|placement agent|visa agent|emigration fee|overseas placement fee)\b'
+    user_guidance: Check MEA eMigrate registered agents before paying for overseas jobs.
+    first_seen: '2010'
+    last_updated: '2026-09-17'
+    source_ids: [mea_overseas_employment, mea_yangon_overseas_job_scam_2024]
+    active: true
+
+  - tactic_id: high_salary_unrealistic
+    display_name: Unrealistic salary for minimal experience
+    severity: low
+    regions: [global]
+    category: bait
+    detection_regex:
+      - '(?:₹|inr|rs\.?)\s?[\d,]{6,}|(?:\$|usd)\s?[\d,]{3,}\s?(?:per week|weekly|daily)'
+    user_guidance: Extremely high pay for little experience can be bait; verify on official careers pages.
+    first_seen: '2014'
+    last_updated: '2026-09-17'
+    source_ids: [i4c_handbook_2025, scamwatch_au_job_scams]
+    active: true

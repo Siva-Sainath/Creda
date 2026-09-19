@@ -1,0 +1,9 @@
+{
+  "source_id": "greenhouse_figma_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/figma/jobs",
+  "canonical_url": "https://boards-api.greenhouse.io/v1/boards/figma/jobs",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "a5b6dbd896a980009396d77c6a1748bd5742870dcd09786b1718c84ed46fca5c",
+  "bytes": 97453,
+  "http_status": 200
+}

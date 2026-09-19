@@ -1,0 +1,8 @@
+{
+  "source_id": "greenhouse_instacart_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/instacart/jobs",
+  "downloaded_at": "2026-09-17",
+  "method": "greenhouse_api",
+  "checksum_sha256": "91ee2a7fb5b8fb6aa1eddcd060486a74b69f724e582a4f723a2c6db0ae1aaeaa",
+  "bytes": 92578
+}

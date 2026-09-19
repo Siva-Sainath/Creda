@@ -1,0 +1,524 @@
+version: 1
+updated_at: '2026-09-17'
+# Employer coverage matrix for impersonation-prone companies.
+# Fetch: python scripts/fetch_employer_registry.py
+# Process: python scripts/run_etl.py
+
+employers:
+  # --- Big tech (global) ---
+  - employer_key: amazon
+    display_name: Amazon
+    company_tier: big_tech
+    regions: [global, india, us, eu]
+    scam_target_priority: critical
+    official_domains: [amazon.com, amazon.jobs, joining.docs.amazon.com]
+    official_careers_urls: [https://www.amazon.jobs/]
+    aliases: [amazon, amazon india, amazon jobs, aws hiring]
+    policy:
+      source_id: amazon_recruitment_fraud_policy
+      canonical_url: https://amazon.jobs/content/en/how-we-hire/fraud-alert-india
+      fetch: {method: direct, url: "https://amazon.jobs/content/en/how-we-hire/fraud-alert-india", filename: index.html}
+
+  - employer_key: google
+    display_name: Google
+    company_tier: big_tech
+    regions: [global, india, us, eu]
+    scam_target_priority: critical
+    official_domains: [google.com, careers.google.com]
+    official_careers_urls: [https://careers.google.com/]
+    aliases: [google, alphabet, google india, google careers]
+    policy:
+      source_id: google_recruitment_fraud_policy
+      canonical_url: https://careers.google.com/how-we-hire/recruitment-fraud/
+      fetch: {method: manual, filename: index.html, manual_file: google_recruitment_fraud_policy.html}
+
+  - employer_key: microsoft
+    display_name: Microsoft
+    company_tier: big_tech
+    regions: [global, india, us, eu]
+    scam_target_priority: critical
+    official_domains: [microsoft.com, careers.microsoft.com]
+    official_careers_urls: [https://careers.microsoft.com/]
+    aliases: [microsoft, msft, microsoft india]
+    policy:
+      source_id: microsoft_recruitment_fraud_alert
+      canonical_url: https://careers.microsoft.com/
+      fetch: {method: manual, filename: index.html, manual_file: microsoft_recruitment_fraud_alert.html}
+
+  - employer_key: meta
+    display_name: Meta
+    company_tier: big_tech
+    regions: [global, india, us]
+    scam_target_priority: high
+    official_domains: [meta.com, fb.com]
+    official_careers_urls: [https://www.metacareers.com/]
+    aliases: [meta, facebook, instagram hiring]
+    ats: {type: custom, note: "No public fraud page fetched; vacancy-only coverage"}
+
+  - employer_key: apple
+    display_name: Apple
+    company_tier: big_tech
+    regions: [global, india, us]
+    scam_target_priority: high
+    official_domains: [apple.com]
+    official_careers_urls: [https://www.apple.com/careers/]
+    aliases: [apple, apple india]
+
+  - employer_key: netflix
+    display_name: Netflix
+    company_tier: big_tech
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [netflix.com, jobs.netflix.com]
+    official_careers_urls: [https://jobs.netflix.com/]
+    aliases: [netflix]
+
+  - employer_key: adobe
+    display_name: Adobe
+    company_tier: big_tech
+    regions: [global, india, us]
+    scam_target_priority: medium
+    official_domains: [adobe.com]
+    official_careers_urls: [https://careers.adobe.com/]
+    aliases: [adobe]
+
+  - employer_key: salesforce
+    display_name: Salesforce
+    company_tier: big_tech
+    regions: [global, india, us]
+    scam_target_priority: high
+    official_domains: [salesforce.com]
+    official_careers_urls: [https://careers.salesforce.com/]
+    aliases: [salesforce, sfdc]
+
+  - employer_key: oracle
+    display_name: Oracle
+    company_tier: big_tech
+    regions: [global, india]
+    scam_target_priority: high
+    official_domains: [oracle.com]
+    official_careers_urls: [https://www.oracle.com/careers/]
+    aliases: [oracle, oracle india]
+    policy:
+      source_id: oracle_recruitment_fraud_policy
+      canonical_url: https://www.oracle.com/corporate/security-alert/recruitment-fraud/
+      fetch: {method: manual, filename: index.html, manual_file: oracle_recruitment_fraud_policy.html}
+
+  - employer_key: ibm
+    display_name: IBM
+    company_tier: big_tech
+    regions: [global, india]
+    scam_target_priority: high
+    official_domains: [ibm.com]
+    official_careers_urls: [https://www.ibm.com/careers]
+    aliases: [ibm, ibm india]
+    policy:
+      source_id: ibm_recruitment_fraud_policy
+      canonical_url: https://www.ibm.com/careers/us-en/fraud-alert/
+      fetch: {method: manual, filename: index.html, manual_file: ibm_recruitment_fraud_policy.html}
+
+  - employer_key: cisco
+    display_name: Cisco
+    company_tier: big_tech
+    regions: [global, india]
+    scam_target_priority: medium
+    official_domains: [cisco.com]
+    official_careers_urls: [https://jobs.cisco.com/]
+    aliases: [cisco]
+
+  - employer_key: intel
+    display_name: Intel
+    company_tier: big_tech
+    regions: [global, india]
+    scam_target_priority: medium
+    official_domains: [intel.com]
+    official_careers_urls: [https://jobs.intel.com/]
+    aliases: [intel]
+
+  - employer_key: nvidia
+    display_name: NVIDIA
+    company_tier: big_tech
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [nvidia.com]
+    official_careers_urls: [https://nvidia.wd5.myworkdayjobs.com/]
+    aliases: [nvidia]
+
+  # --- Indian IT / GCC (high impersonation in India) ---
+  - employer_key: tcs
+    display_name: Tata Consultancy Services
+    company_tier: big_tech
+    regions: [india, global]
+    scam_target_priority: critical
+    official_domains: [tcs.com]
+    official_careers_urls: [https://www.tcs.com/careers]
+    aliases: [tcs, tata consultancy services, tata group hiring]
+    policy:
+      source_id: tcs_recruitment_fraud_policy
+      canonical_url: https://www.tcs.com/careers/india/recruitment-fraud-alert
+      fetch:
+        method: wayback
+        url: "https://web.archive.org/web/20260107221722/https://www.tcs.com/careers/india/recruitment-fraud-alert"
+        filename: index.html
+
+  - employer_key: infosys
+    display_name: Infosys
+    company_tier: big_tech
+    regions: [india, global]
+    scam_target_priority: critical
+    official_domains: [infosys.com]
+    official_careers_urls: [https://www.infosys.com/careers.html]
+    aliases: [infosys, infosys limited, infosys careers]
+    policy:
+      source_id: infosys_recruitment_fraud_policy
+      canonical_url: https://www.infosys.com/careers/recruitment-fraud-alert.html
+      fetch: {method: manual, filename: index.html, manual_file: infosys_recruitment_fraud_policy.html}
+
+  - employer_key: wipro
+    display_name: Wipro
+    company_tier: big_tech
+    regions: [india, global]
+    scam_target_priority: critical
+    official_domains: [wipro.com, careers.wipro.com]
+    official_careers_urls: [https://careers.wipro.com/]
+    aliases: [wipro, wipro limited]
+    policy:
+      source_id: wipro_recruitment_fraud_policy
+      canonical_url: https://careers.wipro.com/content/Recruitment-Fraud-Alert/
+      fetch: {method: manual, filename: index.html, manual_file: wipro_recruitment_fraud_policy.html}
+
+  - employer_key: hcl
+    display_name: HCLTech
+    company_tier: mid_market
+    regions: [india, global]
+    scam_target_priority: high
+    official_domains: [hcltech.com, hcl.com]
+    official_careers_urls: [https://www.hcltech.com/careers]
+    aliases: [hcl, hcltech, hcl technologies]
+    policy:
+      source_id: hcl_recruitment_fraud_policy
+      canonical_url: https://www.hcltech.com/careers/recruitment-fraud-alert
+      fetch: {method: manual, filename: index.html, manual_file: hcl_recruitment_fraud_policy.html}
+
+  - employer_key: cognizant
+    display_name: Cognizant
+    company_tier: big_tech
+    regions: [india, global, us]
+    scam_target_priority: high
+    official_domains: [cognizant.com, careers.cognizant.com]
+    official_careers_urls: [https://careers.cognizant.com/]
+    aliases: [cognizant, cognizant india]
+    policy:
+      source_id: cognizant_recruitment_fraud_policy
+      canonical_url: https://careers.cognizant.com/global/en/recruitment-fraud-alert
+      fetch: {method: manual, filename: index.html, manual_file: cognizant_recruitment_fraud_policy.html}
+
+  - employer_key: tech_mahindra
+    display_name: Tech Mahindra
+    company_tier: mid_market
+    regions: [india, global]
+    scam_target_priority: high
+    official_domains: [techmahindra.com]
+    official_careers_urls: [https://careers.techmahindra.com/]
+    aliases: [tech mahindra, techmahindra]
+    policy:
+      source_id: tech_mahindra_recruitment_fraud_policy
+      canonical_url: https://www.techmahindra.com/en-in/careers/recruitment-fraud-alert/
+      fetch: {method: manual, filename: index.html, manual_file: tech_mahindra_recruitment_fraud_policy.html}
+
+  - employer_key: accenture
+    display_name: Accenture
+    company_tier: big_tech
+    regions: [global, india]
+    scam_target_priority: high
+    official_domains: [accenture.com]
+    official_careers_urls: [https://www.accenture.com/careers]
+    aliases: [accenture, accenture india]
+    policy:
+      source_id: accenture_recruitment_fraud_policy
+      canonical_url: https://www.accenture.com/us-en/careers/recruitment-fraud-alert
+      fetch: {method: manual, filename: index.html, manual_file: accenture_recruitment_fraud_policy.html}
+
+  - employer_key: capgemini
+    display_name: Capgemini
+    company_tier: mid_market
+    regions: [global, india, eu]
+    scam_target_priority: high
+    official_domains: [capgemini.com]
+    official_careers_urls: [https://www.capgemini.com/careers/]
+    aliases: [capgemini]
+    policy:
+      source_id: capgemini_recruitment_fraud_policy
+      canonical_url: https://www.capgemini.com/in-en/careers/recruitment-fraud-alert/
+      fetch: {method: manual, filename: index.html, manual_file: capgemini_recruitment_fraud_policy.html}
+
+  # --- Consulting / finance (impersonation targets) ---
+  - employer_key: kpmg
+    display_name: KPMG
+    company_tier: mid_market
+    regions: [global, india]
+    scam_target_priority: critical
+    official_domains: [kpmg.com]
+    official_careers_urls: [https://kpmg.com/careers]
+    aliases: [kpmg, kpmg india]
+    policy:
+      source_id: kpmg_recruitment_fraud_policy
+      canonical_url: https://kpmg.com/in/en/media/press-releases/2024/12/important-recruitment-fraud-alert.html
+      fetch: {method: direct, url: "https://kpmg.com/in/en/media/press-releases/2024/12/important-recruitment-fraud-alert.html", filename: index.html}
+      published_at: '2024-12'
+
+  - employer_key: amex
+    display_name: American Express
+    company_tier: mid_market
+    regions: [global, us, india]
+    scam_target_priority: high
+    official_domains: [americanexpress.com, aexp.com, recruitment.americanexpress.com]
+    official_careers_urls: [https://www.americanexpress.com/en-us/careers/]
+    aliases: [amex, american express]
+    policy:
+      source_id: amex_recruitment_fraud_policy
+      canonical_url: https://www.americanexpress.com/en-us/careers/recruitment-fraud/
+      fetch: {method: direct, url: "https://www.americanexpress.com/en-us/careers/recruitment-fraud/", filename: index.html}
+
+  - employer_key: valero
+    display_name: Valero
+    company_tier: mid_market
+    regions: [us]
+    scam_target_priority: medium
+    official_domains: [valero.com]
+    aliases: [valero]
+    policy:
+      source_id: valero_recruitment_scams_2025
+      canonical_url: https://www.valero.com/sites/default/files/valero-documents/2025-10/Recruiting%20Scams_Careers%20Legal%20Document.pdf
+      fetch: {method: direct, url: "https://www.valero.com/sites/default/files/valero-documents/2025-10/Recruiting%20Scams_Careers%20Legal%20Document.pdf", filename: policy.pdf}
+      published_at: '2025'
+
+  - employer_key: netapp
+    display_name: NetApp
+    company_tier: mid_market
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [netapp.com]
+    aliases: [netapp]
+    policy:
+      source_id: netapp_recruitment_fraud_policy
+      canonical_url: https://www.netapp.com/responsibility/trust-center/security/recruitment-scam-warning-fraud-alert/
+      fetch:
+        method: wayback
+        url: "https://web.archive.org/web/20250602062002/https://www.netapp.com/responsibility/trust-center/security/recruitment-scam-warning-fraud-alert/"
+        filename: index.html
+
+  # --- Startups / mid-market tech (Greenhouse/Lever/Ashby) ---
+  - employer_key: stripe
+    display_name: Stripe
+    company_tier: startup
+    regions: [global, us, eu]
+    scam_target_priority: high
+    official_domains: [stripe.com]
+    aliases: [stripe]
+    ats: {type: greenhouse, board: stripe, source_id: greenhouse_stripe_jobs}
+
+  - employer_key: coinbase
+    display_name: Coinbase
+    company_tier: mid_market
+    regions: [global, us]
+    scam_target_priority: high
+    official_domains: [coinbase.com]
+    aliases: [coinbase]
+    ats: {type: greenhouse, board: coinbase, source_id: greenhouse_coinbase_jobs}
+
+  - employer_key: figma
+    display_name: Figma
+    company_tier: startup
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [figma.com]
+    aliases: [figma]
+    ats: {type: greenhouse, board: figma, source_id: greenhouse_figma_jobs}
+
+  - employer_key: databricks
+    display_name: Databricks
+    company_tier: mid_market
+    regions: [global, us, india]
+    scam_target_priority: medium
+    official_domains: [databricks.com]
+    aliases: [databricks]
+    ats: {type: greenhouse, board: databricks, source_id: greenhouse_databricks_jobs}
+
+  - employer_key: discord
+    display_name: Discord
+    company_tier: startup
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [discord.com]
+    aliases: [discord]
+    ats: {type: greenhouse, board: discord, source_id: greenhouse_discord_jobs}
+
+  - employer_key: airbnb
+    display_name: Airbnb
+    company_tier: mid_market
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [airbnb.com]
+    aliases: [airbnb]
+    ats: {type: greenhouse, board: airbnb, source_id: greenhouse_airbnb_jobs}
+
+  - employer_key: anthropic
+    display_name: Anthropic
+    company_tier: startup
+    regions: [global, us]
+    scam_target_priority: high
+    official_domains: [anthropic.com]
+    aliases: [anthropic, claude ai hiring]
+    ats: {type: greenhouse, board: anthropic, source_id: greenhouse_anthropic_jobs}
+
+  - employer_key: datadog
+    display_name: Datadog
+    company_tier: mid_market
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [datadoghq.com]
+    aliases: [datadog]
+    ats: {type: greenhouse, board: datadog, source_id: greenhouse_datadog_jobs}
+
+  - employer_key: mongodb
+    display_name: MongoDB
+    company_tier: mid_market
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [mongodb.com]
+    aliases: [mongodb]
+    ats: {type: greenhouse, board: mongodb, source_id: greenhouse_mongodb_jobs}
+
+  - employer_key: cloudflare
+    display_name: Cloudflare
+    company_tier: mid_market
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [cloudflare.com]
+    aliases: [cloudflare]
+    ats: {type: greenhouse, board: cloudflare, source_id: greenhouse_cloudflare_jobs}
+
+  - employer_key: vercel
+    display_name: Vercel
+    company_tier: startup
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [vercel.com]
+    aliases: [vercel]
+    ats: {type: greenhouse, board: vercel, source_id: greenhouse_vercel_jobs}
+
+  - employer_key: reddit
+    display_name: Reddit
+    company_tier: mid_market
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [reddit.com]
+    aliases: [reddit]
+    ats: {type: greenhouse, board: reddit, source_id: greenhouse_reddit_jobs}
+
+  - employer_key: twilio
+    display_name: Twilio
+    company_tier: mid_market
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [twilio.com]
+    aliases: [twilio]
+    ats: {type: greenhouse, board: twilio, source_id: greenhouse_twilio_jobs}
+
+  - employer_key: lyft
+    display_name: Lyft
+    company_tier: mid_market
+    regions: [us]
+    scam_target_priority: medium
+    official_domains: [lyft.com]
+    aliases: [lyft]
+    ats: {type: greenhouse, board: lyft, source_id: greenhouse_lyft_jobs}
+
+  - employer_key: instacart
+    display_name: Instacart
+    company_tier: mid_market
+    regions: [us]
+    scam_target_priority: medium
+    official_domains: [instacart.com]
+    aliases: [instacart]
+    ats: {type: greenhouse, board: instacart, source_id: greenhouse_instacart_jobs}
+
+  - employer_key: spotify
+    display_name: Spotify
+    company_tier: mid_market
+    regions: [global, eu, us]
+    scam_target_priority: medium
+    official_domains: [spotify.com]
+    aliases: [spotify]
+    ats: {type: lever, site: spotify, source_id: lever_spotify_jobs}
+
+  - employer_key: notion
+    display_name: Notion
+    company_tier: startup
+    regions: [global, us]
+    scam_target_priority: medium
+    official_domains: [notion.so]
+    aliases: [notion]
+    ats: {type: ashby, board: notion, source_id: ashby_notion_jobs}
+
+  - employer_key: uber
+    display_name: Uber
+    company_tier: big_tech
+    regions: [global, india, us]
+    scam_target_priority: high
+    official_domains: [uber.com]
+    official_careers_urls: [https://www.uber.com/us/en/careers/]
+    aliases: [uber, uber india]
+
+  - employer_key: flipkart
+    display_name: Flipkart
+    company_tier: big_tech
+    regions: [india]
+    scam_target_priority: critical
+    official_domains: [flipkart.com]
+    official_careers_urls: [https://www.flipkartcareers.com/]
+    aliases: [flipkart, flipkart careers]
+    policy:
+      source_id: flipkart_recruitment_fraud_policy
+      canonical_url: https://www.flipkartcareers.com/
+      fetch: {method: manual, filename: index.html, manual_file: flipkart_recruitment_fraud_policy.html}
+
+  - employer_key: razorpay
+    display_name: Razorpay
+    company_tier: startup
+    regions: [india]
+    scam_target_priority: high
+    official_domains: [razorpay.com]
+    official_careers_urls: [https://razorpay.com/jobs/]
+    aliases: [razorpay]
+    policy:
+      source_id: razorpay_recruitment_fraud_policy
+      canonical_url: https://razorpay.com/jobs/
+      fetch: {method: manual, filename: index.html, manual_file: razorpay_recruitment_fraud_policy.html}
+
+  - employer_key: freshworks
+    display_name: Freshworks
+    company_tier: mid_market
+    regions: [india, global]
+    scam_target_priority: high
+    official_domains: [freshworks.com]
+    official_careers_urls: [https://www.freshworks.com/company/careers/]
+    aliases: [freshworks]
+    policy:
+      source_id: freshworks_recruitment_fraud_policy
+      canonical_url: https://www.freshworks.com/company/careers/
+      fetch: {method: manual, filename: index.html, manual_file: freshworks_recruitment_fraud_policy.html}
+
+  - employer_key: zoho
+    display_name: Zoho
+    company_tier: mid_market
+    regions: [india, global]
+    scam_target_priority: high
+    official_domains: [zoho.com, zohocorp.com]
+    official_careers_urls: [https://www.zoho.com/careers/]
+    aliases: [zoho, zoho corp]
+    policy:
+      source_id: zoho_recruitment_fraud_policy
+      canonical_url: https://www.zoho.com/careers/
+      fetch: {method: manual, filename: index.html, manual_file: zoho_recruitment_fraud_policy.html}

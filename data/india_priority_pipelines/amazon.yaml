@@ -1,0 +1,25 @@
+employer_key: amazon
+display_name: Amazon
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [amazon.com, amazon.jobs, joining.docs.amazon.com]
+india_careers_url: https://www.amazon.jobs/en/locations/india
+global_careers_url: https://www.amazon.jobs/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: india_operations
+    label: Amazon India hiring
+    stages: [apply_amazon_jobs, interview, offer_via_joining_portal, onboarding]
+    allowed_channels: [email @amazon.com, amazon.jobs]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://amazon.jobs/content/en/how-we-hire/fraud-alert-india
+  offer_verification_url: https://joining.docs.amazon.com
+vacancy_source: custom_portal
+sources:
+  - url: https://amazon.jobs/content/en/how-we-hire/fraud-alert-india
+    tier: T1

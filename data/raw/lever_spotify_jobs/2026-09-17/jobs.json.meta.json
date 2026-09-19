@@ -1,0 +1,9 @@
+{
+  "source_id": "lever_spotify_jobs",
+  "source_url": "https://api.lever.co/v0/postings/spotify?mode=json",
+  "canonical_url": "https://api.lever.co/v0/postings/spotify?mode=json",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "7c58c6fde8f8dc06a77eefd94906881b7a641115240d952d7baf47123ff74bbc",
+  "bytes": 656718,
+  "http_status": 200
+}

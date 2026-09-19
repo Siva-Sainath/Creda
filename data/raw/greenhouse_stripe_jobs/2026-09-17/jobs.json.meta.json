@@ -1,0 +1,9 @@
+{
+  "source_id": "greenhouse_stripe_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/stripe/jobs",
+  "canonical_url": "https://boards-api.greenhouse.io/v1/boards/stripe/jobs",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "83587d3171b9cf48f911232fc70830ff407c2122f1cc14e3f59e5f68c5a9d109",
+  "bytes": 407349,
+  "http_status": 200
+}

@@ -1,0 +1,58 @@
+{
+  "bundle_version": "creda-deploy-1.0",
+  "retrieval_date": "2026-09-17",
+  "processing_version": "creda-preprocess-2.0",
+  "counts": {
+    "employer_policies": 21,
+    "employers_in_registry": 47,
+    "hiring_pipeline_profiles": 18,
+    "vacancies": 4822,
+    "channel_patterns": 37,
+    "recruiting_process_patterns": 21,
+    "scam_tactics": 12,
+    "demo_cases": 5
+  },
+  "files": {
+    "channel_patterns.jsonl": {
+      "sha256": "571daf1384d30b8fd1b0560a76c54b959e3cc4cd0224c547b708f383230cb955",
+      "bytes": 19049
+    },
+    "demo_cases.json": {
+      "sha256": "9a32505a1c8b7f21c6e420227239099d7128380636b13db1f572a505629ec015",
+      "bytes": 2178
+    },
+    "employer_aliases.json": {
+      "sha256": "e43a0ef6efef946ee5d1cbb507dfd9a839d084cc099356b7cb363b2e2d7eee0e",
+      "bytes": 4346
+    },
+    "employer_index.json": {
+      "sha256": "6150b8a61f2ce38965f5fa3300acffbbe63e51f889d654e7dfc0a9214d9c2ca2",
+      "bytes": 23125
+    },
+    "employer_policies.jsonl": {
+      "sha256": "2c460c6224f451da44f776bebc8c78acc83554a4fff72f30f35089048b4ec332",
+      "bytes": 37089
+    },
+    "hiring_pipeline_profiles.jsonl": {
+      "sha256": "fab2e51b456e0b89711eaac8aa3a994342fd8bd2d2486364e329ef86c761ee58",
+      "bytes": 20299
+    },
+    "official_ats_sources.json": {
+      "sha256": "82be6b8611a393de67f524e95086ff20b14ef58bf8a5f8435170a7126304f8fd",
+      "bytes": 2157
+    },
+    "recruiting_process_patterns.jsonl": {
+      "sha256": "3d7022c12a48b64d8234a2af4bf1b58ac1c76f67f199b7ffb815a2d98d52ae79",
+      "bytes": 19715
+    },
+    "scam_tactics.jsonl": {
+      "sha256": "eb2e13aa4e4310037e9f36a3788651ef1e8f829f9fd30a60b767948728875640",
+      "bytes": 6351
+    },
+    "vacancy_index.jsonl": {
+      "sha256": "3cc7a242f8a236d8ed522b3c58ae7fea85d34d78b56f897d92d3c772d725d55a",
+      "bytes": 1595305
+    }
+  },
+  "s3_prefix": "curated/"
+}

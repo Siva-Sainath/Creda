@@ -1,0 +1,27 @@
+employer_key: zoho
+display_name: Zoho
+scam_target_priority: high
+regions: [india, global]
+official_domains: [zoho.com]
+india_careers_url: https://www.zoho.com/careers/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: zoho_campus
+    label: Zoho campus / off-campus (Tamil Nadu focus)
+    stages: [apply_portal, written_test, interview, offer, onboarding]
+    allowed_channels: [email @zohocorp.com, zoho.com/careers]
+    forbidden_before_stages: [fee_before_interview]
+  - track_id: experienced
+    label: Experienced hire
+    stages: [apply_portal, interview, offer, onboarding]
+    allowed_channels: [email @zohocorp.com]
+fraud_policy:
+  source_url: https://www.zoho.com/careers/
+vacancy_source: custom_portal
+sources:
+  - url: https://www.zoho.com/careers/
+    tier: T1

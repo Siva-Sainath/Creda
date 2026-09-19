@@ -1,0 +1,27 @@
+employer_key: accenture
+display_name: Accenture
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [accenture.com]
+india_careers_url: https://www.accenture.com/in-en/careers
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview, sensitive_documents_early]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: campus
+    label: Campus / entry level (India)
+    stages: [apply_portal, assessment, interview, offer, onboarding]
+    allowed_channels: [email @accenture.com, accenture.com/careers]
+    forbidden_before_stages: [fee_before_interview]
+  - track_id: experienced
+    label: Experienced hire
+    stages: [apply_portal, screening, interview, offer, onboarding]
+    allowed_channels: [email @accenture.com]
+fraud_policy:
+  source_url: https://www.accenture.com/us-en/careers/recruitment-fraud-alert
+vacancy_source: custom_portal
+sources:
+  - url: https://www.accenture.com/us-en/careers/recruitment-fraud-alert
+    tier: T1

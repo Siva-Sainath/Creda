@@ -1,0 +1,8 @@
+{
+  "source_id": "greenhouse_lyft_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/lyft/jobs",
+  "downloaded_at": "2026-09-17",
+  "method": "greenhouse_api",
+  "checksum_sha256": "bf1ce614961069e77028810e6cdd2bba6b4a3a05f8947fc6dd41a1fddf384b33",
+  "bytes": 143492
+}

@@ -1,0 +1,9 @@
+{
+  "source_id": "greenhouse_discord_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/discord/jobs",
+  "canonical_url": "https://boards-api.greenhouse.io/v1/boards/discord/jobs",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "3e6e361f82d7de2d0bcbd55f59c31dba1242f250bed79bd2dc0bb77a01260027",
+  "bytes": 38230,
+  "http_status": 200
+}

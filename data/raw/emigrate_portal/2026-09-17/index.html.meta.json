@@ -1,0 +1,9 @@
+{
+  "source_id": "emigrate_portal",
+  "source_url": "https://emigrate.gov.in/ext/home",
+  "canonical_url": "https://www.emigrate.gov.in/#/emigrate/home",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "11b0d8225e72d68252ff3477b298757f6eeebf261b23bcc8e880f349cff69819",
+  "bytes": 1510,
+  "http_status": 200
+}

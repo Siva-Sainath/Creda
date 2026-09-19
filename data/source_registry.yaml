@@ -1,0 +1,359 @@
+version: 1
+generated_at: '2026-09-17'
+sources:
+- source_id: emscad
+  name: Employment Scam Aegean Dataset (EMSCAD)
+  source_url: https://www.mdpi.com/1999-5903/9/1/6
+  publisher: University of the Aegean
+  source_type: historical_dataset
+  geographic_scope: global
+  date_range: 2012-2014
+  retrieval_method: kaggle_or_author_snapshot
+  license: CC0 (Kaggle copy; verify against original terms)
+  permitted_use: research_and_model_development; historical_baseline_only
+  evidence_tier: T3
+  expected_fields:
+  - title
+  - location
+  - department
+  - salary_range
+  - company_profile
+  - description
+  - requirements
+  - benefits
+  - telecommuting
+  - has_company_logo
+  - has_questions
+  - employment_type
+  - required_experience
+  - required_education
+  - industry
+  - function
+  - fraudulent
+  known_biases:
+  - historical_2012_2014
+  - English_heavy
+  - highly_imbalanced
+  - platform_specific
+  freshness_policy: immutable
+  status: downloaded
+  local_path: data/raw/emscad/
+  checksum: 25e52f6d34939510f3f2ca5afc55ccfe7259ccc01283319bd484c466ea88baaf
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: difraud_job_scams
+  name: DiFrauD job scams component
+  source_url: https://huggingface.co/datasets/difraud/difraud/tree/main/job_scams
+  publisher: DiFrauD authors
+  source_type: transformed_historical_dataset
+  geographic_scope: global
+  date_range: 2012-2014 (derived; confirm provenance)
+  retrieval_method: huggingface_resolve
+  license: MIT
+  permitted_use: research_and_model_development; duplicate_check_required
+  evidence_tier: T3
+  expected_fields:
+  - text
+  - label
+  known_biases:
+  - derived_from_EMSCAD_or_related_job_scams
+  - binary_labels
+  - English_heavy
+  freshness_policy: immutable
+  status: downloaded
+  local_path: data/raw/difraud_job_scams/
+  checksum: 905790a8a762d3bd46ab0943f627cf94d7184d5876ebf358bba630f4d20d2fc0
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: kaggle_fake_job_postings_srisai
+  name: Fake Job Postings (Srisai S. Hassanisetty)
+  source_url: https://www.kaggle.com/datasets/srisaisuhassanisetty/fake-job-postings
+  publisher: Kaggle contributor
+  source_type: supplemental_dataset
+  geographic_scope: unknown
+  date_range: unknown
+  retrieval_method: kaggle_api
+  license: unknown_pending_data_card
+  permitted_use: quarantine_until_license_and_provenance_verified
+  evidence_tier: T3
+  expected_fields: unknown
+  known_biases:
+  - provenance_unclear
+  - fake_only_selection_bias_possible
+  freshness_policy: immutable_snapshot
+  status: quarantined_license_review
+  local_path: data/quarantine/kaggle_fake_job_postings_srisai/
+  checksum: null
+  downloaded_at: null
+  duplicate_provenance_notes: ''
+- source_id: kaggle_fake_vs_real_synthetic
+  name: Fake vs Real Job Postings (Synthetic NLP Dataset)
+  source_url: https://www.kaggle.com/datasets/khushikyad001/fake-vs-real-job-postings-synthetic-nlp-dataset
+  publisher: Kaggle contributor Khushi Yadav
+  source_type: synthetic_dataset
+  geographic_scope: synthetic
+  date_range: 2025-2026 upload; generated examples
+  retrieval_method: kaggle_api
+  license: MIT
+  permitted_use: pattern_exploration_only; never_final_test_set
+  evidence_tier: T3
+  expected_fields:
+  - job_posting_text
+  - is_fake
+  - metadata
+  known_biases:
+  - synthetic_generation
+  - benchmark_artifacts
+  - not_real_world_prevalence
+  freshness_policy: immutable_snapshot
+  status: downloaded
+  local_path: data/raw/kaggle_fake_vs_real_synthetic/
+  checksum: a00014bd642b9e89d95b52708271b8e6396a5b54657c6fe0f529eb648799d9e7
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: i4c_captcha_advisory_2025
+  name: I4C Rise in Fake CAPTCHA Filling Jobs advisory
+  source_url: https://cybercrime.gov.in/Webform/theme/resources/advisories/ADVISORY%20TAU-ADV-004_Captcha%20Filling%20Fraud_08.04.2025.pdf
+  publisher: Indian Cyber Crime Coordination Centre (I4C)
+  source_type: government_advisory
+  geographic_scope: India
+  date_range: '2025-04-08'
+  retrieval_method: https_download_pdf
+  license: government_publication; verify reuse terms
+  permitted_use: scam_pattern_evidence_and_user_guidance
+  evidence_tier: T1
+  expected_fields:
+  - title
+  - publication_date
+  - advisory_text
+  - scam_pattern_tags
+  known_biases:
+  - advisory_describes_pattern_not_individual_guilt
+  freshness_policy: recheck_30_days_until_superseded
+  status: downloaded
+  local_path: data/raw/i4c_captcha_advisory_2025/
+  checksum: ddc3af554e0bf09cdf361a55f4b530cd0dcb820703198175851d8e31947f589d
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: mea_overseas_employment
+  name: MEA overseas employment and recruiting-agent guidance
+  source_url: https://www.mea.gov.in/overseas-employment.htm
+  publisher: Ministry of External Affairs, Government of India
+  source_type: government_guidance
+  geographic_scope: India_and_overseas
+  date_range: current_page
+  retrieval_method: https_download_html_and_linked_pdf
+  license: government_publication; verify reuse terms
+  permitted_use: overseas_recruitment_verification_guidance
+  evidence_tier: T1
+  expected_fields:
+  - guidance_text
+  - recruiting_agent_rules
+  - source_links
+  known_biases:
+  - guidance_not_case_specific_verdict
+  freshness_policy: recheck_7_days
+  status: downloaded
+  local_path: data/raw/mea_overseas_employment/
+  checksum: dbf08583c8a263e00c533ee177ae89ca0c51c6dd53fea4214d867b763cc51772
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: ftc_job_scams
+  name: FTC job scams consumer guidance
+  source_url: https://consumer.ftc.gov/articles/job-scams
+  publisher: U.S. Federal Trade Commission
+  source_type: government_guidance
+  geographic_scope: United States; patterns broadly applicable
+  date_range: current_page
+  retrieval_method: https_download_html
+  license: U.S. government public information
+  permitted_use: scam_pattern_evidence_and_user_guidance
+  evidence_tier: T1
+  expected_fields:
+  - guidance_text
+  - scam_pattern_tags
+  known_biases:
+  - US_context
+  - guidance_not_case_specific_verdict
+  freshness_policy: recheck_30_days
+  status: source_unavailable_403
+  local_path: data/raw/ftc_job_scams/
+  checksum: 5305f3585370392e7db08d782da7c258483fb7eb7aed1aaac885e470d58c5e9e
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: amazon_recruitment_fraud_policy
+  name: Amazon India recruitment fraud policy
+  source_url: https://amazon.jobs/content/en/how-we-hire/fraud-alert-india
+  publisher: Amazon Jobs
+  source_type: employer_policy
+  geographic_scope: India
+  date_range: current_page
+  retrieval_method: https_download_html
+  license: official employer page; quote with attribution
+  permitted_use: current_employer_policy_evidence
+  evidence_tier: T1
+  expected_fields:
+  - policy_claims
+  - official_domains
+  - no_fee_statement
+  - source_url
+  known_biases:
+  - employer_specific
+  - policy_can_change
+  freshness_policy: recheck_7_days
+  status: downloaded
+  local_path: data/raw/amazon_recruitment_fraud_policy/
+  checksum: 5d2e64eaa49318bd87ee57112518d58cc585900b7d6f2ca8fee10dbe52f3d216
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: amazon_jobs
+  name: Amazon Jobs canonical vacancy site
+  source_url: https://www.amazon.jobs/
+  publisher: Amazon Jobs
+  source_type: official_vacancy
+  geographic_scope: global
+  date_range: current_page
+  retrieval_method: https_download_html
+  license: official employer page
+  permitted_use: vacancy_verification_only
+  evidence_tier: T1
+  expected_fields:
+  - job_title
+  - location
+  - requisition_id
+  - canonical_url
+  known_biases:
+  - public_vacancies_only
+  - private_or_closed_roles_absent
+  freshness_policy: recheck_24_hours
+  status: downloaded
+  local_path: data/raw/amazon_jobs/
+  checksum: f98835ce24db408702534151cdcb91ef099d712dd636e0dc088f25da462bb762
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: yc_jobs
+  name: Y Combinator jobs and company directory
+  source_url: https://www.ycombinator.com/jobs/
+  publisher: Y Combinator
+  source_type: canonical_startup_directory_and_vacancy
+  geographic_scope: global
+  date_range: current_page
+  retrieval_method: https_download_html
+  license: website terms; use for verification links and metadata
+  permitted_use: startup_affiliation_and_vacancy_verification
+  evidence_tier: T1
+  expected_fields:
+  - company_name
+  - company_url
+  - role_title
+  - job_url
+  known_biases:
+  - YC_companies_only
+  - public_vacancies_only
+  freshness_policy: recheck_24_hours
+  status: downloaded
+  local_path: data/raw/yc_jobs/
+  checksum: f69850276ccd15f0704f9a4800dea09306f59a828a4060f56ad96cb3da80756a
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: greenhouse_job_board_api
+  name: Greenhouse public Job Board API documentation
+  source_url: https://developers.greenhouse.io/job-board.html
+  publisher: Greenhouse
+  source_type: ats_documentation
+  geographic_scope: global
+  date_range: current_documentation
+  retrieval_method: https_download_html
+  license: documentation terms
+  permitted_use: canonical_ats_adapter_implementation
+  evidence_tier: T1
+  expected_fields:
+  - board_token
+  - jobs_endpoint
+  - job_id
+  - updated_at
+  known_biases:
+  - only_public_greenhouse_boards
+  freshness_policy: recheck_30_days
+  status: downloaded
+  local_path: data/raw/greenhouse_job_board_api/
+  checksum: 666dca356fa154a91e382fe55c007d004c67abb79fb6f7f97055e2d1668c5794
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: lever_postings_api
+  name: Lever public Postings API documentation
+  source_url: https://github.com/lever/postings-api
+  publisher: Lever
+  source_type: ats_documentation
+  geographic_scope: global
+  date_range: current_documentation
+  retrieval_method: https_download_html
+  license: repository license; verify at retrieval
+  permitted_use: canonical_ats_adapter_implementation
+  evidence_tier: T1
+  expected_fields:
+  - site
+  - postings_endpoint
+  - posting_id
+  - hosted_url
+  known_biases:
+  - only_public_lever_boards
+  freshness_policy: recheck_30_days
+  status: downloaded
+  local_path: data/raw/lever_postings_api/
+  checksum: 6f94b9d9a5d4efe8d44c770e0a2559cc4ad78897f12e268cbfa2a84344deba08
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: cafc_fraud_reports
+  name: Canadian Anti-Fraud Centre Fraud Reporting System dataset
+  source_url: https://open.canada.ca/data/en/dataset/6a09c998-cddb-4a22-beff-4dca67ab892f
+  publisher: Canadian Anti-Fraud Centre / RCMP
+  source_type: government_fraud_statistics
+  geographic_scope: Canada; international reports may be included in aggregates
+  date_range: 2021-01-01 to 2025-09-30
+  retrieval_method: open_government_csv
+  license: Open Government Licence - Canada
+  permitted_use: aggregate_pattern_discovery_and_context; no individual verdicts
+  evidence_tier: T1
+  expected_fields:
+  - date
+  - fraud_type
+  - reports
+  - victims
+  - losses
+  - geography
+  known_biases:
+  - reported_cases_only
+  - aggregate_counts
+  - Canada_context
+  - underreporting
+  freshness_policy: recheck_30_days
+  status: downloaded
+  local_path: data/raw/cafc_fraud_reports/
+  checksum: c46f61591da71eadd91c3e47ed3e3cb8102880a8861c027ab7a35182c8bd719c
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''
+- source_id: nasc_job_scam_fusion_report_2025
+  name: Australian National Anti-Scam Centre Job Scam Fusion Cell report
+  source_url: https://www.nasc.gov.au/system/files/nasc-job-scam-fusion-cell-final-report-2025.pdf
+  publisher: National Anti-Scam Centre, Australian Competition and Consumer Commission
+  source_type: government_report
+  geographic_scope: Australia; international pattern relevance
+  date_range: '2025'
+  retrieval_method: https_download_pdf
+  license: Australian government publication; verify reuse terms
+  permitted_use: scam_pattern_evidence_and_research_context
+  evidence_tier: T1
+  expected_fields:
+  - case_studies
+  - scam_patterns
+  - prevention_guidance
+  known_biases:
+  - Australia_context
+  - report_not_case_specific_verdict
+  freshness_policy: recheck_30_days
+  status: downloaded
+  local_path: data/raw/nasc_job_scam_fusion_report_2025/
+  checksum: c48ea5689298432f837d8553f3464c1aacabdab7855ffb828e9786844411e581
+  downloaded_at: '2026-09-17'
+  duplicate_provenance_notes: ''

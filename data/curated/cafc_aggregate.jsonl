@@ -1,0 +1,39 @@
+{"source_id": "cafc_fraud_reports", "category": "Bank Investigator", "reports": 15134, "victims": 5688, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Charity / Donation", "reports": 471, "victims": 170, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Collection Agency", "reports": 1503, "victims": 227, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Counterfeit Merchandise", "reports": 13497, "victims": 13288, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Credit Card", "reports": 63, "victims": 56, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Directory", "reports": 50, "victims": 11, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Emergency (Jail, Accident, Hospital, Help)", "reports": 7979, "victims": 3336, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Extortion", "reports": 32779, "victims": 8416, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "False Billing", "reports": 2172, "victims": 726, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Foreign Money Offer", "reports": 1691, "victims": 272, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Fraudulent Cheque", "reports": 4, "victims": 1, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "GRANT", "reports": 1793, "victims": 1004, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Health", "reports": 78, "victims": 24, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Identity Fraud", "reports": 80073, "victims": 79231, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Incomplete", "reports": 719, "victims": 98, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Investments", "reports": 20394, "victims": 18610, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Job", "reports": 14195, "victims": 9802, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Loan", "reports": 1953, "victims": 1559, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Merchandise", "reports": 18420, "victims": 15144, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Modem-Hijacking", "reports": 2, "victims": 1, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Office Supplies", "reports": 10, "victims": 1, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Other", "reports": 10675, "victims": 2614, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Personal Info", "reports": 28626, "victims": 20713, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Phishing", "reports": 30138, "victims": 6962, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Prize", "reports": 4735, "victims": 1445, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Psychics", "reports": 170, "victims": 121, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Pyramid", "reports": 299, "victims": 235, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Recovery Pitch", "reports": 2060, "victims": 1230, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Romance", "reports": 6779, "victims": 5362, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Service", "reports": 26962, "victims": 19159, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Spear Phishing", "reports": 6314, "victims": 3413, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Spoofing", "reports": 206, "victims": 39, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Survey", "reports": 113, "victims": 19, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Telecom Fraud", "reports": 93, "victims": 46, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Timeshare", "reports": 221, "victims": 160, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Unauthorized Charge", "reports": 99, "victims": 91, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Unknown", "reports": 9618, "victims": 1738, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Vacation", "reports": 172, "victims": 122, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}
+{"source_id": "cafc_fraud_reports", "category": "Vendor Fraud", "reports": 10101, "victims": 6277, "label": "unverified", "evidence_tier": "T1", "note": "aggregate context only; no individual verdict"}

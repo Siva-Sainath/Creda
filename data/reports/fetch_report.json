@@ -1,0 +1,304 @@
+{
+  "retrieval_date": "2026-09-17",
+  "downloaded": [
+    {
+      "source_id": "ftc_job_scams",
+      "path": "data/raw/ftc_job_scams/2026-09-17/index.html",
+      "checksum": "5305f3585370392e7db08d782da7c258483fb7eb7aed1aaac885e470d58c5e9e",
+      "bytes": 496476
+    },
+    {
+      "source_id": "google_recruitment_fraud_policy",
+      "path": "data/raw/google_recruitment_fraud_policy/2026-09-17/index.html",
+      "checksum": "7d1f2ef032b2a7ba64ef49bc5bf5cee20f254bd5d93d6189961d8a9fecaaa205",
+      "bytes": 815087
+    },
+    {
+      "source_id": "ic3_annual_report_2024",
+      "path": "data/raw/ic3_annual_report_2024/2026-09-17/report.pdf",
+      "checksum": "ba494b0a1bd991c722cf65619eb518329175b898fb508e8c84fc7dd12e07cac0",
+      "bytes": 3049659
+    },
+    {
+      "source_id": "ncsc_phishing_guidance",
+      "path": "data/raw/ncsc_phishing_guidance/2026-09-17/index.html",
+      "checksum": "b1fc479da41b2b40480c496823977f0f56f1975227b5e56d3fc546d8ee938bfe",
+      "bytes": 134496
+    },
+    {
+      "source_id": "emigrate_portal",
+      "path": "data/raw/emigrate_portal/2026-09-17/index.html",
+      "checksum": "11b0d8225e72d68252ff3477b298757f6eeebf261b23bcc8e880f349cff69819",
+      "bytes": 1510
+    },
+    {
+      "source_id": "i4c_cybercrime_portal",
+      "path": "data/raw/i4c_cybercrime_portal/2026-09-17/index.html",
+      "checksum": "629fc2265824c6d641e1540fb3f316a8088b3a71ae783cca1c6ced8a2295ad19",
+      "bytes": 80575
+    },
+    {
+      "source_id": "greenhouse_stripe_jobs",
+      "path": "data/raw/greenhouse_stripe_jobs/2026-09-17/jobs.json",
+      "checksum": "83587d3171b9cf48f911232fc70830ff407c2122f1cc14e3f59e5f68c5a9d109",
+      "bytes": 407349
+    },
+    {
+      "source_id": "greenhouse_airbnb_jobs",
+      "path": "data/raw/greenhouse_airbnb_jobs/2026-09-17/jobs.json",
+      "checksum": "b7a7f3c705fff87ce327f303c437cd7fb713c168e218380b98f359f48dcd875e",
+      "bytes": 125548
+    },
+    {
+      "source_id": "greenhouse_discord_jobs",
+      "path": "data/raw/greenhouse_discord_jobs/2026-09-17/jobs.json",
+      "checksum": "3e6e361f82d7de2d0bcbd55f59c31dba1242f250bed79bd2dc0bb77a01260027",
+      "bytes": 38230
+    },
+    {
+      "source_id": "ashby_notion_jobs",
+      "path": "data/raw/ashby_notion_jobs/2026-09-17/jobs.json",
+      "checksum": "73c5c582184f7ea1144a96ed4ea498d0221892c1ae50995a8c7b5d0fb31d593f",
+      "bytes": 2260883
+    },
+    {
+      "source_id": "amazon_recruitment_fraud_policy",
+      "path": "data/raw/amazon_recruitment_fraud_policy/2026-09-17/index.html",
+      "checksum": "605d915ac35cb4665834a5de6051148b6674d859beb2eaab37df2aec82942e49",
+      "bytes": 176784
+    },
+    {
+      "source_id": "amazon_jobs",
+      "path": "data/raw/amazon_jobs/2026-09-17/index.html",
+      "checksum": "f98835ce24db408702534151cdcb91ef099d712dd636e0dc088f25da462bb762",
+      "bytes": 29746
+    },
+    {
+      "source_id": "yc_jobs",
+      "path": "data/raw/yc_jobs/2026-09-17/index.html",
+      "checksum": "f69850276ccd15f0704f9a4800dea09306f59a828a4060f56ad96cb3da80756a",
+      "bytes": 370861
+    },
+    {
+      "source_id": "mea_overseas_employment",
+      "path": "data/raw/mea_overseas_employment/2026-09-17/index.html",
+      "checksum": "dbf08583c8a263e00c533ee177ae89ca0c51c6dd53fea4214d867b763cc51772",
+      "bytes": 42003
+    },
+    {
+      "source_id": "greenhouse_job_board_api",
+      "path": "data/raw/greenhouse_job_board_api/2026-09-17/index.html",
+      "checksum": "666dca356fa154a91e382fe55c007d004c67abb79fb6f7f97055e2d1668c5794",
+      "bytes": 142149
+    },
+    {
+      "source_id": "lever_postings_api",
+      "path": "data/raw/lever_postings_api/2026-09-17/index.html",
+      "checksum": "6f94b9d9a5d4efe8d44c770e0a2559cc4ad78897f12e268cbfa2a84344deba08",
+      "bytes": 367029
+    },
+    {
+      "source_id": "i4c_captcha_advisory_2025",
+      "path": "data/raw/i4c_captcha_advisory_2025/2026-09-17/advisory.pdf",
+      "checksum": "ddc3af554e0bf09cdf361a55f4b530cd0dcb820703198175851d8e31947f589d",
+      "bytes": 454840
+    },
+    {
+      "source_id": "i4c_fake_job_sms_advisory",
+      "path": "data/raw/i4c_fake_job_sms_advisory/2026-09-17/advisory.pdf",
+      "checksum": "c09c42351be2a82a4c84561003093c316ebc3eb78a4c872ce57ee90eb7c550a5",
+      "bytes": 414945
+    },
+    {
+      "source_id": "i4c_handbook_2025",
+      "path": "data/raw/i4c_handbook_2025/2026-09-17/handbook.pdf",
+      "checksum": "16028474ce956b43760956c0d49d20fe018be7960d8cc23dc0a9cc02ab3af95f",
+      "bytes": 2729036
+    },
+    {
+      "source_id": "cyberdost_job_fraud_tips",
+      "path": "data/raw/cyberdost_job_fraud_tips/2026-09-17/tips.pdf",
+      "checksum": "d1c279a0a39c2acc9fa49cf2339e69fdf7683efa4e496796896bce9a7af596ee",
+      "bytes": 3745919
+    },
+    {
+      "source_id": "mea_yangon_overseas_job_scam_2024",
+      "path": "data/raw/mea_yangon_overseas_job_scam_2024/2026-09-17/advisory.pdf",
+      "checksum": "ad164e9485a1a82d5f6c24692fd2d49f6b243183f99e6e875c8ce7e80fe80fcc",
+      "bytes": 3051748
+    },
+    {
+      "source_id": "ca_ag_job_scam_alert_2025",
+      "path": "data/raw/ca_ag_job_scam_alert_2025/2026-09-17/index.html",
+      "checksum": "25be4814129cd657d83c4a6f0c6372995006f4e6f97e2db59d00fa0a875bb595",
+      "bytes": 51350
+    },
+    {
+      "source_id": "kpmg_recruitment_fraud_policy",
+      "path": "data/raw/kpmg_recruitment_fraud_policy/2026-09-17/index.html",
+      "checksum": "0a42e5848adac582e5189cd60aa87295ef2d38eee9d9312d4ba701ac15390f8a",
+      "bytes": 206452
+    },
+    {
+      "source_id": "amex_recruitment_fraud_policy",
+      "path": "data/raw/amex_recruitment_fraud_policy/2026-09-17/index.html",
+      "checksum": "3ba41e34606f8f723ebae2a00e53448c1389766a957951a81fe0b5eee6c56305",
+      "bytes": 302755
+    },
+    {
+      "source_id": "valero_recruitment_scams_2025",
+      "path": "data/raw/valero_recruitment_scams_2025/2026-09-17/policy.pdf",
+      "checksum": "a021c0c50e0431db343dd5af092c74314adc46235ef32669824c19d00cd9ac3f",
+      "bytes": 60430
+    },
+    {
+      "source_id": "greenhouse_shopify_jobs",
+      "path": "data/raw/greenhouse_shopify_jobs/2026-09-17/jobs.json",
+      "checksum": "1f81a8c3fbdfcbf8b4de8de86aae69635b972d64c5a270756676114e3348a257",
+      "bytes": 251802
+    },
+    {
+      "source_id": "greenhouse_figma_jobs",
+      "path": "data/raw/greenhouse_figma_jobs/2026-09-17/jobs.json",
+      "checksum": "a5b6dbd896a980009396d77c6a1748bd5742870dcd09786b1718c84ed46fca5c",
+      "bytes": 97453
+    },
+    {
+      "source_id": "greenhouse_databricks_jobs",
+      "path": "data/raw/greenhouse_databricks_jobs/2026-09-17/jobs.json",
+      "checksum": "f9ac681c150d28f0370509ed522b4da9a59b75c85fd6a8ea53a7f0fff5e4485a",
+      "bytes": 753710
+    },
+    {
+      "source_id": "wipro_recruitment_fraud_policy",
+      "path": "data/raw/wipro_recruitment_fraud_policy/2026-09-17/index.html",
+      "checksum": "5f170b45d29754cb3fb4b67c02050dfe03ee8e218ec404d869b3d4609df5f1b0",
+      "bytes": 203796
+    },
+    {
+      "source_id": "lever_spotify_jobs",
+      "path": "data/raw/lever_spotify_jobs/2026-09-17/jobs.json",
+      "checksum": "7c58c6fde8f8dc06a77eefd94906881b7a641115240d952d7baf47123ff74bbc",
+      "bytes": 656718
+    },
+    {
+      "source_id": "smartrecruiters_api_docs",
+      "path": "data/raw/smartrecruiters_api_docs/2026-09-17/index.html",
+      "checksum": "faa99bcca8ab590b9e974a4fac5bc80d34fd234bfd9f45bbfb3a46f274c036df",
+      "bytes": 228115
+    },
+    {
+      "source_id": "linkedin_job_scam_guidance",
+      "path": "data/raw/linkedin_job_scam_guidance/2026-09-17/index.html",
+      "checksum": "0e19872d7f5b6ec1a90438460c7e13f6974ba8a78e41bbb81b657711bf2178b5",
+      "bytes": 28385
+    }
+  ],
+  "failed": [
+    {
+      "source_id": "nasc_job_scam_fusion_report_2025",
+      "url": "https://www.nasc.gov.au/system/files/nasc-job-scam-fusion-cell-final-report-2025.pdf",
+      "http_status": 403,
+      "detail": "https://www.nasc.gov.au/system/files/nasc-job-scam-fusion-cell-final-report-2025.pdf",
+      "bytes": 473
+    },
+    {
+      "source_id": "scamwatch_au_job_scams",
+      "url": "https://www.scamwatch.gov.au/types-of-scams/jobs-and-employment-scams",
+      "http_status": 403,
+      "detail": "https://www.scamwatch.gov.au/types-of-scams/jobs-and-employment-scams",
+      "bytes": 442
+    },
+    {
+      "source_id": "netapp_recruitment_fraud_policy",
+      "url": "https://www.netapp.com/responsibility/trust-center/security/recruitment-scam-warning-fraud-alert/",
+      "http_status": 403,
+      "detail": "https://www.netapp.com/responsibility/trust-center/security/recruitment-scam-warning-fraud-alert/",
+      "bytes": 478
+    }
+  ],
+  "probes": [
+    {
+      "source_id": "action_fraud_uk_jobs",
+      "url": "https://www.actionfraud.police.uk/a-z-of-fraud/fake-jobs-and-work-from-home-scams",
+      "http_status": 403,
+      "available": false,
+      "final_url": "https://www.actionfraud.police.uk/a-z-of-fraud/fake-jobs-and-work-from-home-scams"
+    },
+    {
+      "source_id": "infosys_recruitment_fraud_policy",
+      "url": "https://www.infosys.com/careers/recruitment-fraud-alert.html",
+      "http_status": 403,
+      "available": false,
+      "final_url": "https://www.infosys.com/careers/recruitment-fraud-alert.html"
+    },
+    {
+      "source_id": "tcs_recruitment_fraud_policy",
+      "url": "https://www.tcs.com/careers/india/recruitment-fraud-alert",
+      "http_status": 403,
+      "available": false,
+      "final_url": "https://www.tcs.com/careers/india/recruitment-fraud-alert"
+    },
+    {
+      "source_id": "microsoft_recruitment_fraud_alert",
+      "url": "https://www.microsoft.com/en-us/trust-center/security/recruitment-fraud-alert",
+      "http_status": 404,
+      "available": false,
+      "final_url": "https://www.microsoft.com/en-us/trust-center/security/recruitment-fraud-alert"
+    },
+    {
+      "source_id": "wipro_recruitment_fraud_policy",
+      "url": "https://careers.wipro.com/content/Recruitment-Fraud-Alert/?locale=en_US",
+      "http_status": 200,
+      "available": true,
+      "final_url": "https://careers.wipro.com/content/Recruitment-Fraud-Alert/?locale=en_US"
+    },
+    {
+      "source_id": "ftc_job_scams_archive",
+      "url": "https://www.ftc.gov/news-events/data-visualizations/data-spotlight/2025/01/new-data-show-consumers-lost-12-billion-scams-2024",
+      "http_status": 404,
+      "available": false,
+      "final_url": "https://www.ftc.gov/news-events/data-visualizations/data-spotlight/2025/01/new-data-show-consumers-lost-12-billion-scams-2024"
+    }
+  ],
+  "bulk": [
+    {
+      "source_id": "cafc_fraud_reports",
+      "status": "skipped_existing",
+      "path": "data/raw/cafc_fraud_reports/2026-09-17/cafc.csv",
+      "checksum": "c46f61591da71eadd91c3e47ed3e3cb8102880a8861c027ab7a35182c8bd719c"
+    },
+    {
+      "source_id": "difraud_job_scams",
+      "status": "skipped_existing"
+    },
+    {
+      "source_id": "emscad",
+      "status": "skipped_existing",
+      "checksum": "25e52f6d34939510f3f2ca5afc55ccfe7259ccc01283319bd484c466ea88baaf"
+    },
+    {
+      "source_id": "kaggle_fake_vs_real_synthetic",
+      "status": "skipped_existing"
+    },
+    {
+      "source_id": "scambench_employment",
+      "splits": [
+        {
+          "split": "employment_scam",
+          "status": "failed",
+          "http_status": 401,
+          "detail": "https://huggingface.co/datasets/Shouninger/ScamBench/resolve/main/Scam/Employment.csv"
+        },
+        {
+          "split": "employment_nonscam",
+          "status": "failed",
+          "http_status": 401,
+          "detail": "https://huggingface.co/datasets/Shouninger/ScamBench/resolve/main/Non-scam/Employment.csv"
+        }
+      ]
+    }
+  ],
+  "checksum_manifest": "data/raw/2026-09-17.sha256",
+  "checksum_count": 76
+}

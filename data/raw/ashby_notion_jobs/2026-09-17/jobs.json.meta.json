@@ -1,0 +1,9 @@
+{
+  "source_id": "ashby_notion_jobs",
+  "source_url": "https://api.ashbyhq.com/posting-api/job-board/notion",
+  "canonical_url": "https://api.ashbyhq.com/posting-api/job-board/notion",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "73c5c582184f7ea1144a96ed4ea498d0221892c1ae50995a8c7b5d0fb31d593f",
+  "bytes": 2260883,
+  "http_status": 200
+}

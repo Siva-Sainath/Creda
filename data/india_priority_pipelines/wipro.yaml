@@ -1,0 +1,23 @@
+employer_key: wipro
+display_name: Wipro
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [wipro.com, careers.wipro.com]
+india_careers_url: https://careers.wipro.com/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: all_hires
+    label: Standard Wipro hiring
+    stages: [apply_careers_site, screening, interview, offer, onboarding]
+    allowed_channels: [email @wipro.com, careers.wipro.com]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://careers.wipro.com/content/Recruitment-Fraud-Alert/
+vacancy_source: custom_portal
+sources:
+  - url: https://careers.wipro.com/content/Recruitment-Fraud-Alert/
+    tier: T1

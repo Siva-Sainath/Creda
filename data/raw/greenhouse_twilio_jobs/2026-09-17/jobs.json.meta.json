@@ -1,0 +1,8 @@
+{
+  "source_id": "greenhouse_twilio_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/twilio/jobs",
+  "downloaded_at": "2026-09-17",
+  "method": "greenhouse_api",
+  "checksum_sha256": "75e8aea2c37517d7d1687696a64761dfb799327841cd399710e4fd16f4754d7f",
+  "bytes": 98383
+}

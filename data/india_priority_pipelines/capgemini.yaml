@@ -1,0 +1,23 @@
+employer_key: capgemini
+display_name: Capgemini
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [capgemini.com]
+india_careers_url: https://www.capgemini.com/in-en/careers/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: all_hires
+    label: Capgemini hiring (India)
+    stages: [apply_portal, screening, interview, offer, onboarding]
+    allowed_channels: [email @capgemini.com, capgemini.com/careers]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://www.capgemini.com/in-en/careers/recruitment-fraud-alert/
+vacancy_source: custom_portal
+sources:
+  - url: https://www.capgemini.com/in-en/careers/recruitment-fraud-alert/
+    tier: T1

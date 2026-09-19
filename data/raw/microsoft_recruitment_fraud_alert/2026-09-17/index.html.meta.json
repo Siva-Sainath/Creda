@@ -1,0 +1,8 @@
+{
+  "source_id": "microsoft_recruitment_fraud_alert",
+  "source_url": "https://careers.microsoft.com/",
+  "downloaded_at": "2026-09-17",
+  "method": "manual_verified_snapshot",
+  "checksum_sha256": "2988e80093cc650bce64f868e364144cfb0bcca79481b2cbb8ded9212d152fbe",
+  "bytes": 1156
+}

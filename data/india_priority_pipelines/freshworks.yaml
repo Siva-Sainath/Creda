@@ -1,0 +1,23 @@
+employer_key: freshworks
+display_name: Freshworks
+scam_target_priority: high
+regions: [india, global]
+official_domains: [freshworks.com]
+india_careers_url: https://www.freshworks.com/company/careers/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: startup_hire
+    label: Freshworks hiring
+    stages: [apply_careers_site, interview, offer, onboarding]
+    allowed_channels: [email @freshworks.com, freshworks.com/careers]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://www.freshworks.com/company/careers/
+vacancy_source: custom_portal
+sources:
+  - url: https://www.freshworks.com/company/careers/
+    tier: T1

@@ -1,0 +1,27 @@
+employer_key: flipkart
+display_name: Flipkart
+scam_target_priority: critical
+regions: [india]
+official_domains: [flipkartcareers.com, flipkart.com]
+india_careers_url: https://www.flipkartcareers.com/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview, sensitive_documents_early]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: internship
+    label: Internship (high scam volume in India)
+    stages: [apply_careers_site, interview, offer, onboarding]
+    allowed_channels: [email @flipkart.com, flipkartcareers.com]
+    forbidden_before_stages: [fee_before_interview, whatsapp_only_interview]
+  - track_id: full_time
+    label: Full-time hire
+    stages: [apply_careers_site, screening, interview, offer, onboarding]
+    allowed_channels: [email @flipkart.com]
+fraud_policy:
+  source_url: https://www.flipkartcareers.com/
+vacancy_source: custom_portal
+sources:
+  - url: https://www.flipkartcareers.com/
+    tier: T1

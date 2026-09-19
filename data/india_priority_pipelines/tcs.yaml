@@ -1,0 +1,33 @@
+employer_key: tcs
+display_name: Tata Consultancy Services
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [tcs.com, careers.tcs.com]
+india_careers_url: https://www.tcs.com/careers
+global_careers_url: https://www.tcs.com/careers
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview, sensitive_documents_early]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: campus_fresher
+    label: Campus / fresher hiring (India)
+    stages: [apply_on_portal, aptitude_test, interview, offer_verification, onboarding]
+    allowed_channels: [email @tcs.com, careers.tcs.com, official portal]
+    forbidden_before_stages: [fee_before_interview, whatsapp_only_interview]
+  - track_id: experienced
+    label: Experienced hire
+    stages: [apply_on_portal, screening, interview, offer_verification, onboarding]
+    allowed_channels: [email @tcs.com, careers.tcs.com]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://www.tcs.com/careers/india/recruitment-fraud-alert
+  offer_verification_url: https://www.tcs.com/careers/india/recruitment-fraud-alert
+  report_email: careers@tcs.com
+  report_phone: '1800-209-3111'
+vacancy_source: custom_portal
+sources:
+  - url: https://www.tcs.com/careers/india/recruitment-fraud-alert
+    tier: T1
+    note: Official TCS India recruitment fraud alert (Wayback snapshot)

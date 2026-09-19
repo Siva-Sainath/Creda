@@ -1,0 +1,8 @@
+{
+  "source_id": "greenhouse_mongodb_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/mongodb/jobs",
+  "downloaded_at": "2026-09-17",
+  "method": "greenhouse_api",
+  "checksum_sha256": "0facc109771ff733ca7d90999fa9b258b70d197057c3b0c5f837919fa85a88c1",
+  "bytes": 883628
+}

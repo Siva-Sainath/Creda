@@ -1,0 +1,62 @@
+[
+  {
+    "demo_id": "amazon-fee-gmail",
+    "title": "Amazon fee from Gmail mailbox",
+    "input": {
+      "text": "Congratulations! Amazon is hiring. Pay INR 3500 registration fee to hr.recruitment@gmail.com via UPI.",
+      "senderEmail": "hr.recruitment@gmail.com",
+      "employerHint": "Amazon",
+      "locale": "en-IN"
+    },
+    "expected_verdict": "high_risk",
+    "notes": "Free mailbox + fee contradicts Amazon no-fee policy"
+  },
+  {
+    "demo_id": "kpmg-fee-training",
+    "title": "KPMG training fee impersonation",
+    "input": {
+      "text": "KPMG India internship selected. Pay training fee INR 5000 to secure your slot. Interview on WhatsApp.",
+      "senderEmail": "kpmg.careers@outlook.com",
+      "employerHint": "KPMG",
+      "locale": "en-IN"
+    },
+    "expected_verdict": "high_risk",
+    "notes": "Fee + free mailbox + WhatsApp channel vs KPMG policy"
+  },
+  {
+    "demo_id": "stripe-legitimate-style",
+    "title": "Stripe-style remote role (no fee)",
+    "input": {
+      "text": "Stripe is hiring Software Engineer. Apply at https://stripe.com/jobs/listing/software-engineer. No fees required.",
+      "senderEmail": "",
+      "employerHint": "Stripe",
+      "locale": "en-US"
+    },
+    "expected_verdict": "no_conflict_found",
+    "notes": "No fee demand; official careers reference"
+  },
+  {
+    "demo_id": "tcs-fee-whatsapp",
+    "title": "TCS fee + WhatsApp interview scam",
+    "input": {
+      "text": "TCS selected you for campus hiring. Pay INR 5000 registration fee via UPI. Interview on WhatsApp only.",
+      "senderEmail": "tcs.hr@gmail.com",
+      "employerHint": "TCS",
+      "locale": "en-IN"
+    },
+    "expected_verdict": "high_risk",
+    "notes": "Fee + Gmail + WhatsApp vs TCS IPEP pipeline"
+  },
+  {
+    "demo_id": "flipkart-internship-fee",
+    "title": "Flipkart internship fee scam",
+    "input": {
+      "text": "Flipkart internship offer. Pay training fee INR 3000 to secure slot. Contact on Telegram.",
+      "senderEmail": "flipkart.intern@gmail.com",
+      "employerHint": "Flipkart",
+      "locale": "en-IN"
+    },
+    "expected_verdict": "high_risk",
+    "notes": "Common India internship impersonation pattern"
+  }
+]

@@ -1,0 +1,19 @@
+[
+  {"sourceId":"greenhouse_stripe_jobs","employerKey":"stripe","provider":"greenhouse","board":"stripe","priority":"critical"},
+  {"sourceId":"greenhouse_coinbase_jobs","employerKey":"coinbase","provider":"greenhouse","board":"coinbase","priority":"high"},
+  {"sourceId":"greenhouse_figma_jobs","employerKey":"figma","provider":"greenhouse","board":"figma","priority":"medium"},
+  {"sourceId":"greenhouse_databricks_jobs","employerKey":"databricks","provider":"greenhouse","board":"databricks","priority":"medium"},
+  {"sourceId":"greenhouse_discord_jobs","employerKey":"discord","provider":"greenhouse","board":"discord","priority":"medium"},
+  {"sourceId":"greenhouse_airbnb_jobs","employerKey":"airbnb","provider":"greenhouse","board":"airbnb","priority":"medium"},
+  {"sourceId":"greenhouse_anthropic_jobs","employerKey":"anthropic","provider":"greenhouse","board":"anthropic","priority":"high"},
+  {"sourceId":"greenhouse_datadog_jobs","employerKey":"datadog","provider":"greenhouse","board":"datadog","priority":"medium"},
+  {"sourceId":"greenhouse_mongodb_jobs","employerKey":"mongodb","provider":"greenhouse","board":"mongodb","priority":"medium"},
+  {"sourceId":"greenhouse_cloudflare_jobs","employerKey":"cloudflare","provider":"greenhouse","board":"cloudflare","priority":"medium"},
+  {"sourceId":"greenhouse_vercel_jobs","employerKey":"vercel","provider":"greenhouse","board":"vercel","priority":"medium"},
+  {"sourceId":"greenhouse_reddit_jobs","employerKey":"reddit","provider":"greenhouse","board":"reddit","priority":"medium"},
+  {"sourceId":"greenhouse_twilio_jobs","employerKey":"twilio","provider":"greenhouse","board":"twilio","priority":"medium"},
+  {"sourceId":"greenhouse_lyft_jobs","employerKey":"lyft","provider":"greenhouse","board":"lyft","priority":"medium"},
+  {"sourceId":"greenhouse_instacart_jobs","employerKey":"instacart","provider":"greenhouse","board":"instacart","priority":"medium"},
+  {"sourceId":"lever_spotify_jobs","employerKey":"spotify","provider":"lever","board":"spotify","priority":"medium"},
+  {"sourceId":"ashby_notion_jobs","employerKey":"notion","provider":"ashby","board":"notion","priority":"medium"}
+]

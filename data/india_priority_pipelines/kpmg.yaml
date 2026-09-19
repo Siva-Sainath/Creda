@@ -1,0 +1,28 @@
+employer_key: kpmg
+display_name: KPMG India
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [kpmg.com]
+india_careers_url: https://kpmg.com/in/en/careers.html
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview, sensitive_documents_early]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: internship
+    label: Internship / articleship (common scam target)
+    stages: [apply_portal, interview, offer, onboarding]
+    allowed_channels: [email @kpmg.com]
+    forbidden_before_stages: [fee_before_interview, whatsapp_only_interview]
+  - track_id: experienced
+    label: Experienced hire
+    stages: [apply_portal, interview, offer, onboarding]
+    allowed_channels: [email @kpmg.com]
+fraud_policy:
+  source_url: https://kpmg.com/in/en/media/press-releases/2024/12/important-recruitment-fraud-alert.html
+vacancy_source: custom_portal
+sources:
+  - url: https://kpmg.com/in/en/media/press-releases/2024/12/important-recruitment-fraud-alert.html
+    tier: T1
+    published: '2024-12'

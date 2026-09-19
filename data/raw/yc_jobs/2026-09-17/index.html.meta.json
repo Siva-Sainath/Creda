@@ -1,0 +1,9 @@
+{
+  "source_id": "yc_jobs",
+  "source_url": "https://www.ycombinator.com/jobs/",
+  "canonical_url": "https://www.ycombinator.com/jobs/",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "f69850276ccd15f0704f9a4800dea09306f59a828a4060f56ad96cb3da80756a",
+  "bytes": 370861,
+  "http_status": 200
+}

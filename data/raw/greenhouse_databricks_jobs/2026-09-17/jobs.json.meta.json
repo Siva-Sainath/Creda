@@ -1,0 +1,9 @@
+{
+  "source_id": "greenhouse_databricks_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/databricks/jobs",
+  "canonical_url": "https://boards-api.greenhouse.io/v1/boards/databricks/jobs",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "f9ac681c150d28f0370509ed522b4da9a59b75c85fd6a8ea53a7f0fff5e4485a",
+  "bytes": 753710,
+  "http_status": 200
+}

@@ -1,0 +1,27 @@
+employer_key: infosys
+display_name: Infosys
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [infosys.com]
+india_careers_url: https://www.infosys.com/careers.html
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: campus
+    label: Campus / off-campus (India)
+    stages: [apply_portal, assessment, interview, offer, onboarding]
+    allowed_channels: [email @infosys.com, careers portal]
+    forbidden_before_stages: [fee_before_interview]
+  - track_id: experienced
+    label: Lateral experienced
+    stages: [apply_portal, screening, interview, offer, onboarding]
+    allowed_channels: [email @infosys.com]
+fraud_policy:
+  source_url: https://www.infosys.com/careers/recruitment-fraud-alert.html
+vacancy_source: custom_portal
+sources:
+  - url: https://www.infosys.com/careers/recruitment-fraud-alert.html
+    tier: T1

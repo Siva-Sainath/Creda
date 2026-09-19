@@ -1,0 +1,8 @@
+{
+  "source_id": "greenhouse_reddit_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/reddit/jobs",
+  "downloaded_at": "2026-09-17",
+  "method": "greenhouse_api",
+  "checksum_sha256": "09d15d29a5674546c71545dc2ba157b3299136665660c982fa356085ce184608",
+  "bytes": 287125
+}

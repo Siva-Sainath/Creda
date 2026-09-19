@@ -1,0 +1,27 @@
+employer_key: hcl
+display_name: HCLTech
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [hcltech.com, careers.hcltech.com]
+india_careers_url: https://www.hcltech.com/careers
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: campus_fresher
+    label: Campus / fresher (India)
+    stages: [apply_portal, assessment, interview, offer, onboarding]
+    allowed_channels: [email @hcl.com, email @hcltech.com, careers.hcltech.com]
+    forbidden_before_stages: [fee_before_interview]
+  - track_id: experienced
+    label: Lateral hire
+    stages: [apply_portal, screening, interview, offer, onboarding]
+    allowed_channels: [email @hcl.com, email @hcltech.com]
+fraud_policy:
+  source_url: https://www.hcltech.com/careers/recruitment-fraud-alert
+vacancy_source: custom_portal
+sources:
+  - url: https://www.hcltech.com/careers/recruitment-fraud-alert
+    tier: T1

@@ -1,0 +1,8 @@
+{
+  "source_id": "greenhouse_anthropic_jobs",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/anthropic/jobs",
+  "downloaded_at": "2026-09-17",
+  "method": "greenhouse_api",
+  "checksum_sha256": "834f34c45d01cd8664c24161eb76453e7c899cca666a273ce7ca0e0740d0bd1a",
+  "bytes": 433708
+}

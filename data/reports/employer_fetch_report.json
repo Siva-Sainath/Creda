@@ -1,0 +1,181 @@
+{
+  "retrieval_date": "2026-09-17",
+  "downloaded": [
+    {
+      "source_id": "amazon_recruitment_fraud_policy",
+      "method": "direct",
+      "bytes": 176784
+    },
+    {
+      "source_id": "google_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 1426
+    },
+    {
+      "source_id": "microsoft_recruitment_fraud_alert",
+      "method": "manual",
+      "bytes": 1156
+    },
+    {
+      "source_id": "oracle_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 904
+    },
+    {
+      "source_id": "ibm_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 949
+    },
+    {
+      "source_id": "tcs_recruitment_fraud_policy",
+      "method": "wayback",
+      "bytes": 370235
+    },
+    {
+      "source_id": "infosys_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 1174
+    },
+    {
+      "source_id": "wipro_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 1229
+    },
+    {
+      "source_id": "hcl_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 944
+    },
+    {
+      "source_id": "cognizant_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 951
+    },
+    {
+      "source_id": "tech_mahindra_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 924
+    },
+    {
+      "source_id": "accenture_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 970
+    },
+    {
+      "source_id": "capgemini_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 889
+    },
+    {
+      "source_id": "kpmg_recruitment_fraud_policy",
+      "method": "direct",
+      "bytes": 206452
+    },
+    {
+      "source_id": "amex_recruitment_fraud_policy",
+      "method": "direct",
+      "bytes": 302755
+    },
+    {
+      "source_id": "valero_recruitment_scams_2025",
+      "method": "direct",
+      "bytes": 60430
+    },
+    {
+      "source_id": "netapp_recruitment_fraud_policy",
+      "method": "wayback",
+      "bytes": 151122
+    },
+    {
+      "source_id": "flipkart_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 943
+    },
+    {
+      "source_id": "razorpay_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 745
+    },
+    {
+      "source_id": "freshworks_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 758
+    },
+    {
+      "source_id": "zoho_recruitment_fraud_policy",
+      "method": "manual",
+      "bytes": 769
+    }
+  ],
+  "failed": [],
+  "skipped": [
+    {
+      "source_id": "greenhouse_stripe_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_coinbase_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_figma_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_databricks_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_discord_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_airbnb_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_anthropic_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_datadog_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_mongodb_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_cloudflare_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_vercel_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_reddit_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_twilio_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_lyft_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "greenhouse_instacart_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "lever_spotify_jobs",
+      "reason": "exists"
+    },
+    {
+      "source_id": "ashby_notion_jobs",
+      "reason": "exists"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+employer_key: tech_mahindra
+display_name: Tech Mahindra
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [techmahindra.com, careers.techmahindra.com]
+india_careers_url: https://careers.techmahindra.com/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: all_hires
+    label: Tech Mahindra hiring
+    stages: [apply_portal, assessment, interview, offer, onboarding]
+    allowed_channels: [email @techmahindra.com, careers.techmahindra.com]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://www.techmahindra.com/en-in/careers/recruitment-fraud-alert/
+vacancy_source: custom_portal
+sources:
+  - url: https://www.techmahindra.com/en-in/careers/recruitment-fraud-alert/
+    tier: T1

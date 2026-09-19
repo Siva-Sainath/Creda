@@ -1,0 +1,23 @@
+employer_key: google
+display_name: Google
+scam_target_priority: critical
+regions: [india, global]
+official_domains: [google.com, careers.google.com]
+india_careers_url: https://careers.google.com/
+no_fee_statement: true
+forbidden_channels: [whatsapp, telegram]
+forbidden_requests: [fee_or_deposit, im_only_interview, sensitive_documents_early]
+pipeline_version: ipep-1.0
+last_updated: '2026-09-17'
+tracks:
+  - track_id: standard
+    label: Google hiring (incl. India)
+    stages: [apply_careers_site, recruiter_screen, interviews, offer, onboarding]
+    allowed_channels: [email @google.com, careers.google.com]
+    forbidden_before_stages: [fee_before_interview]
+fraud_policy:
+  source_url: https://careers.google.com/how-we-hire/recruitment-fraud/
+vacancy_source: custom_portal
+sources:
+  - url: https://careers.google.com/how-we-hire/recruitment-fraud/
+    tier: T1

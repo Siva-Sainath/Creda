@@ -1,0 +1,9 @@
+{
+  "source_id": "amazon_jobs",
+  "source_url": "https://www.amazon.jobs/",
+  "canonical_url": "https://www.amazon.jobs/en/",
+  "downloaded_at": "2026-09-17",
+  "checksum_sha256": "f98835ce24db408702534151cdcb91ef099d712dd636e0dc088f25da462bb762",
+  "bytes": 29746,
+  "http_status": 200
+}

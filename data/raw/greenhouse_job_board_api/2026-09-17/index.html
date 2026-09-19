@@ -1,0 +1,2186 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="manifest" href="/images/favicons/manifest.json">
+
+<link rel="icon" href="images/favicons/favicon.ico" sizes="32x32">
+<link rel="icon" href="images/favicons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="images/favicons/apple-touch-icon.png">
+
+<meta name="theme-color" content="#047957"><!-- Birch Green 700 -->
+
+    <title>Job Board API | Greenhouse</title>
+
+    <style media="screen">
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #f8f8f2;
+  background-color: #272822;
+}
+.highlight .err {
+  color: #272822;
+  background-color: #f92672;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #f4bf75;
+}
+.highlight .nt {
+  color: #f4bf75;
+}
+.highlight .o, .highlight .ow {
+  color: #f8f8f2;
+}
+.highlight .p, .highlight .pi {
+  color: #f8f8f2;
+}
+.highlight .gi {
+  color: #a6e22e;
+}
+.highlight .gd {
+  color: #f92672;
+}
+.highlight .gh {
+  color: #66d9ef;
+  background-color: #272822;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #ae81ff;
+}
+.highlight .kc {
+  color: #fd971f;
+}
+.highlight .kt {
+  color: #fd971f;
+}
+.highlight .kd {
+  color: #fd971f;
+}
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #a6e22e;
+}
+.highlight .sa {
+  color: #ae81ff;
+}
+.highlight .sr {
+  color: #a1efe4;
+}
+.highlight .si {
+  color: #cc6633;
+}
+.highlight .se {
+  color: #cc6633;
+}
+.highlight .nn {
+  color: #f4bf75;
+}
+.highlight .nc {
+  color: #f4bf75;
+}
+.highlight .no {
+  color: #f4bf75;
+}
+.highlight .na {
+  color: #66d9ef;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #a6e22e;
+}
+.highlight .ss {
+  color: #a6e22e;
+}
+    </style>
+    <style media="print">
+      * {
+        -webkit-transition:none!important;
+        transition:none!important;
+      }
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #586e75;
+}
+.highlight .err {
+  color: #002b36;
+  background-color: #dc322f;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #657b83;
+}
+.highlight .cp {
+  color: #b58900;
+}
+.highlight .nt {
+  color: #b58900;
+}
+.highlight .o, .highlight .ow {
+  color: #93a1a1;
+}
+.highlight .p, .highlight .pi {
+  color: #93a1a1;
+}
+.highlight .gi {
+  color: #859900;
+}
+.highlight .gd {
+  color: #dc322f;
+}
+.highlight .gh {
+  color: #268bd2;
+  background-color: #002b36;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #6c71c4;
+}
+.highlight .kc {
+  color: #cb4b16;
+}
+.highlight .kt {
+  color: #cb4b16;
+}
+.highlight .kd {
+  color: #cb4b16;
+}
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #859900;
+}
+.highlight .sa {
+  color: #6c71c4;
+}
+.highlight .sr {
+  color: #2aa198;
+}
+.highlight .si {
+  color: #d33682;
+}
+.highlight .se {
+  color: #d33682;
+}
+.highlight .nn {
+  color: #b58900;
+}
+.highlight .nc {
+  color: #b58900;
+}
+.highlight .no {
+  color: #b58900;
+}
+.highlight .na {
+  color: #268bd2;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #859900;
+}
+.highlight .ss {
+  color: #859900;
+}
+    </style>
+    <link href="stylesheets/screen_job-board.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
+      <script src="javascripts/all.js"></script>
+
+    <script type="text/javascript">
+!function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement("script");e.type="text/javascript";e.async=!0;e.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.segment.com/analytics.js/v1/"+t+"/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION="3.1.0";
+analytics.load("2q7wwCrJormvWKrplqZYR2gXyxLK5Uhx");
+analytics.page()
+}}();
+</script>
+  </head>
+
+  <body class="job-board" data-languages="[&quot;json&quot;]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar.png" alt="" />
+      </span>
+    </a>
+    <div class="toc-wrapper">
+      <a href="/" class="nav-home-link">
+        <div class="nav-home">
+          <img src="images/logo.png" class="logo" alt="" />
+          <span>Developers Home</span>
+        </div>
+      </a>
+        <div class="lang-selector">
+              <a href="#" data-language-name="json">json</a>
+        </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <ul id="toc" class="toc-list-h1">
+          <li>
+            <a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#jsonp" class="toc-h2 toc-link" data-title="JSONP">JSONP</a>
+                  </li>
+                  <li>
+                    <a href="#authentication" class="toc-h2 toc-link" data-title="Authentication">Authentication</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#jobs" class="toc-h1 toc-link" data-title="Jobs">Jobs</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#list-jobs" class="toc-h2 toc-link" data-title="List jobs">List jobs</a>
+                  </li>
+                  <li>
+                    <a href="#retrieve-a-job" class="toc-h2 toc-link" data-title="Retrieve a job">Retrieve a job</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#offices" class="toc-h1 toc-link" data-title="Offices">Offices</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#list-offices" class="toc-h2 toc-link" data-title="List offices">List offices</a>
+                  </li>
+                  <li>
+                    <a href="#retrieve-an-office" class="toc-h2 toc-link" data-title="Retrieve an office">Retrieve an office</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#departments" class="toc-h1 toc-link" data-title="Departments">Departments</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#list-departments" class="toc-h2 toc-link" data-title="List departments">List departments</a>
+                  </li>
+                  <li>
+                    <a href="#retrieve-a-department" class="toc-h2 toc-link" data-title="Retrieve a department">Retrieve a department</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#prospect-post-sections" class="toc-h1 toc-link" data-title="Prospect Post Sections">Prospect Post Sections</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#list-sections" class="toc-h2 toc-link" data-title="List sections">List sections</a>
+                  </li>
+                  <li>
+                    <a href="#retrieve-a-section" class="toc-h2 toc-link" data-title="Retrieve a section">Retrieve a section</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#educations" class="toc-h1 toc-link" data-title="Educations">Educations</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#list-degrees" class="toc-h2 toc-link" data-title="List Degrees">List Degrees</a>
+                  </li>
+                  <li>
+                    <a href="#list-disciplines" class="toc-h2 toc-link" data-title="List Disciplines">List Disciplines</a>
+                  </li>
+                  <li>
+                    <a href="#list-schools" class="toc-h2 toc-link" data-title="List Schools">List Schools</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#job-boards" class="toc-h1 toc-link" data-title="Job Boards">Job Boards</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#retrieve-job-board" class="toc-h2 toc-link" data-title="Retrieve job board">Retrieve job board</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#applications" class="toc-h1 toc-link" data-title="Applications">Applications</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#submit-an-application" class="toc-h2 toc-link" data-title="Submit an application">Submit an application</a>
+                  </li>
+              </ul>
+          </li>
+      </ul>
+      <ul class="toc-appendage">
+        <li id="github_link"><a href="https://github.com/grnhse/greenhouse-api-docs/tree/master/source/includes/job-board" title="View on Github" target="_blank">View on GitHub</a></li>
+      </ul>
+        <ul class="toc-footer">
+            <li><a href='/assessment.html' title="Assessment API">Assessment API</a></li>
+            <li><a href='/audit-log.html' title="Audit Log API">Audit Log API</a></li>
+            <li><a href="/harvest.html" title="Harvest API">Harvest API</a></li>
+            <li><a href='/candidate-ingestion.html' title="Ingestion API">Ingestion API</a></li>
+            <li><a href='/gho.html' title="Onboarding API">Onboarding API</a></li>
+            <li><a href='/webhooks.html' title="Recruiting Webhooks">Recruiting Webhooks</a></li>
+            <li><a href='/onboarding_webhooks.html' title="Onboarding Webhooks">Onboarding Webhooks</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id='introduction'>Introduction</h1>
+<p>With our Job Board API, you will have easy access to a simple JSON representation of your company&#39;s offices, departments, and published jobs. Since we give you access to the raw data, you can build careers pages with a unique look and feel, construct department-level pages, and more!</p>
+
+<p>We support JSONP callbacks, and have a POST method which can be used to build your own online job application form.</p>
+<h2 id='jsonp'>JSONP</h2><div class="highlight"><pre class="highlight html tab-html"><code><span class="nt">&lt;script
+  </span><span class="na">type=</span><span class="s">"text/javascript"</span>
+  <span class="na">src=</span><span class="s">"https://boards-api.greenhouse.io/v1/example/method/url?callback="</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/script&gt;</span>
+</code></pre></div>
+<p>To call a method via JSONP (http://en.wikipedia.org/wiki/JSONP), insert the script tag below into your HTML document with an appropriate method URL and provide your own method name in the &quot;callback&quot; querystring parameter. NOTE: The callback name may only contain numbers, letters, underscore, and period.</p>
+<h2 id='authentication'>Authentication</h2>
+<aside class="success">
+Job Board data is publicly available, so authentication is not required for any GET endpoints.
+</aside>
+
+<p>Only the application submission endpoint
+(<code>POST https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs/{id}</code>) requires Basic Auth. The Job Board API Key must be <strong>Base64 encoded</strong> before it can be used to post applications.
+<a href="#submit-an-application">Read more</a>.</p>
+<h1 id='jobs'>Jobs</h1><h2 id='list-jobs'>List jobs</h2><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"jobs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">127817</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"internal_job_id"</span><span class="p">:</span><span class="mi">144381</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Vault Designer"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2016-01-14T10:55:28-05:00"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"requisition_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"50"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"NYC"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"https://boards.greenhouse.io/vaulttec/jobs/127817"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"metadata"</span><span class="p">:</span><span class="kc">null</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>When <code>?content=true</code>:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"jobs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">127817</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"internal_job_id"</span><span class="p">:</span><span class="mi">144381</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Vault Designer"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2016-01-14T10:55:28-05:00"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"requisition_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"50"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"NYC"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"https://boards.greenhouse.io/vaulttec/jobs/127817"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"metadata"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"content"</span><span class="p">:</span><span class="s2">"This is the job description. &amp;amp;lt;p&amp;amp;gt;Any HTML included through the hosted job application editor will be automatically converted into corresponding HTML entities.&amp;amp;lt;/p&amp;amp;gt;"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">13583</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Department of Departments"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+            </span><span class="mi">13585</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"offices"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">8304</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"East Coast"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="s2">"United States"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+            </span><span class="mi">8787</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">8787</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"New York City"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="s2">"New York, NY, United States"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="mi">8304</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns the list of all job posts. The <code>id</code> field contains the unique identifier for the job post, while <code>internal_job_id</code> contains the unique identifier for the job itself. Any job custom fields you have selected to be exposed in the job board API will be shown in the <code>metadata</code> attribute.</p>
+
+<aside class="warning">
+When submitting a job application, you will use the <code>id</code> field to specify the application's target job post.
+</aside>
+
+<p>Prospect posts include a null value for <code>internal_job_id</code></p>
+<h3 id='http-request'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs</code></p>
+<h3 id='url-parameters'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+</tbody></table>
+<h3 id='optional-querystring-parameters'>Optional Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>content</td>
+<td>If set to <code>true</code>, include the full post description, department, and office of each job post.</td>
+</tr>
+</tbody></table>
+<h2 id='retrieve-a-job'>Retrieve a job</h2><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"company_name"</span><span class="p">:</span><span class="s2">"Greenhouse"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"first_published"</span><span class="p">:</span><span class="s2">"2013-08-01T20:00:00Z"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"application_deadline"</span><span class="p">:</span><span class="s2">"2026-08-01T20:00:00Z"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"requisition_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"50"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"content"</span><span class="p">:</span><span class="s2">"This is the job description. &amp;amp;lt;p&amp;amp;gt;Any HTML included through the hosted job application editor will be automatically converted into corresponding HTML entities.&amp;amp;lt;/p&amp;amp;gt;"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"internal_job_id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"include_ai_disclaimer"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"ai_disclaimer"</span><span class="p">:</span><span class="s2">"&lt;p&gt;We use Greenhouse’s AI-powered Talent Matching tool to compare your application against our job requirements.&lt;/p&gt;"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"ai_opt_out_request_url"</span><span class="p">:</span><span class="s2">"https://app.greenhouse.io/job_post/55555/ai_opt_out"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"location_questions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Location"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"location"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input_text"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"values"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Latitude"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"latitude"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input_hidden"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"values"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Longitude"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"longitude"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input_hidden"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"values"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"questions"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="s2">"First Name"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"first_name"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"input_text"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="s2">"Resume"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"resume"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"input_file"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"resume_text"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"textarea"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="s2">"Do you like apples?"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"question_2222"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"multi_value_single_select"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"values"</span><span class="p">:[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"value"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"label"</span><span class="p">:</span><span class="s2">"No"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"value"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"label"</span><span class="p">:</span><span class="s2">"Yes"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"metadata"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">12345</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Field Name"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value_type"</span><span class="p">:</span><span class="s2">"text"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="s2">"Some value"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"data_compliance"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gdpr"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"requires_consent"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="err">//</span><span class="w"> </span><span class="err">To</span><span class="w"> </span><span class="err">be</span><span class="w"> </span><span class="err">deprecated.</span><span class="w"> </span><span class="err">Use</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">your</span><span class="w"> </span><span class="err">organization</span><span class="w"> </span><span class="err">doesn't</span><span class="w"> </span><span class="err">have</span><span class="w"> </span><span class="err">single-purpose</span><span class="w"> </span><span class="err">consent</span><span class="w"> </span><span class="err">configured</span><span class="p">,</span><span class="w"> </span><span class="err">otherwise</span><span class="w"> </span><span class="err">use</span><span class="w"> </span><span class="err">separate</span><span class="w"> </span><span class="err">values</span><span class="w"> </span><span class="err">for</span><span class="w"> </span><span class="err">processing</span><span class="w"> </span><span class="err">and</span><span class="w"> </span><span class="err">retention</span><span class="w">
+      </span><span class="nl">"requires_processing_consent"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"requires_retention_consent"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"retention_period"</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"pay_input_ranges"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"min_cents"</span><span class="p">:</span><span class="mi">5000000</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"max_cents"</span><span class="p">:</span><span class="mi">7500000</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"currency_type"</span><span class="p">:</span><span class="s2">"USD"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"NYC Salary Range"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"blurb"</span><span class="p">:</span><span class="s2">"In order to provide transparency..."</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>When demographic questions are enabled:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">44444</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+  </span><span class="err">...</span><span class="w">
+  </span><span class="nl">"demographic_questions"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"header"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Diversity and Inclusion at Acme Corp."</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;p&gt;Acme Corp. is dedicated to...&lt;/p&gt;"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"questions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Favorite Color"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"multi_value_multi_select"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"answer_options"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Red"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"free_form"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">101</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Green"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"free_form"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">102</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Blue"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"free_form"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">102</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Prefer to Type My Own"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"free_form"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a job post. Setting the questions querystring parameter to
+<code>&quot;true&quot;</code> will include the list of job application fields; these fields
+can be used to dynamically construct your own job application form.</p>
+
+<p>Any job custom fields you have selected to be exposed in the job board API will be shown in the <code>metadata</code> attribute.</p>
+<h3 id='http-request-2'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs/{job_id}</code></p>
+<h3 id='url-parameters-2'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+<tr>
+<td>job_id</td>
+<td>ID of the job to retrieve</td>
+</tr>
+</tbody></table>
+<h3 id='querystring-parameters'>Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>*questions</td>
+<td>If set to <code>true</code>, include additional fields in the response:<br><br>- <code>questions</code>: An array of custom questions defined for this job post<br>- <code>location_questions</code>: An array of questions used to capture the applicant&#39;s location (included only if the job post has the location configured as &quot;optional&quot; or &quot;required&quot;)<br>- <code>compliance</code>: An array of questions used by government contractors to capture applicant information to comply with EEOC regulations (included only if the job post has EEOC questions enabled)<br>- <code>demographic_questions</code>: An object containing demographic questions and related information (included only if your organization has Greenhouse Inclusion, and the job post has demographic questions enabled)</td>
+</tr>
+<tr>
+<td>*pay_transparency</td>
+<td>If set to <code>true</code>, include an array of <code>pay_input_ranges</code> with the pay range information defined for this job post.</td>
+</tr>
+</tbody></table>
+<h3 id='questions-location-questions-compliance'>Questions / Location Questions / Compliance</h3>
+<p>Possible field types:</p>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>How to represent</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>input_file</td>
+<td>Represent with an input of type file</td>
+</tr>
+<tr>
+<td>input_text</td>
+<td>Represent with an input of type text</td>
+</tr>
+<tr>
+<td>input_hidden</td>
+<td>Represent with an input of type hidden</td>
+</tr>
+<tr>
+<td>textarea</td>
+<td>Represent with a textarea</td>
+</tr>
+<tr>
+<td>multi_value_single_select</td>
+<td>Can be represented as either a set of radio buttons or a select</td>
+</tr>
+<tr>
+<td>multi_value_multi_select</td>
+<td>Can be represented as either a set of checkboxes or a multi-select</td>
+</tr>
+</tbody></table>
+
+<p>Please note that it is possible for multiple fields to be aggregated beneath a single question. The &quot;Resume&quot; field is a prime example, with both an input_file and textarea type accepted. If marked as required, then we expect at least one of these fields to contain a valid value when your form is submitted to the <a href="#applications">application submission</a> endpoint.</p>
+<h3 id='demographic-questions'>Demographic Questions</h3>
+<table><thead>
+<tr>
+<th>Type</th>
+<th>How to represent</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>multi_value_single_select</td>
+<td>Can be represented as either a set of radio buttons or a select</td>
+</tr>
+<tr>
+<td>multi_value_multi_select</td>
+<td>Can be represented as either a set of checkboxes or a multi-select</td>
+</tr>
+</tbody></table>
+
+<p>For organizations using Greenhouse Inclusion, the response may contain demographic questions. Each question contains an array of answer options that may be rendered based on the question &#39;type&#39; defined in the table above. The candidate must select an answer option for questions with <code>required</code> set to <code>true</code>. If an answer option is selected that has <code>free_form</code> set to <code>true</code>, the candidate must be allowed to type a free-form response. This free-form response is only required if no other answer options have been selected by the candidate.</p>
+<h3 id='data-compliance'>Data Compliance</h3>
+<p>Responses may include <code>data_compliance</code> objects if your organization is using GDPR rules and &#39;explicit consent&#39; legal basis. The object includes whether a response is required, and configured data retention period (in days) for the associated rule.</p>
+<h3 id='board-level-introductions-and-conclusions'>Board-level Introductions and Conclusions</h3>
+<p>For organizations with Default Descriptions authored on the Job Board, the <code>content</code> field will include the Board-level Introduction, Post-level Description, and Board-level Conclusion as a single concatenated string.</p>
+<h1 id='offices'>Offices</h1><h2 id='list-offices'>List offices</h2>
+<blockquote>
+<p>With <code>render_as=list</code> (default)</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"offices"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">10201</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"West Coast"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+        </span><span class="mi">11111</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">11111</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">33333</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Engineering"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+              </span><span class="p">},</span><span class="w">
+              </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Mobile Engineer - iOS"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+              </span><span class="p">},</span><span class="w">
+              </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">22222</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Account Management"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+
+          </span><span class="p">],</span><span class="w">
+          </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="mi">10201</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>With <code>render_as=tree</code></p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"offices"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">10201</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"West Coast"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">11111</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">33333</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Engineering"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+                  </span><span class="p">},</span><span class="w">
+                  </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Mobile Engineer - iOS"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+                  </span><span class="p">},</span><span class="w">
+                  </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">],</span><span class="w">
+              </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+              </span><span class="p">]</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">22222</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Account Management"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+
+              </span><span class="p">],</span><span class="w">
+              </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+              </span><span class="p">]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a list of all of your organization&#39;s departments and jobs, grouped by office.</p>
+<h3 id='http-request'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/offices</code></p>
+<h3 id='url-parameters'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+</tbody></table>
+<h3 id='querystring-parameters'>Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>render_as</td>
+<td>No</td>
+<td>string</td>
+<td>This parameter defines how to represent the list of offices. The default value is &#39;list&#39;.</td>
+</tr>
+</tbody></table>
+
+<p>Allowed <code>render_as</code> values:</p>
+
+<table><thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>list</td>
+<td>(Default). The offices are returned as a list of objects and they include <code>parent_id</code> and <code>child_ids</code>.</td>
+</tr>
+<tr>
+<td>tree</td>
+<td>The offices are returned as a list of trees with <code>children</code>.</td>
+</tr>
+</tbody></table>
+<h2 id='retrieve-an-office'>Retrieve an office</h2>
+<blockquote>
+<p>With <code>render_as=list</code> (default)</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">11111</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">33333</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Engineering"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Mobile Engineer - iOS"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">22222</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Account Management"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="mi">10201</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>With <code>render_as=tree</code></p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">11111</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">33333</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Engineering"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Mobile Engineer - iOS"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">22222</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Account Management"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a list of your organization&#39;s departments and jobs for the given <code>office_id</code>.</p>
+<h3 id='http-request-2'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/offices/{office_id}</code></p>
+<h3 id='url-parameters-2'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+<tr>
+<td>office_id</td>
+<td>ID of the office to retrieve</td>
+</tr>
+</tbody></table>
+<h3 id='querystring-parameters-2'>Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>render_as</td>
+<td>No</td>
+<td>string</td>
+<td>This parameter defines how to represent the list of offices. The default value is &#39;list&#39;.</td>
+</tr>
+</tbody></table>
+
+<p>Allowed <code>render_as</code> values:</p>
+
+<table><thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>list</td>
+<td>(Default).</td>
+</tr>
+<tr>
+<td>tree</td>
+<td>The children offices are returned as a tree.</td>
+</tr>
+</tbody></table>
+<h1 id='departments'>Departments</h1><h2 id='list-departments'>List departments</h2>
+<blockquote>
+<p>With <code>render_as=list</code> (default)</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">77777</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"R &amp; D"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+        </span><span class="mi">33333</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">33333</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Engineering"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Mobile Engineer - iOS"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="mi">77777</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">22222</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Account Management"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>With <code>render_as=tree</code></p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"departments"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">77777</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"R &amp; D"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">33333</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Engineering"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+              </span><span class="p">},</span><span class="w">
+              </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Mobile Engineer - iOS"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+              </span><span class="p">},</span><span class="w">
+              </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">22222</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Account Management"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a list of your organization&#39;s departments and jobs.</p>
+<h3 id='http-request'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/departments</code></p>
+<h3 id='url-parameters'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+</tbody></table>
+<h3 id='querystring-parameters'>Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>render_as</td>
+<td>No</td>
+<td>string</td>
+<td>This parameter defines how to represent the list of departments. The default value is &#39;list&#39;.</td>
+</tr>
+</tbody></table>
+
+<p>Allowed <code>render_as</code> values:</p>
+
+<table><thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>list</td>
+<td>(Default). The departments are returned as a list of objects and they include <code>parent_id</code> and <code>child_ids</code>.</td>
+</tr>
+<tr>
+<td>tree</td>
+<td>The departments are returned as a list of trees with <code>children</code>.</td>
+</tr>
+</tbody></table>
+<h2 id='retrieve-a-department'>Retrieve a department</h2>
+<blockquote>
+<p>With <code>render_as=list</code> (default)</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">33333</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Engineering"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Mobile Engineer - iOS"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"parent_id"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"child_ids"</span><span class="p">:[</span><span class="w">
+    </span><span class="mi">77777</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>With <code>render_as=tree</code></p>
+</blockquote>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">33333</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Engineering"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Engineer"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Mobile Engineer - iOS"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">77777</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Mobile Development"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"children"</span><span class="p">:[</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a list of jobs for a given <code>department_id</code>.</p>
+<h3 id='http-request-2'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/departments/{department_id}</code></p>
+<h3 id='url-parameters-2'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+<tr>
+<td>department_id</td>
+<td>ID of the department to retrieve</td>
+</tr>
+</tbody></table>
+<h3 id='querystring-parameters-2'>Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>render_as</td>
+<td>No</td>
+<td>string</td>
+<td>This parameter defines how to represent the list of departments. The default value is &#39;list&#39;.</td>
+</tr>
+</tbody></table>
+
+<p>Allowed <code>render_as</code> values:</p>
+
+<table><thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>list</td>
+<td>(Default).</td>
+</tr>
+<tr>
+<td>tree</td>
+<td>The children departments are returned as a tree.</td>
+</tr>
+</tbody></table>
+<h1 id='prospect-post-sections'>Prospect Post Sections</h1><h2 id='list-sections'>List sections</h2><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"sections"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">14128</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Don't see a job you like?"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Engineer"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Manager"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">85764</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"General Application"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">888888</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Prospect"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=888888"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a list of your organization’s sections and prospect posts. Prospect posts can be listed under a specific department or section. To view all prospect posts, list jobs and filter results by null <code>internal_job_id</code></p>
+<h3 id='http-request'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/sections</code></p>
+<h3 id='url-parameters'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+</tbody></table>
+<h2 id='retrieve-a-section'>Retrieve a section</h2><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">14128</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"Don't see a job you like?"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"jobs"</span><span class="p">:[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">44444</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Engineer"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=444444"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="mi">55555</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Product Manager"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"San Francisco, CA"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2013-07-02T19:39:23Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"absolute_url"</span><span class="p">:</span><span class="s2">"http://your.co/careers?gh_jid=55555"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"language"</span><span class="p">:</span><span class="s2">"en"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a list of prospect posts for a given <code>section_id</code></p>
+<h3 id='http-request-2'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/sections/{section_id}</code></p>
+<h3 id='url-parameters-2'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+<tr>
+<td>section_id</td>
+<td>ID of the section to retrieve</td>
+</tr>
+</tbody></table>
+<h1 id='educations'>Educations</h1>
+<p>This is a list of endpoints which can be used to populate Education data for candidate applications. Instructions for posting applications that include Education information can be found under <a href="#submit-an-application">Applications</a>.</p>
+<h2 id='list-degrees'>List Degrees</h2><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494452</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"High School"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494478</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Associate's Degree"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494516</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bachelor's Degree"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494551</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Master's Degree"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494580</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Master of Business Administration (M.B.A.)"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494607</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Juris Doctor (J.D.)"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494638</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Doctor of Medicine (M.D.)"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494662</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Doctor of Philosophy (Ph.D.)"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494689</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Engineer's Degree"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494710</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Other"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"per_page"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span></code></pre></div>
+<p>Returns a list of all of your organization&#39;s degrees.</p>
+<h3 id='http-request'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/education/degrees</code></p>
+<h3 id='url-parameters'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+</tbody></table>
+<h3 id='querystring-parameters'>Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>term</td>
+<td>No</td>
+<td>string</td>
+<td>Returns any degrees containing this string in their name.</td>
+</tr>
+<tr>
+<td>page</td>
+<td>No</td>
+<td>string</td>
+<td>A cursor for use in pagination. Returns the n-th chunk of objects (100 per page).</td>
+</tr>
+</tbody></table>
+<h2 id='list-disciplines'>List Disciplines</h2><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494865</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Accounting"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494892</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"African Studies"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494917</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Agriculture"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494940</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Anthropology"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5494964</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Applied Health Services"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5495009</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Architecture"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5495033</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Art"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5495051</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Asian Studies"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5495074</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Biology"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5495101</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Business"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">71</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"per_page"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a list of all of your organization&#39;s disciplines.</p>
+<h3 id='http-request-2'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/education/disciplines</code></p>
+<h3 id='url-parameters-2'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+</tbody></table>
+<h3 id='querystring-parameters-2'>Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>term</td>
+<td>No</td>
+<td>string</td>
+<td>Returns any disciplines containing this string in their name.</td>
+</tr>
+<tr>
+<td>page</td>
+<td>No</td>
+<td>string</td>
+<td>A cursor for use in pagination. Returns the n-th chunk of objects (100 per page).</td>
+</tr>
+</tbody></table>
+<h2 id='list-schools'>List Schools</h2><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417077</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Abraham Baldwin Agricultural College"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417117</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Academy of Art University"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417156</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Acadia University"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417194</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Adams State University"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417217</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Adelphi University"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417245</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Adrian College"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417295</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Adventist University of Health Sciences"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417331</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Agnes Scott College"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417366</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AIB College of Business"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">5417384</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alaska Pacific University"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">2464</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"per_page"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns a list of all of your organization&#39;s schools.</p>
+<h3 id='http-request-3'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}/education/schools</code></p>
+<h3 id='url-parameters-3'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+</tbody></table>
+<h3 id='querystring-parameters-3'>Querystring Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>term</td>
+<td>No</td>
+<td>string</td>
+<td>Returns any schools containing this string in their name.</td>
+</tr>
+<tr>
+<td>page</td>
+<td>No</td>
+<td>string</td>
+<td>A cursor for use in pagination. Returns the n-th chunk of objects (100 per page).</td>
+</tr>
+</tbody></table>
+<h1 id='job-boards'>Job Boards</h1><h2 id='retrieve-job-board'>Retrieve job board</h2><div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your Organization"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;p&gt;...&lt;/p&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>Returns your organization&#39;s name and job board content. </p>
+<h3 id='http-request'>HTTP Request</h3>
+<p><code>GET https://boards-api.greenhouse.io/v1/boards/{board_token}</code></p>
+<h3 id='url-parameters'>URL Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token</td>
+</tr>
+</tbody></table>
+<h1 id='applications'>Applications</h1><h2 id='submit-an-application'>Submit an application</h2>
+<blockquote>
+<p>This endpoint can take a multipart form-data POST. You should use this if you need to upload a resume or cover letter.</p>
+</blockquote>
+<div class="highlight"><pre class="highlight html tab-html"><code><span class="c">&lt;!--
+EXAMPLE FORM BELOW (simplified):
+
+Please keep in mind that the HTTP Basic Auth API token is a secret key.  Any form posts should be proxied by your own servers.  Any direct post to the /applications POST method would reveal your secret key to anybody that views source--which would be a very bad thing.
+--&gt;</span>
+<span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">"POST"</span> <span class="na">action=</span><span class="s">"!!REQUEST MUST BE PROXIED ON YOUR SERVERS!!"</span> <span class="na">enctype=</span><span class="s">'multipart/form-data'</span><span class="nt">&gt;</span>
+  <span class="c">&lt;!-- represents the ID of the job post --&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"id"</span> <span class="na">value=</span><span class="s">"55555"</span> <span class="nt">/&gt;</span>
+  <span class="c">&lt;!-- place the value of the gh_src URL parameter in the field below --&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"mapped_url_token"</span> <span class="na">value=</span><span class="s">"token12345"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>First Name <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"first_name"</span> <span class="nt">/&gt;&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Last Name <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"last_name"</span> <span class="nt">/&gt;&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Email <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"email"</span> <span class="nt">/&gt;&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Phone <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"phone"</span> <span class="nt">/&gt;&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Resume <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"file"</span> <span class="na">name=</span><span class="s">"resume"</span> <span class="nt">/&gt;&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Cover Letter <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"file"</span> <span class="na">name=</span><span class="s">"cover_letter"</span> <span class="nt">/&gt;&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>LinkedIn Profile <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"question_5555"</span> <span class="nt">/&gt;&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Some dropdown
+    <span class="nt">&lt;select</span> <span class="na">name=</span><span class="s">"question_3333"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;option&gt;&lt;/option&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"1"</span><span class="nt">&gt;</span>Yes<span class="nt">&lt;/option&gt;</span>
+      <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"0"</span><span class="nt">&gt;</span>No<span class="nt">&lt;/option&gt;</span>
+    <span class="nt">&lt;/select&gt;</span>
+  <span class="nt">&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Multi select with checkboxes<span class="nt">&lt;br/&gt;</span>
+    <span class="nt">&lt;label&gt;&lt;input</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">name=</span><span class="s">"question_2222[]"</span> <span class="na">value=</span><span class="s">"2"</span> <span class="nt">/&gt;</span> Red<span class="nt">&lt;/label&gt;&lt;br/&gt;</span>
+    <span class="nt">&lt;label&gt;&lt;input</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">name=</span><span class="s">"question_2222[]"</span> <span class="na">value=</span><span class="s">"5"</span> <span class="nt">/&gt;</span> Orange<span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;/label&gt;&lt;br/&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">name=</span><span class="s">"data_compliance[gdpr_consent_given]"</span> <span class="na">value=</span><span class="s">"1"</span> <span class="nt">/&gt;</span>
+    <span class="c">&lt;!-- `gdpr_consent_given` to be deprecated. Use if your organization doesn't have single-purpose consent configured, otherwise use separate checkboxes for processing and retention --&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">name=</span><span class="s">"data_compliance[gdpr_processing_consent_given]"</span> <span class="na">value=</span><span class="s">"1"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">name=</span><span class="s">"data_compliance[gdpr_retention_consent_given]"</span> <span class="na">value=</span><span class="s">"1"</span> <span class="nt">/&gt;</span>
+    {{ORGANIZATION}} has my consent to collect, store, and process my data for the purpose
+    of considering me for employment.
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">name=</span><span class="s">"data_compliance[gdpr_demographic_data_consent_given]"</span> <span class="na">value=</span><span class="s">"1"</span> <span class="nt">/&gt;</span>
+    By checking this box, I consent to {{ORGANIZATION}} collecting, storing, and processing my responses to the demographic data surveys above.
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/form&gt;</span>
+</code></pre></div>
+<blockquote>
+<p>cURL equivalent:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>curl -X POST \
+  -H "Content-Type: multipart/form-data" \
+  -H "Authorization: Basic MGQwMzFkODIyN2VhZmE2MWRjMzc1YTZjMmUwNjdlMjQ6" \
+  -F "first_name=Sammy" \
+  -F "last_name=McSamson" \
+  -F "email=sammy@example.com" \
+  -F "phone=3337778888" \
+  -F "location=110 5th Ave New York, NY, 10011" \
+  -F "latitude=40.7376671" \
+  -F "longitude=-73.9929196" \
+  -F "country_short_name=US" \
+  -F "resume=@/path/to/resume/ADA084551.pdf" \
+  -F "cover_letter=@/path/to/coverletter/blah.pdf" \
+  -F "educations[][school_name_id]=5417077" \
+  -F "educations[][degree_id]=5494452"\
+  -F "educations[][discipline_id]=5494865" \
+  -F "educations[][start_date][month]=8" \
+  -F "educations[][start_date][year]=2012" \
+  -F "educations[][end_date][month]=5" \
+  -F "educations[][end_date][year]=2016" \
+  -F "employments[][company_name]=Business Co" \
+  -F "employments[][title]=Sales Manager" \
+  -F "employments[][start_date][month]=1" \
+  -F "employments[][start_date][year]=2016" \
+  -F "employments[][end_date][month]=2" \
+  -F "employments[][end_date][year]=2018" \
+  -F "employments[][current]=false"
+  -F "mapped_url_token=token12345" \
+  -F "question_12349_url=http://dropbox.com/dl/attachment.pdf" \
+  -F "question_12349_url_filename=attachment.pdf" \
+  -F "question_12350_content=SGVsbG8sIHdvcmxkIQo=" \
+  -F "question_12350_content_filename=something_else.txt" \
+  -F "demographic_answers[][question_id]=87" \
+  -F "demographic_answers[][answer_options][][answer_option_id]=194" \
+  -F "demographic_answers[][question_id]=88" \
+  -F "demographic_answers[][answer_options][][answer_option_id]=212" \
+  -F "demographic_answers[][answer_options][][text]=Free-form Answer" \
+  -F "data_compliance[gdpr_consent_given]=true" \ # `gdpr_consent_given` to be deprecated. Use if your organization doesn't have single-purpose consent configured, otherwise use separate values for processing and retention
+  -F "data_compliance[gdpr_processing_consent_given]=true" \
+  -F "data_compliance[gdpr_retention_consent_given]=true" \
+  -F "data_compliance[gdpr_demographic_data_consent_given]=true" \
+  -F "applicant_ip=203.0.113.47" \
+  "https://boards-api.greenhouse.io/v1/boards/very_awesome_inc/jobs/127817"
+</code></pre></div>
+<blockquote>
+<p>or, you can POST a JSON encoded body (with <code>Content-Type: application/json</code>):</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic MGQwMzFkODIyN2VhZmE2MWRjMzc1YTZjMmUwNjdlMjQ6" \
+  -d '{
+    "first_name": "Sammy",
+    "last_name": "McSamson",
+    "email": "sammy@example.com",
+    "phone": "3337778888",
+    "location": "110 5th Ave New York, NY, 10011",
+    "latitude": "40.7376671",
+    "longitude": "-73.9929196",
+    "country_short_name": "US",
+    "resume_text": "I have many years of experience as an expert basket weaver...",
+    "cover_letter_text": "I have a very particular set of skills, skills I have acquired over a very long career. Skills that make me...",
+    "gender": 2,
+    "race": 4,
+    "veteran_status": 3,
+    "disability_status": 3,
+    "question_12345": "Here is some short text for the first question",
+    "question_12346": 1,
+    "question_12347": 5869311,
+    "question_12348": [5869319,5869317],
+    "question_12349_url": "http://dropbox.com/dl/attachment.pdf",
+    "question_12349_url_filename": "attachment.pdf",
+    "question_12350_content": "SGVsbG8sIHdvcmxkIQo=",
+    "question_12350_content_filename": "something_else.txt",
+    "educations": [
+      {
+        "school_name_id" : "1403524",
+        "degree_id": "1403534",
+        "discipline_id": "1403605",
+        "start_date": { "month": "1", "year": "1989"},
+        "end_date": { "month": "2", "year": "1990"}
+      },
+      {
+        "school_name_id" : "1401063",
+        "degree_id": "1403525",
+        "discipline_id": "1403608",
+        "start_date": { "month": "1", "year": "2011"},
+        "end_date": { "month": "2", "year": "2012"}
+      }
+    ],
+    "employments": [
+      {
+        "company_name": "Business Co.",
+        "title": "Sales Manager",
+        "start_date": {
+          "month": "1",
+          "year": "2016"
+        },
+        "end_date": {
+          "month": "2",
+          "year": "2018"
+        },
+        "current": "false"
+      }
+    ],
+    "mapped_url_token":"token12345",
+    "demographic_answers":[
+      {
+        "question_id": 87,
+        "answer_options": [
+          {
+            "answer_option_id": 194
+          }
+        ]
+      },
+      {
+        "question_id": 88,
+        "answer_options": [
+          {
+            "answer_option_id": 212,
+            "text": "Free-form Answer"
+          }
+        ]
+      }
+    ]
+  },
+  "data_compliance": {
+    "gdpr_consent_given": true, // To be deprecated. Use if your organization doesn't have single-purpose consent configured, otherwise use separate values for processing and retention
+    "gdpr_processing_consent_given": true
+    "gdpr_retention_consent_given": true
+    "gdpr_demographic_data_consent_given": true
+  },
+  "applicant_ip":"203.0.113.47"' \
+  "https://boards-api.greenhouse.io/v1/boards/very_awesome_inc/jobs/127817"
+</code></pre></div>
+<p>Use this endpoint to submit a new application. This endpoint accepts a multipart form POST representing a job application. Application forms are job-specific and will be constructed via the &quot;questions&quot; array available via the <a href="#retrieve-a-job">Job method</a>. Please see the <a href="#retrieve-a-job">Job method</a> documentation for instructions on submitting location information through the API.</p>
+
+<p>Note that when submitting an application through this method, Greenhouse will not confirm the inclusion of required fields. Validation for required fields must be done on the client side, as Greenhouse will not reject applications that are missing required fields.</p>
+
+<aside class="warning">
+  This method requires HTTP Basic Auth over SSL/TLS: the Basic Auth username is your API key (found on the API Credentials page). No password is required.
+</aside>
+
+<aside class="notice">
+  In general, we would encourage customers to make use of the Embedded Job Application before going to the trouble of building their own form. Our application form is well tested, validated, battle-hardened, and has built-in spam protection measures. Building your own form can introduce a number of challenges which are typically not worth the additional effort.
+</aside>
+<h3 id='http-request'>HTTP Request</h3>
+<p><code>POST https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs/{id}</code></p>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>board_token</td>
+<td>Job Board URL token.  If you&#39;re submitting an application for a job post on an internal job board, use <code>&quot;internal&quot;</code>.</td>
+</tr>
+<tr>
+<td>id</td>
+<td>Job post ID. Both internal and external job posts are allowed.</td>
+</tr>
+</tbody></table>
+<h3 id='request-headers'>Request Headers</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Authorization</td>
+<td>This header should include a basic authorization with a <strong>Base64 encoded</strong> API key</td>
+</tr>
+<tr>
+<td>Content-Type</td>
+<td>Required if the request contains an attachment</td>
+</tr>
+</tbody></table>
+<h3 id='request-parameters'>Request Parameters</h3>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>*mapped_url_token</td>
+<td>If present, the <code>gh_src</code> URL parameter, which is used to indicate the referral source of this application.</td>
+</tr>
+<tr>
+<td>first_name</td>
+<td>Applicant&#39;s first name</td>
+</tr>
+<tr>
+<td>last_name</td>
+<td>Applicant&#39;s last name</td>
+</tr>
+<tr>
+<td>email</td>
+<td>Applicant&#39;s email address</td>
+</tr>
+<tr>
+<td>*phone</td>
+<td>Applicant&#39;s phone number</td>
+</tr>
+<tr>
+<td>*location</td>
+<td>Applicant&#39;s street address</td>
+</tr>
+<tr>
+<td>*latitude</td>
+<td>Applicant&#39;s home latitude. This is a <em>hidden</em> field and should not be exposed directly to the applicant.</td>
+</tr>
+<tr>
+<td>*longitude</td>
+<td>Applicant&#39;s home longitude. This is a <em>hidden</em> field and should not be exposed directly to the applicant.</td>
+</tr>
+<tr>
+<td>*country_short_name</td>
+<td>Applicant&#39;s home country.  This is a <em>hidden</em> field and should not be exposed directly to the applicant.</td>
+</tr>
+<tr>
+<td>*resume</td>
+<td><em>Please see below for details.</em></td>
+</tr>
+<tr>
+<td>*cover_letter</td>
+<td><em>Please see below for details.</em></td>
+</tr>
+<tr>
+<td>*educations</td>
+<td>An array of education objects. Each education object should have five fields: <code>school_name_id</code>, <code>degree_id</code>, <code>discipline_id</code>, <code>start_date</code>, and <code>end_date</code>. You can get the <code>school_name_id</code>, <code>degree_id</code>, <code>discipline_id</code> from our <a href="#list-schools">List Schools</a>, <a href="#list-degrees">List Degrees</a>, and <a href="#list-disciplines">List Disciplines</a> endpoints. <code>start_date</code> and <code>end_date</code> will use a hash of month and year.</td>
+</tr>
+<tr>
+<td>*employments</td>
+<td>An array of employments objects. Each employment object should have: <code>company_name</code>, <code>title</code>, <code>start_date</code>, and <code>current</code> (must be <code>true</code> or <code>false</code>). If <code>current</code> is <code>false</code>, must have <code>end_date</code>. <code>start_date</code> and <code>end_date</code> will use a hash of month and year.</td>
+</tr>
+<tr>
+<td>*demographic_answers</td>
+<td>An array of demographic answer objects, applicable only if your organization has Greenhouse Inclusion and demographic questions are enabled on the job post. Each object must have a <code>question_id</code> field. The <code>answer_options</code> field is an array of objects, one for each <code>answer_option_id</code> the candidate selected. For answer options which support free-form responses, a <code>text</code> field may also be supplied with the candidate&#39;s hand-typed answer. Note that these questions are always optional, so the <code>answer_options</code> array may be empty, null, or omitted if the candidate did not make any selections.</td>
+</tr>
+<tr>
+<td>*data_compliance</td>
+<td>An object representing a candidate’s answers to required data compliance questions. This field is dependent on your organization’s <a href="https://support.greenhouse.io/hc/en-us/articles/360061849112-GDPR-features-overview">privacy and compliance configuration</a>. If your organization doesn&#39;t have single-purpose consent configured, use <code>{&quot;gdpr_consent_given&quot;: true}</code>. Otherwise use separate consent values, like <code>{&quot;gdpr_processing_consent_given&quot;:true}</code> or <code>{gdpr_retention_consent_given&quot;:false.}</code>.</td>
+</tr>
+<tr>
+<td>*applicant_ip</td>
+<td>Applicant&#39;s IP address</td>
+</tr>
+</tbody></table>
+<h3 id='submitting-attachments'>Submitting Attachments</h3>
+<p>We support 4 methods of uploading attachments when submitting a candidate application:</p>
+
+<ol>
+<li>Submit the attachment via direct upload using multipart/form-data.</li>
+<li>Submit the attachment via direct upload using application/json.</li>
+<li>Submit a path to the attachment on an external server.</li>
+<li>Submit the plaintext file contents.</li>
+</ol>
+
+<p><br></p>
+
+<p><strong>Resume Attachments</strong></p>
+
+<table><thead>
+<tr>
+<th>Method</th>
+<th>Content-Type</th>
+<th>Required Fields</th>
+<th>Example</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Direct upload</td>
+<td>multipart/form-data</td>
+<td>&quot;resume&quot;</td>
+<td>&quot;resume&quot;: &quot;@/Users/UserName/Documents/resume.pdf&quot; <em>(this example is specific to cURL)</em></td>
+</tr>
+<tr>
+<td>Direct upload</td>
+<td>application/json</td>
+<td>&quot;resume_content&quot;, &quot;resume_content_filename&quot;</td>
+<td>&quot;resume_content&quot;: &quot;SGVsbG8sIHdvcmxkIQo=&quot;, &quot;resume_content_filename&quot;: &quot;resume.pdf&quot;</td>
+</tr>
+<tr>
+<td>Path to file on external server</td>
+<td>multipart/form-data <em>or</em> application/json</td>
+<td>&quot;resume_url&quot;, &quot;resume_url_filename&quot;</td>
+<td>&quot;resume_url&quot;: &quot;https://example.com/resume.pdf&quot;, &quot;resume_url_filename&quot;: &quot;resume.pdf&quot;</td>
+</tr>
+<tr>
+<td>Plaintext file contents</td>
+<td>multipart/form-data <em>or</em> application/json</td>
+<td>&quot;resume_text&quot;</td>
+<td>&quot;resume_text&quot;: &quot;This is my awesome resume!&quot;</td>
+</tr>
+</tbody></table>
+
+<p><br></p>
+
+<p><strong>Cover Letter Attachments</strong></p>
+
+<table><thead>
+<tr>
+<th>Method</th>
+<th>Content-Type</th>
+<th>Required Fields</th>
+<th>Example</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Direct upload</td>
+<td>multipart/form-data</td>
+<td>&quot;cover_letter&quot;</td>
+<td>&quot;cover_letter&quot;: &quot;@/Users/UserName/Documents/coverletter.pdf&quot; <em>(this example is specific to cURL)</em></td>
+</tr>
+<tr>
+<td>Direct upload</td>
+<td>application/json</td>
+<td>&quot;cover_letter_content&quot;, &quot;cover_letter_content_filename&quot;</td>
+<td>&quot;cover_letter_content&quot;: &quot;SGVsbG8sIHdvcmxkIQo=&quot;, &quot;cover_letter_content_filename&quot;: &quot;coverletter.pdf&quot;</td>
+</tr>
+<tr>
+<td>Path to file on external server</td>
+<td>multipart/form-data <em>or</em> application/json</td>
+<td>&quot;cover_letter_url&quot;, &quot;cover_letter_url_filename&quot;</td>
+<td>&quot;cover_letter_url&quot;: &quot;https://example.com/coverletter.pdf&quot;, &quot;cover_letter_url_filename&quot;: &quot;coverletter.pdf&quot;</td>
+</tr>
+<tr>
+<td>Plaintext file contents</td>
+<td>multipart/form-data <em>or</em> application/json</td>
+<td>&quot;cover_letter_text&quot;</td>
+<td>&quot;cover_letter_text&quot;: &quot;This is my awesome cover letter!&quot;</td>
+</tr>
+</tbody></table>
+
+<p><br></p>
+
+<p><strong>Custom Question Attachments</strong></p>
+
+<table><thead>
+<tr>
+<th>Method</th>
+<th>Content-Type</th>
+<th>Required Fields</th>
+<th>Example</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Direct upload</td>
+<td>multipart/form-data</td>
+<td>&quot;question_12345&quot;</td>
+<td>&quot;question_12345&quot;: &quot;@/Users/UserName/Documents/attachment.pdf&quot; <em>(this example is specific to cURL)</em></td>
+</tr>
+<tr>
+<td>Direct upload</td>
+<td>application/json</td>
+<td>&quot;question_12345_content&quot;, &quot;question_12345_content_filename&quot;</td>
+<td>&quot;question_12345_content&quot;: &quot;SGVsbG8sIHdvcmxkIQo=&quot;, &quot;question_12345_content_filename&quot;: &quot;attachment.pdf&quot;</td>
+</tr>
+<tr>
+<td>Path to file on external server</td>
+<td>multipart/form-data <em>or</em> application/json</td>
+<td>&quot;question_12345_url&quot;, &quot;question_12345_url_filename&quot;</td>
+<td>&quot;question_12345_url&quot;: &quot;https://example.com/attachment.pdf&quot;, &quot;question_12345_url_filename&quot;: &quot;attachment.pdf&quot;</td>
+</tr>
+</tbody></table>
+<h3 id='collecting-applicant-location'>Collecting Applicant Location</h3>
+<p>Here is the suggested workflow for populating <code>location</code>, <code>latitude</code>, <code>longitude</code>, and <code>country_short_name</code>:</p>
+
+<ol>
+<li>The applicant begins typing a location in your <code>location</code> text box.</li>
+<li>As the applicant types, your app makes a call to the <a href="https://developers.google.com/maps/documentation/javascript/places-autocomplete">Google Places Autocomplete API</a>
+to retrieve suggested location names (e.g. New York, NY, United States)
+and the <code>place_id</code> associated with each location (e.g. <code>ChIJOwg_06VPwokRYv534QaPC8g</code>).</li>
+<li>Your app displays the suggested location names to the applicant.</li>
+<li>The applicant selects a suggested location.</li>
+<li>Your app uses the <code>place_id</code> from the previous API call to retrieve the latitude,
+longitude, and address components for the selected location using the <a href="https://developers.google.com/maps/documentation/javascript/places#place_details">Google Place Details API</a>.</li>
+<li>Your app populates the hidden <code>latitude</code> and <code>longitude</code> fields with the result of
+this API call.</li>
+<li>Your app finds the address component where <code>types</code> includes <code>&quot;country&quot;</code> and populates the
+hidden <code>country_short_name</code> field with that component&#39;s <code>short_name</code> (e.g. <code>&quot;US&quot;</code>, <code>&quot;FR&quot;</code>)</li>
+</ol>
+
+<p>Note that <code>location</code>, <code>latitude</code>, and <code>longitude</code> must all be included. If only <code>location</code> is
+sent and <code>latitude</code> and <code>longitude</code> are omitted, <code>location</code> will be ignored entirely.
+Including <code>country_short_name</code> is strongly recommended - it enables fraud detection
+location checks for submitted applications.</p>
+<h3 id='validations-on-post-requests'>Validations on POST Requests</h3>
+<p><strong>Job validations:</strong></p>
+
+<ul>
+<li>The job must be live and published</li>
+<li>The job board must be live and published</li>
+<li>The job post ID must exist on the job board with the supplied board_token</li>
+</ul>
+
+<p><strong>Field validations:</strong></p>
+
+<ul>
+<li><code>first_name</code>, <code>last_name</code>, and <code>email</code> fields are required</li>
+<li><code>first_name</code>, <code>last_name</code>, and <code>email</code> fields cannot be greater than 255 characters long</li>
+<li><code>first_name</code>, <code>last_name</code>, and <code>phone</code> fields must not contain a URL</li>
+<li><code>email</code> field must contain a valid email address</li>
+<li><code>educations</code> object must contain valid <code>school_name_id</code>, <code>degree_id</code>, <code>discipline_id</code>, <code>start_date</code>, and <code>end_date</code></li>
+<li><code>employments</code> object must contain <code>company_name</code>, <code>title</code>, <code>start_date</code> and <code>current</code> (must be <code>true</code> or <code>false</code>). If <em>current=false</em>, must contain <code>end_date</code></li>
+<li><code>start_date</code> must be before <code>end_date</code></li>
+<li>Field values must match the field type specified on the job post question</li>
+</ul>
+
+<p><strong>Attachments:</strong></p>
+
+<ul>
+<li>Must be a supported file type (pdf, doc, docx, txt, rtf)</li>
+<li>File size must be &gt; 0 bytes</li>
+</ul>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+                <a href="#" data-language-name="json">json</a>
+          </div>
+      </div>
+    </div>
+  </body>
+</html>
