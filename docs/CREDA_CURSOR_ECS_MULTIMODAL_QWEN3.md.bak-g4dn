@@ -1,0 +1,81 @@
+# CURSOR — Get ECS multimodal Qwen3 working (cheap, warm, good enough)
+
+**Modes:** `/architect` then `/poteto-mode`
+
+Repo: `/Users/siva/Documents/first_commit_hack`  
+AWS: `creda-dev` · `ap-south-1`  
+API: `https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com`  
+No PR unless asked.
+
+## Goal
+Ship **one warm ECS judge** that:
+1. Runs a **Qwen3-family multimodal** model (vision + text) for screenshots / PDF page images  
+2. Uses **vLLM or llama.cpp** — pick what is cheaper *and* good enough for Creda JSON judgments  
+3. Stays **warm** (request must work immediately — no cold create)  
+4. Keeps day-to-day bill inside ~$250 credits when possible  
+
+## Decision (locked — do not reopen unless blocked)
+| Workload | Runtime | Why |
+|----------|---------|-----|
+| **Multimodal (screenshots + PDF pages)** | **vLLM on GPU** (`g5.xlarge` via **ECS on EC2**, not Fargate) | JumpStart twin; llama.cpp VL on CPU is too slow/weak for product demos |
+| **Text-only fallback** | **llama.cpp** Qwen3-4B-Instruct GGUF on existing **Fargate** | Cheap always-on when GPU ASG desired=0 |
+
+**Default for “Creda works” demos:** GPU vLLM Qwen3 VL warm.  
+**Default overnight / low budget:** Fargate text llama (OCR text only for PDFs).
+
+Do **not** try multimodal vLLM on Fargate. Do **not** use SageMaker endpoint for this pass (deleted on purpose).
+
+---
+
+## /architect (short)
+1. Confirm GPU quota for `g5.xlarge` in ap-south-1  
+2. Model id: prefer **Qwen3 / Qwen3.5 4B VL Instruct** (same family as JumpStart `huggingface-vlm-qwen3-5-4b`)  
+3. Wire: worker `JUDGE_BACKEND=vllm` → `http://127.0.0.1:8000/v1/chat/completions`  
+4. PDF path: poppler/pdftoppm first 1–2 pages → images + optional Textract text in packet  
+5. Up/down scripts for GPU ASG (demo day)
+
+Then `/poteto-mode`.
+
+---
+
+## Implement
+
+### 1) GPU ECS service (EC2)
+- Capacity provider: ECS-optimized **GPU AMI** + ASG **`g5.xlarge`** (desired 0 or 1)
+- Task: sidecar **vLLM** serving Qwen3 VL + existing **strands-worker**
+- Healthcheck vLLM before SQS consume
+- Scripts: `scripts/creda_gpu_up.sh` / `creda_gpu_down.sh` (desired 1 ↔ 0)
+
+### 2) Worker
+- `JUDGE_BACKEND=vllm` when GPU service up; else `llama`
+- Reuse `media_loader.load_case_images` + chat content like `vlm_inference.py`
+- Max 2 images; downscale long edge (~1024) for cheap tokens / VRAM
+- **Short JSON out**: verdict, headline, reasoning (≤~120 tokens), nextActions[{label,detail,tone}] — keep completions small = cheaper + faster
+- Qwen is judge centerpiece; tools (ATS searcher, domain, fees) feed the packet — don’t override verdict with a second rule stamp for the product path
+
+### 3) Cheap tokens knobs (required)
+- `max_tokens` ≤ 180–220 for judge JSON  
+- temperature 0  
+- No long chain-of-thought / disable thinking if model supports it  
+- Compact evidence packet (truncate excerpts)  
+- Prefer **4B VL** over 7B+/72B  
+
+### 4) Amplify UI (minimum for multimodal)
+- + attach PDF + screenshots; show thumbs while waiting  
+- Wait copy: “Qwen reading your pages…” when attachments present  
+- Fix nextActions string→object so orders aren’t “Next step”
+
+### 5) Acceptance
+- [ ] `creda_gpu_up.sh` → vLLM health OK → smoke VL completion with 1 PNG  
+- [ ] Live case + screenshot → READY, `agentSource` shows vllm/creda-vlm  
+- [ ] Live case + PDF → pages or OCR reach model; coherent ruling  
+- [ ] `creda_gpu_down.sh` → GPU stopped; Fargate text path still judges text-only cases  
+- [ ] Document $/hr when GPU up  
+
+## Hard fail
+- Multimodal claimed on Fargate CPU llama only  
+- SageMaker endpoint recreated “for convenience” without up/down discipline  
+- Giant max_tokens / verbose CoT burning time and money  
+
+## Done
+Architect note · GPU up smoke · one PDF + one screenshot case · GPU down · Amplify note · Ready for Grok test loop
