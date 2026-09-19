@@ -1,0 +1,20 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - |
+          if [ -z "$CREDA_API_URL" ] && [ -n "$VITE_API_URL" ]; then
+            export CREDA_API_URL="$VITE_API_URL"
+          fi
+          if [ -z "$CREDA_API_URL" ]; then
+            echo "CREDA_API_URL is not set; using known API fallback"
+            export CREDA_API_URL="https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com"
+          fi
+        - sed -i "s|__CREDA_API_URL__|${CREDA_API_URL}|g" index.html
+  artifacts:
+    baseDirectory: .
+    files:
+      - '**/*'
+  cache:
+    paths: []
