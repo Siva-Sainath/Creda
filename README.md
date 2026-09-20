@@ -1,82 +1,135 @@
-# Creda - check the offer before you send the money
+# Creda
 
-Students keep getting WhatsApp "HR" with a Flipkart logo, a Rs 2,499 PhonePe kit, and a Gmail address. Creda is the 30-second check we wanted before anyone pays.
+## You get a job offer. 30 seconds to tell if it's real.
 
-[Open the live app](https://main.d32sg54oqu2gcb.amplifyapp.com/) · [Telegram @CredashieldBot](https://t.me/CredashieldBot) · Mumbai `ap-south-1`
+Every month, thousands of students in India see a WhatsApp message with a company logo, a salary, and a bank account. "Send Rs 2,500 for the kit and you're hired." It's never real.
 
-![Creda architecture in ap-south-1](docs/architecture.png)
+**Creda checks if a job offer is a scam** — paste the text, get a verdict in 30 seconds. No login. Same check on the web, Telegram, or Chrome.
 
-Paste the offer. We stamp **high risk**, **unverified**, or **no conflict found**. No account. Same loop on the web, Telegram, and a Chrome extension.
+**[Open the app](https://main.d32sg54oqu2gcb.amplifyapp.com/)** · **[Telegram @CredashieldBot](https://t.me/CredashieldBot)**
 
-## Why this one
+![Creda checks your offer against real employer data](docs/architecture.png)
 
-1. **Same text the scammer sent.** We do not need a cleaned demo. Drop the WhatsApp copy in and wait for the stamp.
-2. **Official sources, not vibes.** Gatherer + Searcher hits employer ATS indexes, domain checks, and known fee tactics. EventBridge refreshes that index daily.
-3. **Three honest rulings.** High risk when they ask for UPI. Unverified when LinkedIn is vague. No conflict when the Greenhouse link is real. We are not a fear machine.
-4. **Cheap enough to leave on.** API Gateway HTTP + Lambda + DynamoDB + SQS + S3 + Amplify sit in free tier or a few USD a month at student volume. The only real bill is a warm judge.
-5. **Built for the person with chat open.** No Cognito. A case token in the header. Mumbai region, next to the phones getting these texts.
+## What you get
 
-## Cost (Mumbai)
+**Three honest verdicts.** We don't scare you just to scare you.
 
-| What | What you pay |
-| --- | --- |
-| 1,000 checks / month, judge off | under USD 5 |
-| Warm Fargate judge (4 vCPU / 8 GB) | ~USD 5 / day, scale to 0 after judging |
-| GPU for screenshots (g4dn.xlarge) | ~USD 0.58 / hour, `scripts/creda_gpu_up.sh` then down |
+- **High risk**: They ask for money upfront, fake email, or known scammer tactics.
+- **Unverified**: Real company, but something doesn't add up (vague role, no clear hiring process).
+- **No conflict found**: The company is hiring, this looks real, go for it.
 
-One fake "laptop deposit" already costs more than a weekend of Creda with the text judge warm.
+**Works with what you already have.** Paste the actual WhatsApp text the scammer sent. Copy a screenshot. Drop a job URL. We'll check it.
 
-## Paste these
+**Answers in 30 seconds.** We compare your offer against official employer careers pages, ATS indexes, and a database of known scam fee structures. It's fast because we cache the evidence overnight.
 
-**Scam (full loop):**
+**Runs where you are.** Amplify web app in India. Telegram for anyone. No account, no tracking.
+
+## Try it
+
+**Definitely a scam:**
 
 ```
-Flipkart hiring for WFH catalog tagging. Salary 35k/month. Buy starter kit Rs 2499 on PhonePe to hr.flipkart.wfh@gmail.com. Training on WhatsApp group only.
+Flipkart hiring for WFH catalog tagging. Salary 35k/month. 
+Buy starter kit Rs 2499 on PhonePe to hr.flipkart.wfh@gmail.com. 
+Training on WhatsApp group only.
 ```
 
-**Not enough proof:**
+**Suspicious but not proof:**
 
 ```
-LinkedIn InMail from Notion Talent: We loved your profile for a remote PM role. Reply with your salary expectation. Interview tomorrow on Google Meet, no prep needed.
+LinkedIn InMail from Notion Talent: We loved your profile for a remote PM role. 
+Reply with your salary expectation. Interview tomorrow on Google Meet, no prep needed.
 ```
 
-**Looks fine:** a real Greenhouse or careers URL. No fee.
+**Probably real:** a direct link to Flipkart Careers or LinkedIn from a verified account, no upfront fee.
 
-## How it runs
+## Why we built this
 
-```
-seeker -> Amplify UI / Telegram
-      -> API Gateway HTTP API
-      -> Intake Lambda -> DynamoDB + S3
-      -> SQS -> Gatherer / Searcher Lambda  (EventBridge daily ATS refresh)
-      -> SQS -> Fargate Qwen3-4B  (optional g4dn + Qwen-VL)
-      -> poll DynamoDB -> stamp
-```
+A student who pays Rs 2,499 (USD 3) for a fake "starter kit" loses two weeks of part-time income. If Creda takes 30 seconds to save one student a month, it pays for itself. We built it because scam offers keep changing but the pattern doesn't.
 
-HTTP API instead of REST (cheaper for this traffic). Evidence bundle is built offline and stored on S3 so Lambda does not run pandas on click. GPU is opt-in and the ASG goes to zero when we are not filming.
+## How it works (the short version)
 
-## Run it
+You paste an offer → we check it against real employer websites → we look for fee tactics (UPI requests, "kit" payments, registration fees) → we tell you what we found.
+
+If you send a screenshot, we can read it with image AI. If you're not sure what service to trust, we tell you honestly: we couldn't verify, so be careful.
+
+## The stack
+
+We run it cheap so students can use it free. Here's what you need to know:
+
+- **Web:** Amplify (static hosting)
+- **API:** Lambda functions that check employers and scam patterns
+- **Database:** DynamoDB (stores your cases so you can follow up)
+- **Search:** Overnight batch job that refreshes employer data from ATS indexes
+- **Judge:** Small Qwen model on Fargate (decides if it's a scam)
+- **Optional:** GPU when you upload a screenshot (usually off, costs almost nothing at this scale)
+
+**What it costs:**
+
+| Scenario | Cost |
+|----------|------|
+| 1,000 students checking offers per month (text only) | under USD 5 |
+| Keep the judge warm 24/7 | ~USD 5/day |
+| GPU for screenshot reading (when used) | ~USD 0.58/hour |
+
+One fake deposit that doesn't work out costs way more than a month of Creda.
+
+## Set it up
+
+**For you (try it live right now):**
+
+[Open app](https://main.d32sg54oqu2gcb.amplifyapp.com/)
+
+**For Telegram:**
+
+Message [@CredashieldBot](https://t.me/CredashieldBot), paste an offer, get a verdict.
+
+**For developers (run it yourself):**
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+# Set up Python
+python -m venv .venv
+source .venv/bin/activate
+
+# Install and run
 pip install -r requirements.txt
 bash scripts/serve_frontend.sh
 ```
 
 ```bash
+# Check the API is alive
 curl -s https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com/health | jq .
 ```
 
-Deploy: `DEPLOY.md`. Telegram: `docs/TELEGRAM_SETUP.md`.
+**Full setup:** See `DEPLOY.md` and `docs/TELEGRAM_SETUP.md`.
+
+**Telegram hardening:** See `docs/TELEGRAM_BOT_HARDENING.md`.
+
+## Structure
 
 ```
-backend/     Lambda
-frontend/    Amplify app
-infra/       SAM + ECS
-deploy/bundle/  evidence JSON
-extension/   Chrome
-scripts/     deploy, tests, GPU
-docs/        architecture.png, operator notes
+backend/           Lambda functions that do the checking
+frontend/          The web app (Amplify)
+infra/             Deployment templates (SAM, ECS)
+scripts/           Deploy, tests, and GPU scaling
+docs/              Setup guides, architecture notes
+deploy/bundle/     Employer evidence (built offline)
+extension/         Chrome helper
 ```
 
-Want `creda.in` instead of `*.amplifyapp.com`? Buy the name in Route 53, then Amplify Hosting, Custom domains, map `main` to the root.
+## For your own domain
+
+The app lives at `*.amplifyapp.com` and you can't rename that. To use your own domain:
+
+1. Buy a domain in Route 53 (e.g., `creda.in`)
+2. In the Amplify console, go to **Hosting** → **Custom domains**
+3. Map your domain to the `main` branch
+
+That's it. You'll have your own URL in a few minutes.
+
+## Next
+
+- **Run it locally:** `DEPLOY.md`
+- **Set up Telegram:** `docs/TELEGRAM_SETUP.md`
+- **How we check:** `docs/MVP-HARDENED-ARCHITECTURE.md`
+- **Report a bug:** [GitHub Issues](https://github.com/Siva-Sainath/Creda/issues)
