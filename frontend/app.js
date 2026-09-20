@@ -1230,7 +1230,7 @@
       var params = new URLSearchParams(window.location.search);
       var caseId = params.get("case");
       var token = params.get("token");
-      if (!caseId || !token) return;
+      if (!caseId || !token) return false;
       session.caseId = caseId;
       session.token = token;
       saveSession();
@@ -1240,7 +1240,8 @@
         var qs = params.toString();
         window.history.replaceState({}, "", window.location.pathname + (qs ? "?" + qs : ""));
       }
-    } catch (e) {}
+      return true;
+    } catch (e) { return false; }
   }
 
   function restoreSession() {
@@ -3009,13 +3010,24 @@
         if (e.target === sheet) toggleReportPanel(false);
       });
     }
-    bootstrapSessionFromUrl();
-    restoreSession();
-    checkHealth().then(function () {
-      if (session.caseId && session.token) resumeSession();
-    }).catch(function () {
-      if (session.caseId && session.token) resumeSession();
-    });
+    // Only resume a case when arriving via an explicit deep link (?case=&token=,
+    // e.g. shared from Telegram). A plain reload/hard-refresh must always land
+    // on a clean intake, not silently re-open whatever case was last open —
+    // sessionStorage otherwise survives refreshes and traps people on stale
+    // wait/result screens they meant to abandon.
+    var arrivedViaDeepLink = bootstrapSessionFromUrl();
+    if (arrivedViaDeepLink) {
+      checkHealth().then(function () {
+        if (session.caseId && session.token) resumeSession();
+      }).catch(function () {
+        if (session.caseId && session.token) resumeSession();
+      });
+    } else {
+      session.caseId = null;
+      session.token = null;
+      try { sessionStorage.removeItem("creda_case"); } catch (e) {}
+      checkHealth().catch(function () {});
+    }
   }
 
   window.CredaPreviewResult = function (data) {

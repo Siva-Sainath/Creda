@@ -683,9 +683,9 @@ body.creda.has-case .pane-casefile { min-height: calc(100dvh - var(--header-h) -
 #view-result:not(.hidden) { flex: 1; }
 .result-board {
   display: grid; gap: 0.85rem 1.25rem; align-content: start;
-  flex: 1; min-height: 0; width: 100%; max-width: none; margin: 0;
+  width: 100%; max-width: none; margin: 0;
   grid-template-rows: auto auto auto auto;
-  overflow-y: auto; padding-bottom: 0.5rem;
+  padding-bottom: 1.5rem;
 }
 .report-main {
   display: grid; gap: 0.85rem; min-width: 0;
@@ -791,7 +791,7 @@ body[data-verdict="unverified"] .timeline-dot { border-color: #9a6700; color: #9
 .ticket p { margin: 0; color: var(--muted); font-weight: 500; font-size: 0.78rem; line-height: 1.4; }
 
 /* Evidence clip cards — replaces the plain numbered source list */
-.board-sources { min-height: 0; overflow: auto; }
+.board-sources { min-height: 0; }
 .evidence-row { margin: 0; padding: 0; display: grid; gap: 0.5rem; }
 .evidence-card {
   display: grid; grid-template-columns: 1.35rem minmax(0, 1fr); gap: 0.5rem; align-items: start;
