@@ -167,11 +167,29 @@ function start() {
     canvas,
     antialias: true,
     alpha: true,
-    powerPreference: "low-power",
+    // "low-power" can make macOS switch the tab to the integrated GPU mid-session
+    // whenever the discrete GPU is released elsewhere, which shows up as a brief
+    // black/flicker frame while the context migrates. Default avoids that churn.
+    powerPreference: "default",
+    preserveDrawingBuffer: false,
   });
   renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  // If the GL context is ever lost (GPU switch, tab backgrounding, driver
+  // hiccup), stop rendering instead of drawing garbage/blank frames, and
+  // pick back up cleanly once the browser restores it.
+  let contextLost = false;
+  canvas.addEventListener("webglcontextlost", function (e) {
+    e.preventDefault();
+    contextLost = true;
+  });
+  canvas.addEventListener("webglcontextrestored", function () {
+    contextLost = false;
+    hudSnap = true;
+    resize();
+  });
 
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 50);
   camera.position.set(8.4, 6.6, 8.4);
@@ -262,10 +280,21 @@ function start() {
   const cycle = 7.2;
   const _fitV = new THREE.Vector3();
   const _fitBox = new THREE.Box3();
+  let lastResizeW = -1;
+  let lastResizeH = -1;
+  let lastResizeLive = null;
 
   function resize() {
     const w = Math.max(1, host.clientWidth || 480);
     const h = Math.max(1, host.clientHeight || 280);
+    // Some layouts (flex/grid reflow, font swap, sibling GSAP tweens) fire the
+    // ResizeObserver repeatedly for the same effective size. Recomputing the
+    // camera frustum and re-snapping the HUD labels on every one of those
+    // no-op callbacks is what reads as "flicker" — skip when nothing changed.
+    if (w === lastResizeW && h === lastResizeH && liveMode === lastResizeLive) return;
+    lastResizeW = w;
+    lastResizeH = h;
+    lastResizeLive = liveMode;
     renderer.setSize(w, h, false);
     const aspect = w / h;
 
@@ -343,7 +372,7 @@ function start() {
 
   function tick(now) {
     requestAnimationFrame(tick);
-    if (!visible()) return;
+    if (!visible() || contextLost) return;
 
     let stage;
     let targetU;

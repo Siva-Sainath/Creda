@@ -566,7 +566,7 @@
       "#orders-host .action-badge", "#tactics-host .tactic-tile",
       "#exhibits-host .extra-checks", "#judgment-host .why-collapsed",
       ".report-hero", "#report-stats", "#conversation-host .conv-bubble",
-      ".timeline-item", ".ticket", ".evidence-card"
+      ".timeline-item", ".timeline-copy .fw", ".ticket", ".ticket-icon", ".evidence-card"
       ];
     },
     forceRevealVisible: function () {
@@ -624,12 +624,21 @@
         .to(timelineLine, { scaleY: 1, duration: 0.55, ease: "power2.inOut" }, "-=0.05")
         .fromTo(".timeline-dot", { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.32, stagger: 0.14, ease: "back.out(2.4)" }, "-=0.45")
         .fromTo(".timeline-copy", { x: -10, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.3, stagger: 0.14 }, "<0.05")
+        .fromTo(".timeline-copy .fw", { y: 5, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 0.22, stagger: 0.012, ease: "power1.out"
+        }, "<0.05")
         .fromTo(".ticket", { y: 16, autoAlpha: 0, rotation: -1.5 }, {
           y: 0, autoAlpha: 1, rotation: 0, duration: 0.34, stagger: 0.06, ease: "back.out(1.5)"
-        }, "-=0.25")
+        }, "-=0.15")
+        .fromTo(".ticket-icon", { scale: 0, rotation: -25 }, {
+          scale: 1, rotation: 0, duration: 0.32, stagger: 0.06, ease: "back.out(3)"
+        }, "-=0.28")
         .fromTo(".evidence-card", { x: 14, autoAlpha: 0 }, {
           x: 0, autoAlpha: 1, duration: 0.28, stagger: 0.05
         }, "-=0.4")
+        .fromTo(".evidence-index", { scale: 0 }, {
+          scale: 1, duration: 0.28, stagger: 0.05, ease: "back.out(2.6)"
+        }, "-=0.32")
         .fromTo("#conversation-host .conv-bubble, .followup-composer .chip", { y: 8, autoAlpha: 0 }, {
           y: 0, autoAlpha: 1, duration: 0.24, stagger: 0.04
         }, "-=0.15");
@@ -750,6 +759,21 @@
     return blocks.slice(0, 3);
   }
 
+  function wordFlowHtml(text) {
+    var raw = String(text || "").trim();
+    if (!raw) return "";
+    var words = raw.split(/\s+/);
+    if (words.length > 60) return '<span class="flow-text">' + linkifyEsc(raw) + "</span>";
+    return (
+      '<span class="flow-text">' +
+        words.map(function (w) {
+          var inner = /^https?:\/\//i.test(w) ? linkifyEsc(w) : esc(w);
+          return '<span class="fw">' + inner + "</span>";
+        }).join(" ") +
+      "</span>"
+    );
+  }
+
   function findingsHtml(text) {
     var parts = splitFindings(text);
     if (!parts.length) return "";
@@ -760,7 +784,7 @@
           return (
             '<div class="timeline-item">' +
               '<span class="timeline-dot">' + (i + 1) + "</span>" +
-              '<div class="timeline-copy">' + linkifyEsc(p) + "</div>" +
+              '<div class="timeline-copy">' + wordFlowHtml(p) + "</div>" +
             "</div>"
           );
         }).join("") +
@@ -1294,7 +1318,7 @@
     if (follow) {
       var followReady = name === "result" && !conversationPending;
       follow.disabled = !followReady;
-      follow.textContent = conversationPending ? "Waiting…" : "Send";
+      follow.classList.toggle("is-sending", !!conversationPending);
     }
     if (fu) fu.disabled = name !== "result" || conversationPending;
     if (report) report.disabled = name === "wait";
@@ -2591,7 +2615,7 @@
         );
         data.conversationTurns = optimisticTurns;
         var fb = $("btn-followup");
-        if (fb) { fb.disabled = false; fb.textContent = "Send"; }
+        if (fb) { fb.disabled = false; fb.classList.remove("is-sending"); }
         var fi = $("followup-input");
         if (fi) fi.disabled = false;
         document.body.classList.remove("ui-waiting");
@@ -2633,7 +2657,7 @@
         data.conversationTurns = cleaned;
         optimisticTurns = cleaned;
         var fb2 = $("btn-followup");
-        if (fb2) { fb2.disabled = false; fb2.textContent = "Send"; }
+        if (fb2) { fb2.disabled = false; fb2.classList.remove("is-sending"); }
         var fi2 = $("followup-input");
         if (fi2) fi2.disabled = false;
         document.body.classList.remove("ui-waiting");
@@ -2778,7 +2802,7 @@
     if (!q) { showError("followup-error", "Type a question first.", { focusId: "followup-input" }); return; }
     if (!session.caseId || !session.token) { showError("followup-error", "No active case.", { onRetry: resetToIntake }); return; }
     $("btn-followup").disabled = true;
-    $("btn-followup").textContent = "Waiting…";
+    $("btn-followup").classList.add("is-sending");
     optimisticTurns = (lastData && lastData.conversationTurns) ? lastData.conversationTurns.slice() : [];
     optimisticTurns.push({ role: "user", text: q });
     followupBaseline = {
@@ -2824,7 +2848,7 @@
     } finally {
       if (!conversationPending) {
         $("btn-followup").disabled = false;
-        $("btn-followup").textContent = "Send";
+        $("btn-followup").classList.remove("is-sending");
       }
     }
   }
