@@ -1,114 +1,81 @@
 # Creda
 
-Paste a job offer. Get a ruling before you pay.
+Check a job offer before you pay.
 
-- Live: https://main.d32sg54oqu2gcb.amplifyapp.com/
-- API: `https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com`
-- Telegram: [@CredashieldBot](https://t.me/CredashieldBot)
-- Region: `ap-south-1` (Mumbai)
+**Try it:** https://main.d32sg54oqu2gcb.amplifyapp.com/  
+**Bot:** [@CredashieldBot](https://t.me/CredashieldBot)  
+**API:** `https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com` (Mumbai)
 
-## Why
+## What we built
 
-- Fake offers land on WhatsApp, Gmail, and LinkedIn with real company names.
-- They ask for a small UPI, a "laptop deposit", or a PhonePe kit.
-- We are students. We wanted a check that uses the same text, before anyone pays.
+- Paste offer text, a screenshot, or a URL. No account.
+- Creda pulls official careers data and known fee tactics, then stamps **high risk**, **unverified**, or **no conflict found**.
+- Same flow on the website, Telegram, and a Chrome extension.
 
-## What it does
+We built this because fake Flipkart / TCS / Infosys offers keep landing on student WhatsApp with a small UPI or "laptop deposit".
 
-- Paste text, a screenshot, a PDF, or a URL.
-- Pulls official ATS listings, employer domain, and known fee tactics.
-- Stamps one of: **high risk**, **unverified**, **no conflict found**.
-- Shows exhibits and next steps.
-- Same loop on the website, Telegram, and a Chrome extension.
-- No login. A case token in the header is enough.
+## Paste these
 
-## Try these
-
-High risk:
+**Scam (full demo):**
 
 ```
 Flipkart hiring for WFH catalog tagging. Salary 35k/month. Buy starter kit Rs 2499 on PhonePe to hr.flipkart.wfh@gmail.com. Training on WhatsApp group only.
 ```
 
-Unverified:
+**Not enough proof:**
 
 ```
 LinkedIn InMail from Notion Talent: We loved your profile for a remote PM role. Reply with your salary expectation. Interview tomorrow on Google Meet, no prep needed.
 ```
 
-No conflict: a real Greenhouse or careers URL, no fee.
+**Looks fine:** a real Greenhouse or careers link, no upfront fee.
 
-## How it is built
+## Stack (ap-south-1)
 
-```
-seeker -> Amplify / Telegram
-       -> API Gateway (HTTP)
-       -> Intake Lambda -> DynamoDB + S3
-       -> SQS -> Gatherer/Searcher Lambda
-       -> EventBridge (daily ATS refresh)
-       -> SQS -> Fargate (Qwen 4B)
-       -> poll DynamoDB -> UI
-```
+| Piece | Service |
+| --- | --- |
+| UI | Amplify Hosting |
+| API | API Gateway HTTP API |
+| Intake | Lambda, DynamoDB, S3 |
+| Evidence | SQS, Lambda, EventBridge (daily refresh) |
+| Judge | ECS Fargate, llama.cpp Qwen3-4B |
+| Screenshots (optional) | g4dn + Qwen-VL, scaled to 0 when idle |
 
-| Service | Role | Why this one |
-| --- | --- | --- |
-| Amplify Hosting | UI | Static HTTPS. No app server. |
-| API Gateway HTTP API | Public routes | Cheaper than REST for this traffic. Throttle 2 req/s. |
-| Lambda (ARM) | Intake, gather, ingest | Scales to zero. |
-| DynamoDB on-demand | Cases, token hash, reports | Pay per request. TTL. |
-| S3 | Uploads + evidence bundle | Presigned PUT. Bundle built offline, not at click time. |
-| SQS | Worker queue, then judge queue | API returns 202. DLQ on failure. |
-| EventBridge | Daily refresh | No always-on ETL box. |
-| ECS Fargate | llama.cpp Qwen3-4B | Real stamp. Only always-on compute. |
-| g4dn.xlarge (optional) | Qwen-VL for screenshots | ~USD 0.58/hour. Scale ASG to 0 after. |
-
-No Cognito on the student path. No SageMaker on the live path.
+No Cognito on the student path. Evidence bundle is built offline and uploaded to S3 so Lambda does not run ETL on each click.
 
 ## Cost
 
-Request path (API Gateway + Lambda + DynamoDB + SQS + S3 + EventBridge + Amplify): free tier or a few USD/month at student volume.
+- API path at student volume: free tier or a few USD/month.
+- Warm Fargate judge (demo): about USD 5/day if you leave it on. We scale down after judging.
+- GPU: about USD 0.58/hour in Mumbai, only when needed.
 
-| If left on | What you pay |
-| --- | --- |
-| Fargate judge, 4 vCPU / 8 GB, desired 1 | ~USD 5/day |
-| g4dn.xlarge | ~USD 0.58/hour, only when `scripts/creda_gpu_up.sh` |
-| 1,000 checks/month, Fargate off, no GPU | under USD 5 |
-
-A weekend of judging with the text judge warm is still cheaper than one fake deposit.
-
-## Custom domain
-
-You cannot rename `*.amplifyapp.com`. Buy `creda.in` (or similar) in Route 53. Amplify console: Hosting, Custom domains, Add domain, Amplify-managed cert, map branch `main` to the root.
-
-## Layout
+## Repo
 
 ```
-backend/        Lambda
-frontend/       Amplify app
-infra/          SAM + ECS
-deploy/bundle/  evidence JSON for S3
-extension/      Chrome
-scripts/        deploy, ETL, GPU, tests
-schemas/        judge JSON
+backend/        Lambda handlers
+frontend/       Static app (Amplify)
+infra/          SAM + ECS templates
+deploy/bundle/    Evidence JSON for S3
+extension/      Chrome helper
+scripts/        Deploy and tests
+schemas/        Judge output JSON
+docs/           Telegram setup, test prompts, architecture notes
 ```
 
-Operator steps: `DEPLOY.md`.
+Deploy: `DEPLOY.md`. Telegram: `docs/TELEGRAM_SETUP.md`.
 
-## Run
+## Local
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 bash scripts/serve_frontend.sh
 ```
 
 ```bash
-export CREDA_API_URL=https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com
-curl -s "$CREDA_API_URL/health" | jq .
+curl -s https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com/health | jq .
 ```
 
-```bash
-bash scripts/deploy.sh
-bash scripts/smoke_mvp.sh
-```
+## Custom domain
+
+You cannot rename `*.amplifyapp.com`. Buy a domain in Route 53, then Amplify console, Hosting, Custom domains, map `main` to the root.

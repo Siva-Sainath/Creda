@@ -16,6 +16,7 @@ __pycache__/
 node_modules/
 frontend/dist/
 frontend/deploy.zip
+diffusion-creda-arch/node_modules/
 
 # Local caches and scratch
 .skills-cache/
@@ -32,3 +33,12 @@ data/curated/evidence.jsonl
 data/curated/evidence.parquet
 data/raw/cafc_fraud_reports/
 data/raw/emscad/
+
+# Agent / session notes (not for repo pickup)
+docs/composer/
+docs/astra/
+docs/reference/
+docs/screenshots/
+scripts/demo-narration.txt
+diffusion-creda-arch/captures/
+diffusion-creda-arch/exports/*.mp4
