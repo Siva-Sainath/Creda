@@ -6,8 +6,6 @@ Students keep getting WhatsApp "HR" with a Flipkart logo, a Rs 2,499 PhonePe kit
 
 ![Creda architecture in ap-south-1](docs/architecture.png)
 
-[60-second architecture tour](docs/creda-architecture.mp4)
-
 Paste the offer. We stamp **high risk**, **unverified**, or **no conflict found**. No account. Same loop on the web, Telegram, and a Chrome extension.
 
 ## Why this one
@@ -78,7 +76,7 @@ infra/       SAM + ECS
 deploy/bundle/  evidence JSON
 extension/   Chrome
 scripts/     deploy, tests, GPU
-docs/        architecture.png, architecture tour, operator notes
+docs/        architecture.png, operator notes
 ```
 
 Want `creda.in` instead of `*.amplifyapp.com`? Buy the name in Route 53, then Amplify Hosting, Custom domains, map `main` to the root.
