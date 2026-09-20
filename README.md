@@ -1,200 +1,114 @@
-# Creda WorkOffer Shield
+# Creda
 
-Verify job offers against official employer sources before you reply. Creda combines deterministic checks, curated evidence bundles, and a Qwen-based judge to produce a stamped verdict, exhibits, and next steps.
+Paste a job offer. Get a ruling before you pay.
 
-**Live demo**
+- Live: https://main.d32sg54oqu2gcb.amplifyapp.com/
+- API: `https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com`
+- Telegram: [@CredashieldBot](https://t.me/CredashieldBot)
+- Region: `ap-south-1` (Mumbai)
 
-| Surface | URL |
-|---------|-----|
-| Web UI | https://main.d32sg54oqu2gcb.amplifyapp.com |
-| API | https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com |
+## Why
 
-Region: `ap-south-1` (Mumbai). AWS profile for operators: `creda-dev`.
+- Fake offers land on WhatsApp, Gmail, and LinkedIn with real company names.
+- They ask for a small UPI, a "laptop deposit", or a PhonePe kit.
+- We are students. We wanted a check that uses the same text, before anyone pays.
 
-## Table of contents
+## What it does
 
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Repository layout](#repository-layout)
-- [Prerequisites](#prerequisites)
-- [Quick start](#quick-start)
-- [Deployment](#deployment)
-- [GPU judge (optional)](#gpu-judge-optional)
-- [Testing](#testing)
-- [Configuration](#configuration)
-- [Documentation](#documentation)
-- [License](#license)
+- Paste text, a screenshot, a PDF, or a URL.
+- Pulls official ATS listings, employer domain, and known fee tactics.
+- Stamps one of: **high risk**, **unverified**, **no conflict found**.
+- Shows exhibits and next steps.
+- Same loop on the website, Telegram, and a Chrome extension.
+- No login. A case token in the header is enough.
 
-## Overview
+## Try these
 
-Creda is built for competition and demo use: a single-page intake UI, an async case API, and a worker that assembles evidence from ATS listings, domain signals, scam tactic indexes, and optional multimodal input (screenshots and PDFs). The model returns structured JSON (verdict, headline, reasoning, exhibits, next actions). Deterministic rules annotate the packet but do not silently override the model stamp on the product path.
-
-## Features
-
-- **Case intake**: paste offer text, inline URLs (auto-detected), screenshots, or PDFs
-- **Evidence pipeline**: employer registry, vacancy index, channel patterns, hiring pipeline profiles, official ATS sources
-- **Verdict surface**: ruling stamp, tactic tiles, exhibit slips, follow-up conversation with snapshot preservation on re-verify
-- **Report scam**: submit new tactic reports from the results view
-- **Telegram bot**: same checks via `@CredashieldBot` (see `docs/TELEGRAM_SETUP.md`)
-- **Chrome extension**: capture page context and selected text from careers pages (`extension/`)
-
-## Architecture
+High risk:
 
 ```
-Browser / Telegram / Extension
-            |
-            v
-    API Gateway (HTTP)
-            |
-            v
-    Intake Lambda  ------>  DynamoDB (cases)
-            |
-            v
-         SQS queue
-            |
-            v
-    ECS judge worker  ---->  S3 (attachments, bundles)
-            |                    |
-            |                    +--> Curated evidence (deploy/bundle/)
-            v
-    Qwen judge (Fargate text and/or g4dn GPU multimodal)
+Flipkart hiring for WFH catalog tagging. Salary 35k/month. Buy starter kit Rs 2499 on PhonePe to hr.flipkart.wfh@gmail.com. Training on WhatsApp group only.
 ```
 
-| Component | Role |
-|-----------|------|
-| `backend/intake` | REST API: create case, poll status, upload URLs, health, reports |
-| `backend/worker` | Legacy Lambda worker path (deterministic + optional Strands) |
-| `infra/qwen-ecs` | ECS task definitions, judge worker, vLLM GPU template |
-| `infra/template.yaml` | SAM stack (`creda-mumbai`) |
-| `frontend/` | Static SPA hosted on Amplify |
-| `deploy/bundle/` | Pre-built evidence JSON consumed at runtime |
-| `scripts/` | Deploy, ETL, GPU up/down, test catalog |
-
-Multimodal judging uses **vLLM + Qwen3-VL-4B** on **ECS EC2 g4dn.xlarge** when the GPU stack is up. Text-only fallback uses **Fargate + llama.cpp** with Qwen3-4B GGUF. SageMaker is not used on the live path.
-
-## Repository layout
+Unverified:
 
 ```
-.
-├── backend/           # Lambda handlers and shared libraries
-├── data/              # Source datasets for ETL (private/ is gitignored)
-├── deploy/bundle/     # Runtime evidence bundle uploaded to S3
-├── docs/              # Operator guides, handoffs, architecture notes
-├── extension/         # Chrome extension (unpacked load)
-├── frontend/          # index.html SPA + amplify.yml
-├── infra/             # SAM and ECS CloudFormation templates
-├── schemas/           # JSON schemas for agent output
-├── scripts/           # Deploy, test, ETL, GPU automation
-├── DEPLOY.md          # Step-by-step deploy checklist
-└── AWS-ARCHITECTURE.md
+LinkedIn InMail from Notion Talent: We loved your profile for a remote PM role. Reply with your salary expectation. Interview tomorrow on Google Meet, no prep needed.
 ```
 
-## Prerequisites
+No conflict: a real Greenhouse or careers URL, no fee.
 
-- Python 3.12+
-- AWS CLI v2 with credentials for the target account
-- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) for infrastructure deploy
-- Docker (for `sam build --use-container` and ECS image builds)
-- `jq`, `curl`, `zip` for Amplify manual deploy
+## How it is built
 
-## Quick start
+```
+seeker -> Amplify / Telegram
+       -> API Gateway (HTTP)
+       -> Intake Lambda -> DynamoDB + S3
+       -> SQS -> Gatherer/Searcher Lambda
+       -> EventBridge (daily ATS refresh)
+       -> SQS -> Fargate (Qwen 4B)
+       -> poll DynamoDB -> UI
+```
+
+| Service | Role | Why this one |
+| --- | --- | --- |
+| Amplify Hosting | UI | Static HTTPS. No app server. |
+| API Gateway HTTP API | Public routes | Cheaper than REST for this traffic. Throttle 2 req/s. |
+| Lambda (ARM) | Intake, gather, ingest | Scales to zero. |
+| DynamoDB on-demand | Cases, token hash, reports | Pay per request. TTL. |
+| S3 | Uploads + evidence bundle | Presigned PUT. Bundle built offline, not at click time. |
+| SQS | Worker queue, then judge queue | API returns 202. DLQ on failure. |
+| EventBridge | Daily refresh | No always-on ETL box. |
+| ECS Fargate | llama.cpp Qwen3-4B | Real stamp. Only always-on compute. |
+| g4dn.xlarge (optional) | Qwen-VL for screenshots | ~USD 0.58/hour. Scale ASG to 0 after. |
+
+No Cognito on the student path. No SageMaker on the live path.
+
+## Cost
+
+Request path (API Gateway + Lambda + DynamoDB + SQS + S3 + EventBridge + Amplify): free tier or a few USD/month at student volume.
+
+| If left on | What you pay |
+| --- | --- |
+| Fargate judge, 4 vCPU / 8 GB, desired 1 | ~USD 5/day |
+| g4dn.xlarge | ~USD 0.58/hour, only when `scripts/creda_gpu_up.sh` |
+| 1,000 checks/month, Fargate off, no GPU | under USD 5 |
+
+A weekend of judging with the text judge warm is still cheaper than one fake deposit.
+
+## Custom domain
+
+You cannot rename `*.amplifyapp.com`. Buy `creda.in` (or similar) in Route 53. Amplify console: Hosting, Custom domains, Add domain, Amplify-managed cert, map branch `main` to the root.
+
+## Layout
+
+```
+backend/        Lambda
+frontend/       Amplify app
+infra/          SAM + ECS
+deploy/bundle/  evidence JSON for S3
+extension/      Chrome
+scripts/        deploy, ETL, GPU, tests
+schemas/        judge JSON
+```
+
+Operator steps: `DEPLOY.md`.
+
+## Run
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-
-# Build curated bundle (if not present)
-python scripts/run_etl.py
-python scripts/build_deploy_bundle.py
-
-# Local frontend (injects API URL placeholder)
 bash scripts/serve_frontend.sh
 ```
 
-Open the URL printed by the serve script. Set `CREDA_API_URL` to the deployed API when testing against Mumbai.
-
-## Deployment
-
-Full sequence (API + bundle upload):
+```bash
+export CREDA_API_URL=https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com
+curl -s "$CREDA_API_URL/health" | jq .
+```
 
 ```bash
 bash scripts/deploy.sh
-```
-
-Amplify UI (from `frontend/`):
-
-```bash
-export CREDA_API_URL=https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com
-mkdir -p dist
-sed "s|__CREDA_API_URL__|${CREDA_API_URL}|g" index.html > dist/index.html
-# Then upload dist/ via Amplify console or scripts/deploy_all.sh
-```
-
-Verify health after deploy:
-
-```bash
-curl -s "${CREDA_API_URL}/health" | jq .
-# Expect: ok: true, dataReady: true
-```
-
-See `DEPLOY.md` for troubleshooting, cost notes, and Strands/Bedrock options.
-
-## GPU judge (optional)
-
-Warm multimodal path on g4dn (approximately USD 0.579/hr in Mumbai):
-
-```bash
-bash scripts/creda_gpu_up.sh    # ASG desired=1, vLLM sidecar
-bash scripts/creda_gpu_down.sh  # scale down when credits are low
-bash scripts/deploy_qwen_gpu_ecs.sh
-```
-
-Details: `docs/ARCHITECT_G4DN_NOTE.md`, `docs/CREDA_CURSOR_MVP_SHIP_G4DN.md`.
-
-## Testing
-
-```bash
-# API smoke
 bash scripts/smoke_mvp.sh
-
-# Full catalog (21 cases; warns on agent fallback by default)
-bash scripts/run_test_catalog.sh
-CREDA_TEST_STRICT=true bash scripts/run_test_catalog.sh
-
-# Prompt injection fixtures
-bash scripts/test_injection_fixtures.sh
-
-# Live UI journey (Playwright)
-bash scripts/test_ui_journey.sh
 ```
-
-Test prompts and matrix: `docs/TEST_PROMPTS.md`, `scripts/test_cases.json`.
-
-## Configuration
-
-| Variable | Purpose |
-|----------|---------|
-| `CREDA_API_URL` | API base URL for frontend build and scripts |
-| `CREDA_UI_URL` | Amplify URL for E2E tests |
-| `AWS_PROFILE` | CLI profile (default `creda-dev`) |
-| `JUDGE_BACKEND` | `vllm` or `llama` on ECS worker |
-| `CREDA_TEST_STRICT` | Fail test catalog on agent fallback |
-
-Frontend build tag is in `<meta name="creda-build">` inside `frontend/index.html`.
-
-## Documentation
-
-| Document | Contents |
-|----------|----------|
-| `DEPLOY.md` | Deploy checklist and failure modes |
-| `AWS-ARCHITECTURE.md` | Console and stack reference |
-| `docs/CREDA_CURSOR_MVP_SHIP_G4DN.md` | MVP ship brief (GPU, UI, acceptance) |
-| `docs/TELEGRAM_SETUP.md` | Bot webhook and onboarding |
-| `docs/TEST_PROMPTS.md` | Regression prompts |
-| `extension/README.md` | Chrome extension load instructions |
-
-## License
-
-Proprietary. All rights reserved unless a separate license file is added by the repository owner.
