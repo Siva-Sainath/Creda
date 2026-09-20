@@ -5,31 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Creda — verify a job offer against official sources before you reply." />
   <title>Creda — Verify offers</title>
-  <meta name="creda-build" content="baseten-20260919-v72-baseten-inspired" />
+  <meta name="creda-build" content="baseten-20260920-v100-timeline" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=100timeline" />
 </head>
 <body class="creda">
   <div class="shell">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Creda">
-            <path d="M12 3 20 6.5V12c0 4.5-3.2 8.4-8 10C7.2 20.4 4 16.5 4 12V6.5L12 3Z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M9 12.5 11.2 14.8 16 9.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
         <div class="brand-text">
           <span class="brand-name">Creda</span>
-          <span class="brand-tag">Case verification</span>
-        </div>
-      </div>
-      <div class="topbar-actions">
-        <div class="health health-pill" id="health-pill" title="API health">
-          <span class="dot" id="health-dot"></span>
-          <span id="health-label">Checking…</span>
         </div>
       </div>
     </header>
@@ -40,19 +27,17 @@
         <div class="pane pane-intake glass-pane">
           <section id="view-intake">
             <div class="intake-single">
-              <header class="intake-head">
-                <p class="intake-kicker">Case intake · ap-south-1</p>
+              <header class="intake-head" id="intake-copy">
                 <h1 id="hero-title">Paste the offer</h1>
-                <p class="intake-lede">Paste the recruiter message. Creda checks official sources before you reply.</p>
+                <p class="intake-lede" id="hero-lede">Creda reads the message against known employers before you reply.</p>
               </header>
 
               <div class="composer-card glass-panel" id="composer-shell">
                 <div class="attachment-row hidden" id="attachment-row" aria-live="polite"></div>
                 <div class="parsed-links hidden" id="parsed-links" aria-label="Detected links"></div>
-                <textarea id="offer-text" placeholder="Paste the recruiter message here…" spellcheck="false" rows="6"></textarea>
+                <textarea id="offer-text" placeholder="Paste the recruiter message, WhatsApp hire, or offer email…" spellcheck="false" rows="6"></textarea>
                 <div class="composer-toolbar">
                   <div class="composer-actions">
-                    <button type="button" class="btn btn-ghost btn-sm" id="btn-clear">Clear</button>
                     <button type="button" class="send-btn" id="btn-check" aria-label="Check this offer" disabled>
                       <span class="send-label">Check</span>
                     </button>
@@ -63,35 +48,64 @@
               <p class="composer-safety">Don't paste OTPs, bank details, or passwords.</p>
               <div id="intake-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
 
-              <a class="telegram-chip" id="telegram-row" href="https://t.me/CredashieldBot" target="_blank" rel="noopener noreferrer" aria-label="Open Creda on Telegram @CredashieldBot">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-                <span>Telegram</span>
+              <div class="limits-bar" aria-label="Creda limitations and reporting">
+                <button type="button" class="limits-item limits-btn" id="btn-limits-info">
+                  <span class="limits-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.75"/><path d="M12 8v5M12 16.2h.01" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></span>
+                  <span>Limitations</span>
+                </button>
+                <button type="button" class="limits-item limits-btn" id="btn-limits-report">
+                  <span class="limits-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3M12 6l-7 2.5V12c0 4.5 3.2 8.4 7 9.5 3.8-1.1 7-5 7-9.5V8.5L12 6Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></span>
+                  <span>Report scam</span>
+                </button>
+                <button type="button" class="limits-item limits-btn" id="btn-limits-company">
+                  <span class="limits-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="8" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.75"/></svg></span>
+                  <span>Request company</span>
+                </button>
+              </div>
+
+              <a class="telegram-chip" id="telegram-row" href="https://t.me/CredashieldBot" target="_blank" rel="noopener noreferrer" aria-label="Set up Creda on Telegram — bot @CredashieldBot">
+                <span class="telegram-chip-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                </span>
+                <span class="telegram-chip-copy">
+                  <span class="telegram-chip-handle">@CredashieldBot</span>
+                  <span class="telegram-chip-sub">Click here to set it up</span>
+                </span>
+                <span class="telegram-chip-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
               </a>
 
-              <div class="how-it-works" aria-hidden="true">
-                <p class="how-it-works-kicker">How Creda checks an offer</p>
-                <div class="how-steps">
-                  <div class="how-step">
+              <div class="how-it-works" id="how-it-works" aria-hidden="true">
+                <p class="how-it-works-kicker">How a check moves</p>
+                <div class="how-track" id="how-track">
+                  <div class="how-highlight" id="how-highlight" aria-hidden="true"></div>
+                  <div class="how-step is-active" data-step="0">
                     <span class="how-step-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none"><path d="M6 4h9l3 3v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M5 6.5A3.5 3.5 0 0 1 8.5 3h7A3.5 3.5 0 0 1 19 6.5v7A3.5 3.5 0 0 1 15.5 17H11l-4.2 3.2a.8.8 0 0 1-1.3-.6V17A3.5 3.5 0 0 1 5 13.5v-7Z" fill="currentColor" opacity=".12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        <path d="M8.5 8.2h7M8.5 11.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                      </svg>
                     </span>
                     <span class="how-step-label">Read the message</span>
                   </div>
-                  <span class="how-step-arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </span>
-                  <div class="how-step">
+                  <span class="how-step-arrow" aria-hidden="true"></span>
+                  <div class="how-step" data-step="1">
                     <span class="how-step-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.75"/><path d="M20 20l-4.35-4.35" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="11" cy="11" r="6.4" fill="currentColor" opacity=".12" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M8.4 11.2 10.3 13l3.6-4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="m16.2 16.2 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                      </svg>
                     </span>
-                    <span class="how-step-label">Cross-check official sources</span>
+                    <span class="how-step-label">Verify the source</span>
                   </div>
-                  <span class="how-step-arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </span>
-                  <div class="how-step">
+                  <span class="how-step-arrow" aria-hidden="true"></span>
+                  <div class="how-step" data-step="2">
                     <span class="how-step-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3M12 6l-7 2.5V12c0 4.5 3.2 8.4 7 9.5 3.8-1.1 7-5 7-9.5V8.5L12 6Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M9.5 12.2l1.8 1.8L15 10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="8.2" fill="currentColor" opacity=".12" stroke="currentColor" stroke-width="1.6"/>
+                        <circle cx="12" cy="12" r="5.4" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2.2 1.6"/>
+                        <path d="m9 12.1 2.1 2.1 4.2-4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
                     </span>
                     <span class="how-step-label">Stamp a ruling</span>
                   </div>
@@ -104,115 +118,73 @@
         <div class="pane pane-casefile glass-pane">
 
           <div class="casefile-empty" id="casefile-empty" aria-label="How Creda works">
-            <div class="casefile-guide glass-panel">
-              <div class="casefile-empty-hero" aria-hidden="true">
-                <span class="hero-float hero-float-1"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="4" fill="var(--sage)" stroke="var(--sage-ink)" stroke-width="1.25"/></svg></span>
-                <span class="hero-float hero-float-2"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="var(--warn-bg)" stroke="var(--warn)" stroke-width="1.25"/></svg></span>
-                <span class="hero-float hero-float-3"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5Z" fill="var(--risk-bg)" stroke="var(--risk)" stroke-width="1.25"/></svg></span>
-                <svg class="hero-shield" viewBox="0 0 96 96" fill="none">
-                  <rect x="14" y="30" width="46" height="34" rx="6" fill="#fff" stroke="var(--line-strong)" stroke-width="1.5" transform="rotate(-6 37 47)"/>
-                  <rect x="36" y="26" width="46" height="34" rx="6" fill="#fff" stroke="var(--line-strong)" stroke-width="1.5" transform="rotate(4 59 43)"/>
-                  <circle cx="48" cy="48" r="27" fill="var(--blue-bg)"/>
-                  <path d="M48 22l20 7.3v16.4c0 13.5-8.6 24-20 27.3-11.4-3.3-20-13.8-20-27.3V29.3L48 22Z" fill="#fff" stroke="var(--blue)" stroke-width="2.5" stroke-linejoin="round"/>
-                  <path d="M39 47.5l6.5 6.5 13-13" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            <div class="casefile-stage">
+              <div id="empty-copy">
+                <h2 class="casefile-empty-title" id="empty-title">Is this <span class="mark">recruiter</span> real?</h2>
+                <p class="casefile-empty-text" id="empty-lede">Creda checks the employer name, the fee ask, and the careers domain before you reply.</p>
               </div>
-              <p class="casefile-empty-kicker">Case file</p>
-              <p class="casefile-empty-title">What Creda shows here</p>
-              <p class="casefile-empty-text">After you press Check, this pane fills with a stamped ruling, tactic tiles, evidence exhibits, and next steps — all from official sources.</p>
-              <div class="casefile-guide-grid">
-                <div class="guide-tile">
-                  <span class="guide-tile-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M8 12l3 3 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </span>
-                  <span class="guide-tile-title">Stamp</span>
-                  <span class="guide-tile-text">HIGH RISK / NOT ENOUGH PROOF / NO CONFLICT</span>
-                </div>
-                <div class="guide-tile">
-                  <span class="guide-tile-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5.2-3.5 9.7-8 11-4.5-1.3-8-5.8-8-11V5l8-3Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>
-                  </span>
-                  <span class="guide-tile-title">Why this is a scam</span>
-                  <span class="guide-tile-text">Up to 6 tactic tiles with source chips</span>
-                </div>
-                <div class="guide-tile">
-                  <span class="guide-tile-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"><path d="M6 4h9l3 3v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M9 10h6M9 14h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
-                  </span>
-                  <span class="guide-tile-title">Exhibits</span>
-                  <span class="guide-tile-text">Flat evidence cards — facts on the face</span>
-                </div>
-                <div class="guide-tile">
-                  <span class="guide-tile-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </span>
-                  <span class="guide-tile-title">Orders</span>
-                  <span class="guide-tile-text">What to do next</span>
-                </div>
+              <div class="empty-board">
+                <article class="empty-card empty-card-iso">
+                  <p class="empty-card-kicker">The pass</p>
+                  <div id="iso-home">
+                  <div class="iso-stage" id="iso-host">
+                    <canvas id="iso-canvas" aria-hidden="true"></canvas>
+                    <div class="iso-hud" aria-hidden="true">
+                      <span class="iso-hud-chip" data-hud="offer">Offer</span>
+                      <span class="iso-hud-chip" data-hud="signals">Signals</span>
+                      <span class="iso-hud-chip" data-hud="careers">Careers</span>
+                      <span class="iso-hud-chip" data-hud="ruling">Ruling</span>
+                    </div>
+                    <svg class="empty-scene iso-scene iso-fallback" id="empty-scene" viewBox="0 0 440 160" fill="none" aria-hidden="true">
+                      <path d="M48 80 H392" stroke="#155eef" stroke-width="1.6" stroke-dasharray="5 8" opacity="0.35"/>
+                      <rect x="18" y="42" width="56" height="72" rx="6" fill="#fff" stroke="#0f2433"/>
+                      <path d="M28 58h36M28 72h28M28 86h32" stroke="#c3ced8" stroke-width="2"/>
+                      <text x="46" y="132" text-anchor="middle" font-size="10" fill="#5f6d7a" font-family="JetBrains Mono, monospace">Offer</text>
+                      <rect x="128" y="52" width="70" height="18" rx="4" fill="#b42318"/>
+                      <rect x="128" y="76" width="70" height="18" rx="4" fill="#155eef"/>
+                      <rect x="128" y="100" width="70" height="18" rx="4" fill="#9a6700"/>
+                      <text x="163" y="132" text-anchor="middle" font-size="10" fill="#5f6d7a" font-family="JetBrains Mono, monospace">Signals</text>
+                      <rect x="248" y="48" width="72" height="58" rx="6" fill="#fff" stroke="#155eef"/>
+                      <rect x="248" y="48" width="72" height="12" fill="#155eef"/>
+                      <text x="284" y="132" text-anchor="middle" font-size="10" fill="#5f6d7a" font-family="JetBrains Mono, monospace">Careers</text>
+                      <rect x="360" y="58" width="54" height="36" rx="4" fill="#fef3f2" stroke="#b42318"/>
+                      <text x="387" y="132" text-anchor="middle" font-size="10" fill="#5f6d7a" font-family="JetBrains Mono, monospace">Ruling</text>
+                    </svg>
+                  </div>
+                  </div>
+                </article>
+                <article class="empty-card empty-card-infer" id="empty-infer">
+                  <div class="infer-head">
+                    <p class="empty-card-kicker">Pass</p>
+                    <span class="infer-pill"><i></i> Warm</span>
+                  </div>
+                  <p class="infer-stat">
+                    <strong>45–90s</strong>
+                    <span>typical</span>
+                  </p>
+                  <ul class="infer-meters" aria-hidden="true">
+                    <li><span>Offer</span><b><i data-meter="0"></i></b></li>
+                    <li><span>Source</span><b><i data-meter="1"></i></b></li>
+                    <li><span>Stamp</span><b><i data-meter="2"></i></b></li>
+                  </ul>
+                </article>
               </div>
-              <p class="casefile-empty-hint">Paste a recruiter message on the left, then press Check.</p>
             </div>
           </div>
 
           <section id="view-wait" class="hidden" aria-hidden="true">
             <div class="wait-single">
               <div class="wait-meta">
-                <h2 id="wait-title">Opening your case</h2>
-                <p id="wait-subtitle" class="wait-sub">Preparing the case file…</p>
-                <div class="elapsed" id="elapsed-timer" title="Elapsed time">0:00</div>
+                <div class="wait-meta-copy">
+                  <h2 id="wait-title">Opening your case</h2>
+                  <p id="wait-subtitle" class="wait-sub">Preparing the case file…</p>
+                </div>
+                <div class="wait-timing">
+                  <div class="elapsed" id="elapsed-timer" title="Elapsed time">0:00</div>
+                  <span class="wait-eta" id="wait-eta">Usually 45–90s</span>
+                </div>
               </div>
-              <div class="prestream-rail" id="prestream-rail" aria-label="Verification stages">
-                <span class="prestream-step" data-step="file">Opening</span>
-                <span class="prestream-step" data-step="signals">Signals</span>
-                <span class="prestream-step" data-step="check">Careers</span>
-                <span class="prestream-step" data-step="qwen">Weighing</span>
-              </div>
-              <div class="stage-canvas glass-panel" id="stage-canvas">
-                <svg viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg" id="stage-svg" aria-hidden="true">
-                  <g id="scene-intake" class="stage-scene">
-                    <g id="stage-folder">
-                      <path d="M88 58 L108 48 H148 L158 58 H228 V88 H88 Z" fill="#e8efe8" stroke="#3d5a45" stroke-width="1.2"/>
-                      <rect id="stage-folder-tab" x="108" y="44" width="40" height="8" rx="2" fill="#c5d6c8"/>
-                    </g>
-                    <g id="stage-sheet">
-                      <rect x="118" y="22" width="84" height="52" rx="6" fill="#fff" stroke="#d7e0e8"/>
-                      <path d="M130 36h60M130 48h44M130 58h52" stroke="#c3ced8" stroke-width="1.5"/>
-                    </g>
-                  </g>
-                  <g id="scene-evidence" class="stage-scene is-off">
-                    <g id="evidence-pulse">
-                      <circle cx="108" cy="52" r="24" fill="none" stroke="#155eef" stroke-width="1" opacity=".35"/>
-                      <circle cx="108" cy="52" r="20" fill="#fff" stroke="#0f2433" stroke-width="1.75"/>
-                      <line x1="122" y1="66" x2="136" y2="80" stroke="#0f2433" stroke-width="2.2" stroke-linecap="round"/>
-                    </g>
-                  </g>
-                  <g id="scene-careers" class="stage-scene is-off">
-                    <rect x="118" y="38" width="52" height="44" rx="4" fill="#fff" stroke="#0f2433" stroke-width="1.5"/>
-                    <rect x="128" y="48" width="10" height="10" rx="1" fill="#e8efe8" stroke="#3d5a45" stroke-width="1"/>
-                    <rect x="150" y="48" width="10" height="10" rx="1" fill="#e8efe8" stroke="#3d5a45" stroke-width="1"/>
-                    <rect x="128" y="64" width="10" height="10" rx="1" fill="#e8efe8" stroke="#3d5a45" stroke-width="1"/>
-                    <rect x="150" y="64" width="10" height="10" rx="1" fill="#e8efe8" stroke="#3d5a45" stroke-width="1"/>
-                    <circle cx="200" cy="52" r="14" fill="#eff4ff" stroke="#155eef" stroke-width="1.5"/>
-                    <line x1="210" y1="62" x2="222" y2="74" stroke="#155eef" stroke-width="2" stroke-linecap="round"/>
-                    <circle cx="196" cy="48" r="6" fill="none" stroke="#155eef" stroke-width="1.5"/>
-                  </g>
-                  <g id="scene-qwen" class="stage-scene is-off">
-                    <line x1="160" y1="32" x2="160" y2="58" stroke="#155eef" stroke-width="2"/>
-                    <line x1="132" y1="40" x2="188" y2="40" stroke="#155eef" stroke-width="2"/>
-                    <path d="M132 40 L124 52 L140 52 Z" fill="#eff4ff" stroke="#155eef" stroke-width="1.5"/>
-                    <path d="M188 40 L180 52 L196 52 Z" fill="#eff4ff" stroke="#155eef" stroke-width="1.5"/>
-                    <rect x="148" y="58" width="24" height="6" rx="2" fill="#155eef" opacity=".25"/>
-                  </g>
-                  <g id="scene-stamp" class="stage-scene is-off">
-                    <g id="stage-stamp-press">
-                      <rect class="stamp-body" x="132" y="28" width="56" height="40" rx="6" fill="#fef3f2" stroke="#b42318" stroke-width="1.5"/>
-                      <text class="stamp-text" x="160" y="54" text-anchor="middle" font-size="8" fill="#b42318" font-family="monospace" font-weight="700">RULING</text>
-                    </g>
-                  </g>
-                </svg>
-              </div>
-              <p class="official-status" id="official-status"></p>
-              <div class="evidence-slip" id="live-exhibits"></div>
+              <div class="wait-iso-slot" id="wait-iso-slot"></div>
               <button type="button" class="btn btn-ghost" id="btn-cancel-wait">Back</button>
             </div>
           </section>
@@ -221,26 +193,43 @@
             <div id="sticky-urgent" class="sticky-urgent hidden" role="status" aria-live="polite"></div>
             <div class="result-board">
               <div class="result-toolbar">
-                <button type="button" class="btn-text" id="btn-new">Check another</button>
+                <button type="button" class="btn-text" id="btn-new">◂ New check</button>
                 <button type="button" class="btn-text" id="btn-report">Report a missed scam</button>
               </div>
-              <div id="ruling-host" class="board-stamp-host"></div>
-              <h2 id="board-headline" class="board-headline"></h2>
-              <p id="board-meta" class="board-meta"></p>
-              <div id="orders-host" class="board-actions"></div>
-              <div id="tactics-host" class="board-tactics"></div>
-              <div id="exhibits-host" class="board-exhibits"></div>
-              <div id="judgment-host" class="hidden" aria-hidden="true"></div>
-              <p id="board-consequence" class="board-consequence visually-hidden" aria-live="polite"></p>
-              <div id="conversation-host" class="board-thread"></div>
-              <div class="followup-composer glass-panel" id="followup-composer">
-                <label for="followup-input">Follow-up</label>
-                <div class="followup-row">
-                  <input id="followup-input" type="text" placeholder="e.g. Is the careers link real?" autocomplete="off" />
-                  <button type="button" class="btn btn-primary" id="btn-followup">Send</button>
+              <div class="report-hero">
+                <div id="ruling-host" class="board-stamp-host"></div>
+                <div class="report-copy">
+                  <h2 id="board-headline" class="board-headline"></h2>
+                  <p id="board-meta" class="board-meta"></p>
+                  <p id="board-consequence" class="board-consequence" aria-live="polite"></p>
+                  <div id="report-stats" class="report-stats"></div>
                 </div>
-                <div id="followup-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
               </div>
+              <div class="report-main">
+                <div id="judgment-host" class="report-body"></div>
+                <div id="orders-host" class="board-actions"></div>
+              </div>
+              <aside class="report-aside">
+                <div id="tactics-host" class="board-sources"></div>
+              </aside>
+              <div class="followup-composer" id="followup-composer">
+                  <div id="conversation-host" class="board-thread"></div>
+                  <label for="followup-input">Ask a follow-up</label>
+                  <div id="need-section" class="chip-section hidden">
+                    <p class="chip-section-label">Still missing</p>
+                    <div id="need-chips-host" class="report-ask"></div>
+                  </div>
+                  <div id="ask-section" class="chip-section hidden">
+                    <p class="chip-section-label">Suggested</p>
+                    <div id="ask-chips-host" class="report-ask"></div>
+                  </div>
+                  <div class="followup-row">
+                    <input id="followup-input" type="text" placeholder="e.g. Is the careers link real?" autocomplete="off" />
+                    <button type="button" class="btn btn-primary" id="btn-followup">Send</button>
+                  </div>
+                  <div id="followup-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
+              </div>
+              <div id="exhibits-host" class="hidden" aria-hidden="true"></div>
             </div>
             <div id="research-host" class="hidden" aria-hidden="true"></div>
             <div id="result-error" class="error-host hidden" role="alert" aria-live="assertive"></div>
@@ -251,17 +240,65 @@
     </main>
 
     <footer class="footer">
-      <div class="footer-infra">
-        <span class="footer-health-dot" id="footer-health-dot" aria-hidden="true"></span>
-        <span>Creda explains its judgment from approved evidence.</span>
-      </div>
+      <a class="aws-badge" href="https://aws.amazon.com/" target="_blank" rel="noopener noreferrer" aria-label="Hosted on Amazon Web Services">
+        <svg class="aws-logo" viewBox="0 0 304 182" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#232F3E" d="M86.4 66.4c0 3.7.4 6.7 1.1 8.9.8 2.2 1.8 4.6 3.2 7.2.5.8.7 1.6.7 2.3 0 1-.6 2-1.9 3l-6.3 4.2c-.9.6-1.8.9-2.6.9-1 0-2-.5-3-1.4C76.2 90 75 88.4 74 86.8c-1-1.7-2-3.6-3.1-5.9-7.8 9.2-17.6 13.8-29.4 13.8-8.4 0-15.1-2.4-20-7.2-4.9-4.8-7.4-11.2-7.4-19.2 0-8.5 3-15.4 9.1-20.6 6.1-5.2 14.2-7.8 24.5-7.8 3.4 0 6.9.3 10.6.8 3.7.5 7.5 1.3 11.5 2.2v-7.3c0-7.6-1.6-12.9-4.7-16-3.2-3.1-8.6-4.6-16.3-4.6-3.5 0-7.1.4-10.8 1.3-3.7.9-7.3 2-10.8 3.4-1.6.7-2.8 1.1-3.5 1.3-.7.2-1.2.3-1.6.3-1.4 0-2.1-1-2.1-3.1v-4.9c0-1.6.2-2.8.7-3.5.5-.7 1.4-1.4 2.8-2.1 3.5-1.8 7.7-3.3 12.6-4.5 4.9-1.3 10.1-1.9 15.6-1.9 11.9 0 20.6 2.7 26.2 8.1 5.5 5.4 8.3 13.6 8.3 24.6v32.4zM45.8 81.6c3.3 0 6.7-.6 10.3-1.8 3.6-1.2 6.8-3.4 9.5-6.4 1.6-1.9 2.8-4 3.4-6.4.6-2.4 1-5.3 1-8.7v-4.2c-2.9-.7-6-1.3-9.2-1.7-3.2-.4-6.3-.6-9.4-.6-6.7 0-11.6 1.3-14.9 4-3.3 2.7-4.9 6.5-4.9 11.5 0 4.7 1.2 8.2 3.7 10.6 2.4 2.5 5.9 3.7 10.5 3.7zm80.3 10.8c-1.8 0-3-.3-3.8-1-.8-.6-1.5-2-2.1-3.9L96.7 10.2c-.6-2-.9-3.3-.9-4 0-1.6.8-2.5 2.4-2.5h9.8c1.9 0 3.2.3 3.9 1 .8.6 1.4 2 2 3.9l16.8 66.2 15.6-66.2c.5-2 1.1-3.3 1.9-3.9.8-.6 2.2-1 4-1h8c1.9 0 3.2.3 4 1 .8.6 1.5 2 1.9 3.9l15.8 67 17.3-67c.6-2 1.3-3.3 2-3.9.8-.6 2.1-1 3.9-1h9.3c1.6 0 2.5.8 2.5 2.5 0 .5-.1 1-.2 1.6-.1.6-.3 1.4-.7 2.5l-24.1 77.3c-.6 2-1.3 3.3-2.1 3.9-.8.6-2.1 1-3.8 1h-8.6c-1.9 0-3.2-.3-4-1-.8-.7-1.5-2-1.9-4L156 23l-15.4 64.4c-.5 2-1.1 3.3-1.9 4-.8.7-2.2 1-4 1h-10.6zm128.5 2.7c-5.2 0-10.4-.6-15.4-1.8-5-1.2-8.9-2.5-11.5-4-1.6-.9-2.7-1.9-3.1-2.8-.4-.9-.6-1.9-.6-2.8v-5.1c0-2.1.8-3.1 2.3-3.1.6 0 1.2.1 1.8.3.6.2 1.5.6 2.5 1 3.4 1.5 7.1 2.7 11 3.5 4 .8 7.9 1.2 11.9 1.2 6.3 0 11.2-1.1 14.6-3.3 3.4-2.2 5.2-5.4 5.2-9.5 0-2.8-.9-5.1-2.7-7-1.8-1.9-5.2-3.6-10.1-5.2L246 52c-7.3-2.3-12.7-5.7-16-10.2-3.3-4.4-5-9.3-5-14.5 0-4.2.9-7.9 2.7-11.1 1.8-3.2 4.2-6 7.2-8.2 3-2.3 6.4-4 10.4-5.2 4-1.2 8.2-1.7 12.6-1.7 2.2 0 4.5.1 6.7.4 2.3.3 4.4.7 6.5 1.1 2 .5 3.9 1 5.7 1.6 1.8.6 3.2 1.2 4.2 1.8 1.4.8 2.4 1.6 3 2.5.6.8.9 1.9.9 3.3v4.7c0 2.1-.8 3.2-2.3 3.2-.8 0-2.1-.4-3.8-1.2-5.7-2.6-12.1-3.9-19.2-3.9-5.7 0-10.2.9-13.3 2.8-3.1 1.9-4.7 4.8-4.7 8.9 0 2.8 1 5.2 3 7.1 2 1.9 5.7 3.8 11 5.5l14.2 4.5c7.2 2.3 12.4 5.5 15.5 9.6 3.1 4.1 4.6 8.8 4.6 14 0 4.3-.9 8.2-2.6 11.6-1.8 3.4-4.2 6.4-7.3 8.8-3.1 2.5-6.8 4.3-11.1 5.6-4.2 1.3-8.9 2-14 2z"/>
+          <path fill="#FF9900" fill-rule="evenodd" d="M273.5 143.7c-32.9 24.3-80.7 37.2-121.8 37.2-57.6 0-109.5-21.3-148.7-56.7-3.1-2.8-.3-6.6 3.4-4.4 42.4 24.6 94.7 39.5 148.8 39.5 36.5 0 76.6-7.6 113.5-23.2 4.9-2.1 9.6 4 4.2 8z"/>
+          <path fill="#FF9900" fill-rule="evenodd" d="M287.2 128.1c-4.2-5.4-27.8-2.6-38.5-1.3-3.2.4-3.7-2.4-.8-4.5 18.8-13.2 49.7-9.4 53.3-5 3.6 4.5-1 35.4-18.6 50.2-2.7 2.3-5.3 1.1-4.1-1.9 3.4-11.1 12.3-33.4 8.1-38.7z"/>
+        </svg>
+        <span class="aws-badge-copy">
+          <strong>Hosted on AWS</strong>
+        </span>
+      </a>
     </footer>
   </div>
 
   <div id="report-sheet" class="report-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="report-sheet-title">
     <div class="report-sheet-panel">
+      <p class="report-kicker" id="report-kicker">Intake</p>
       <h3 id="report-sheet-title">Report a missed scam</h3>
-      <textarea id="report-text" placeholder="What did Creda miss?" spellcheck="false"></textarea>
+      <p class="report-lede" id="report-lede">Tell Creda what the current ruling missed. This goes to the tactic registry, not the live judge.</p>
+
+      <div id="report-limits-body" class="report-limits hidden">
+        <ul>
+          <li>Text-only offers today — paste the message, don’t upload a screenshot.</li>
+          <li>No live image or PDF vision. Multimodal needs a GPU path we have not turned on.</li>
+          <li>English-first. Other languages may rule with low confidence.</li>
+          <li>Coverage is the known-employer registry. New companies need a request.</li>
+        </ul>
+      </div>
+
+      <div id="report-form-body">
+        <div class="report-grid">
+          <label class="report-field" id="field-company-wrap">
+            <span>Company or pattern</span>
+            <input id="report-company" type="text" autocomplete="organization" placeholder="e.g. Amazon, Wipro, new OTP kit" />
+          </label>
+          <label class="report-field" id="field-kind-wrap">
+            <span>Kind</span>
+            <select id="report-kind">
+              <option value="missed_scam">Missed scam</option>
+              <option value="fee">Upfront fee</option>
+              <option value="otp">OTP / KYC harvest</option>
+              <option value="lookalike">Lookalike domain</option>
+              <option value="company_request">Add this employer</option>
+            </select>
+          </label>
+        </div>
+        <label class="report-field" id="field-url-wrap">
+          <span>Careers URL or sender domain <em>(optional)</em></span>
+          <input id="report-url" type="url" placeholder="https://…" />
+        </label>
+        <label class="report-field">
+          <span id="report-text-label">What happened</span>
+          <textarea id="report-text" placeholder="What did Creda miss?" spellcheck="false"></textarea>
+        </label>
+        <label class="report-field">
+          <span>Contact <em>(optional)</em></span>
+          <input id="report-contact" type="email" placeholder="you@email.com — only if you want a reply" />
+        </label>
+      </div>
+
       <div class="report-actions">
         <button type="button" class="btn btn-ghost" id="btn-report-cancel">Cancel</button>
         <button type="button" class="btn btn-primary" id="btn-report-send">Send report</button>
@@ -271,6 +308,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
-  <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/MotionPathPlugin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/Flip.min.js"></script>
+  <script type="module" src="iso-loop.js?v=99fill"></script>
+  <script src="app.js?v=100timeline"></script>
 </body>
 </html>

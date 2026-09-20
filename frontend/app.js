@@ -26,6 +26,7 @@
   var followupGraceStartedAt = 0;
   var FOLLOWUP_GRACE_MS = 8000;
   var readySince = 0;
+  var reportMode = "scam";
 
   var CredaStageMachine = {
     current: null,
@@ -41,8 +42,15 @@
       intake: "Reading the message for sender, links, and claims…",
       evidence: "Comparing against known scam tactics…",
       official_checks: "Cross-checking the careers link with official listings…",
-      qwen_weigh: "Qwen is weighing every signal before ruling…",
+      qwen_weigh: "Weighing every signal before ruling…",
       stamp: "Finalizing the ruling…"
+    },
+    infraCopy: {
+      intake: "Reading sender, links, and claims…",
+      evidence: "Matching known scam patterns…",
+      official_checks: "Checking the careers domain…",
+      qwen_weigh: "Weighing signals…",
+      stamp: "Stamping the ruling…"
     },
     forceScene: function (key, data) {
       var meta = this.scenes[key];
@@ -55,7 +63,8 @@
       });
       var title = $("wait-title");
       var sub = $("wait-subtitle");
-      if (title) title.textContent = meta.label;
+      var infra = $("wait-infra");
+      if (title) CredaMotion.setHeadlineWords(title, meta.label);
       if (sub) {
         var copy = pipelineWaitCopy(data || {});
         if (!copy || copy === meta.label || (/preparing/i.test(copy) && key !== "intake")) {
@@ -63,7 +72,10 @@
         }
         sub.textContent = copy;
       }
+      if (infra) infra.textContent = this.infraCopy[key] || this.subtitles[key] || "";
       updatePrestreamRail(key);
+      if (window.CredaPass && typeof CredaPass.setStage === "function") CredaPass.setStage(key);
+      CredaMotion.startStageLoop(key);
       if (!CredaMotion.ok() || CredaMotion.reduced) return;
       if (meta.id) {
         var active = document.getElementById(meta.id);
@@ -93,6 +105,7 @@
     },
     reset: function () {
       this.current = null;
+      CredaMotion.stopStageLoop();
     }
   };
 
@@ -169,6 +182,7 @@
       clearTimeout(this.stepTimer);
       var data = this.readyData;
       this.readyData = null;
+      CredaMotion.stopStageLoop();
       stopPolling();
       followupPollMode = false;
       conversationPending = false;
@@ -203,37 +217,154 @@
     ok: function () { return typeof gsap !== "undefined"; },
     reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     signalTween: null,
+    stageLoopTween: null,
+    pipelineTl: null,
+    emptyTl: null,
     hintTimer: null,
     hintIndex: 0,
+    useCaseTimer: null,
+    useCaseIndex: 0,
+    intakeTimer: null,
+    intakeIndex: 0,
+    INTAKE_TIPS: [
+      { title: "Paste the offer", lede: "Creda reads the message against known employers before you reply." },
+      { title: "Don't send KYC first", lede: "Aadhaar, PAN, and OTPs never belong in a recruiter's opening chat." },
+      { title: "Trust the sender, not the logo", lede: "Handle, domain, and any fee ask matter more than letterhead." },
+      { title: "Then reply", lede: "A typical pass takes about a minute." }
+    ],
+    USE_CASES: [
+      {
+        kicker: "WhatsApp hire",
+        title: "Is this recruiter real?",
+        lede: "Paste the chat before you send Aadhaar, an OTP, or a joining fee.",
+        emptyHtml: "Is this <span class=\"mark\">recruiter</span> real?",
+        emptyLede: "Creda checks the employer name, the fee ask, and the careers domain before you reply.",
+        prompt: "Hi, congratulations you are selected for Amazon warehouse night shift. Pay ₹1,499 for uniform then we share joining letter. Send Aadhaar now."
+      },
+      {
+        kicker: "LinkedIn DM",
+        title: "HR in your inbox",
+        lede: "A hiring manager you never applied to wants you on a private Google Meet.",
+        emptyHtml: "HR in your <span class=\"mark\">inbox</span>",
+        emptyLede: "Lookalike titles and rushed interviews are a common kit. Creda flags the pattern, not the vibe.",
+        prompt: "Hello I am Priya from Wipro Talent. You are shortlisted. Join this Meet in 10 minutes and keep your PAN card ready for KYC: meet.google.com/xyz-fake"
+      },
+      {
+        kicker: "Lookalike careers page",
+        title: "Does that URL check out?",
+        lede: "Paste the offer that links to a careers site that is almost the real one.",
+        emptyHtml: "Does that <span class=\"mark\">URL</span> check out?",
+        emptyLede: "One extra letter in the domain is enough. Creda weighs known employer hosts, not the logo in the email.",
+        prompt: "Please complete onboarding on our portal https://careers-infosys.co.in/join and pay ₹2,000 refundable security for laptop dispatch."
+      },
+      {
+        kicker: "Internship stipend",
+        title: "Unpaid until you pay",
+        lede: "Training fees dressed up as internships still count as an offer Creda can rule on.",
+        emptyHtml: "Unpaid until you <span class=\"mark\">pay</span>",
+        emptyLede: "Upfront course fees and “stipend after week 2” are a registered scam pattern, not a company policy.",
+        prompt: "Selected for remote internship. Stipend ₹25,000 after training. First pay ₹3,999 for LMS access. UPI: intern-hr@okaxis"
+      },
+      {
+        kicker: "Work-from-home kit",
+        title: "Task-based income",
+        lede: "Copy-paste jobs that ask you to recharge a wallet first belong in this box too.",
+        emptyHtml: "Task-based <span class=\"mark\">income</span>",
+        emptyLede: "Creda is not only for Fortune-500 lookalikes. Daily-task and data-entry kits use the same fee-and-OTP play.",
+        prompt: "Earn ₹1,200/day typing captions. To activate your ID send the OTP we just texted and load ₹500 in the partner wallet."
+      },
+      {
+        kicker: "Email offer letter",
+        title: "PDF in the thread",
+        lede: "Forward the email body. Creda reads the text — not the letterhead.",
+        emptyHtml: "PDF in the <span class=\"mark\">thread</span>",
+        emptyLede: "Official-looking PDFs still have to match a known employer. If the sender domain is off, say so in the paste.",
+        prompt: "From: hr@tcs-careers.net Subject: Offer of Employment. Attach your cancelled cheque and Aadhaar to confirm payroll. Joining bonus after you complete Form-16 upload on the link."
+      }
+    ],
+    applyUseCase: function (scene) {
+      if (!scene) return;
+      var title = $("empty-title");
+      var lede = $("empty-lede");
+      if (title) title.innerHTML = scene.emptyHtml;
+      if (lede) lede.textContent = scene.emptyLede;
+    },
+    applyIntakeTip: function (tip) {
+      if (!tip) return;
+      var hero = $("hero-title");
+      var lede = $("hero-lede");
+      if (hero) hero.textContent = tip.title;
+      if (lede) lede.textContent = tip.lede;
+    },
+    crossfade: function (el, write) {
+      if (!el) { write(); return; }
+      if (!this.ok() || this.reduced) { write(); return; }
+      gsap.to(el, {
+        y: -6, opacity: 0, duration: 0.26, ease: "power2.in",
+        onComplete: function () {
+          write();
+          gsap.fromTo(el, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.48, ease: "power3.out" });
+        }
+      });
+    },
+    useCasePaused: function () {
+      if (document.body.classList.contains("has-case")) return true;
+      var empty = $("casefile-empty");
+      if (empty && empty.classList.contains("hidden")) return true;
+      return false;
+    },
+    startUseCaseCycle: function () {
+      var self = this;
+      var scenes = this.USE_CASES;
+      var tips = this.INTAKE_TIPS;
+      if (!scenes.length) return;
+      this.applyUseCase(scenes[0]);
+      this.applyIntakeTip(tips[0]);
+      if (this.useCaseTimer) clearInterval(this.useCaseTimer);
+      if (this.intakeTimer) clearInterval(this.intakeTimer);
+      if (this.reduced) return;
+      this.useCaseTimer = setInterval(function () {
+        if (self.useCasePaused()) return;
+        self.useCaseIndex = (self.useCaseIndex + 1) % scenes.length;
+        self.crossfade($("empty-copy"), function () { self.applyUseCase(scenes[self.useCaseIndex]); });
+      }, 5600);
+      this.intakeTimer = setInterval(function () {
+        if (document.body.classList.contains("has-case")) return;
+        self.intakeIndex = (self.intakeIndex + 1) % tips.length;
+        self.crossfade($("intake-copy"), function () { self.applyIntakeTip(tips[self.intakeIndex]); });
+      }, 6800);
+    },
+    stopUseCaseCycle: function () {
+      if (this.useCaseTimer) { clearInterval(this.useCaseTimer); this.useCaseTimer = null; }
+      if (this.intakeTimer) { clearInterval(this.intakeTimer); this.intakeTimer = null; }
+    },
     init: function () {
       if (!this.ok()) return;
       var self = this;
+      if (typeof MotionPathPlugin !== "undefined") gsap.registerPlugin(MotionPathPlugin);
+      if (typeof Flip !== "undefined") gsap.registerPlugin(Flip);
       gsap.matchMedia().add("(prefers-reduced-motion: reduce)", function () {
         self.reduced = true;
       });
       this.pageLoad();
     },
     pageLoad: function () {
-      if (!this.ok() || this.reduced) return;
+      if (!this.ok() || this.reduced) {
+        this.startPipelineLoop();
+        this.startUseCaseCycle();
+        return;
+      }
       var ease = "cubic-bezier(.22,1,.36,1)";
-      var targets = [".topbar", ".pane-intake > *", ".casefile-guide"];
+      var targets = [".topbar", ".pane-intake > *", ".casefile-stage"];
       targets.forEach(function (sel) {
-        gsap.fromTo(sel, { y: 12, autoAlpha: 0 }, {
-          y: 0, autoAlpha: 1, duration: 0.4, stagger: 0.05, ease: ease,
-          onComplete: function () { gsap.set(sel, { clearProps: "opacity,transform,autoAlpha" }); }
+        gsap.fromTo(sel, { y: 12 }, {
+          y: 0, duration: 0.4, stagger: 0.05, ease: ease,
+          onComplete: function () { gsap.set(sel, { clearProps: "transform" }); }
         });
       });
-      var staggerTargets = [".guide-tile", ".how-step"];
-      staggerTargets.forEach(function (sel) {
-        gsap.fromTo(sel, { y: 10, autoAlpha: 0 }, {
-          y: 0, autoAlpha: 1, duration: 0.35, stagger: 0.06, delay: 0.15, ease: ease,
-          onComplete: function () { gsap.set(sel, { clearProps: "opacity,transform,autoAlpha" }); }
-        });
-      });
-      gsap.fromTo(".hero-shield", { scale: 0.85, autoAlpha: 0 }, {
-        scale: 1, autoAlpha: 1, duration: 0.5, delay: 0.1, ease: "back.out(1.6)",
-        onComplete: function () { gsap.set(".hero-shield", { clearProps: "transform,opacity" }); }
-      });
+      this.startPipelineLoop();
+      this.startEmptyScene();
+      this.startUseCaseCycle();
     },
     startHintCycle: function () {
       var host = document.getElementById("hint-cycle");
@@ -286,17 +417,20 @@
       if (!this.ok() || this.reduced || name === lastView) return;
       lastView = name;
       var el = name === "wait" ? "#view-wait" : name === "result" ? "#view-result" : "#view-intake";
-      gsap.fromTo(el, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out" });
+      gsap.fromTo(el, { autoAlpha: 0, y: 12 }, {
+        autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out",
+        onComplete: function () { gsap.set(el, { clearProps: "opacity,visibility,transform,autoAlpha" }); }
+      });
       if (name === "wait") {
         gsap.fromTo(".prestream-rail .prestream-step",
           { y: 8, autoAlpha: 0 },
           { y: 0, autoAlpha: 1, duration: 0.35, stagger: 0.06, ease: "power2.out", delay: 0.08,
             onComplete: function () { gsap.set(".prestream-rail .prestream-step", { clearProps: "opacity,transform,autoAlpha" }); }
           });
-        gsap.fromTo(".stage-canvas",
-          { scale: 0.98, autoAlpha: 0 },
-          { scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out(1.4)",
-            onComplete: function () { gsap.set(".stage-canvas", { clearProps: "opacity,transform,autoAlpha" }); }
+        gsap.fromTo(".wait-iso-slot",
+          { autoAlpha: 0 },
+          { autoAlpha: 1, duration: 0.4, ease: "power2.out",
+            onComplete: function () { gsap.set(".wait-iso-slot", { clearProps: "opacity,visibility,autoAlpha" }); }
           });
       }
     },
@@ -320,12 +454,119 @@
           onComplete: function () { gsap.set(nodes, { clearProps: "opacity,transform,autoAlpha" }); }
         });
     },
+    setHeadlineWords: function (el, text) {
+      if (!el) return;
+      var value = String(text || "").trim();
+      if (!value) { el.textContent = ""; return; }
+      var words = value.split(/\s+/);
+      if (!this.ok() || this.reduced || words.length > 12) {
+        el.textContent = value;
+        return;
+      }
+      el.innerHTML = words.map(function (w) {
+        return '<span class="word">' + esc(w) + "</span>";
+      }).join(" ");
+      gsap.fromTo(el.querySelectorAll(".word"), { y: 10, autoAlpha: 0 }, {
+        y: 0, autoAlpha: 1, duration: 0.35, stagger: 0.02, ease: "power3.out",
+        onComplete: function () { gsap.set(el.querySelectorAll(".word"), { clearProps: "opacity,transform,autoAlpha" }); }
+      });
+    },
+    // Baseten-style pipeline loop: icons draw on, then a packet travels the wire
+    // to the next node. pathLength="1" lets one dash value drive every path.
+    startPipelineLoop: function () {
+      this.stopPipelineLoop();
+      var host = document.getElementById("how-it-works");
+      var hl = document.getElementById("how-highlight");
+      if (!host) return;
+      var steps = host.querySelectorAll(".how-step");
+      if (!steps.length) return;
+      var activate = function (i, animate) {
+        for (var j = 0; j < steps.length; j++) steps[j].classList.toggle("is-active", j === i);
+        if (!hl || !steps[i]) return;
+        if (animate && typeof Flip !== "undefined") {
+          Flip.fit(hl, steps[i], { duration: 0.55, ease: "power3.inOut" });
+        } else if (typeof Flip !== "undefined") {
+          Flip.fit(hl, steps[i], { duration: 0 });
+        }
+      };
+      activate(0, false);
+      if (!this.ok() || this.reduced) return;
+      var tl = gsap.timeline({ repeat: -1 });
+      steps.forEach(function (step, i) {
+        tl.call(function () { activate(i, true); });
+        tl.to({}, { duration: i === steps.length - 1 ? 1.45 : 1.15 });
+      });
+      this.pipelineTl = tl;
+    },
+    stopPipelineLoop: function () {
+      if (this.pipelineTl) { this.pipelineTl.kill(); this.pipelineTl = null; }
+    },
+    startEmptyScene: function () {
+      this.stopEmptyScene();
+      if (!this.ok() || this.reduced) return;
+      if (document.getElementById("iso-host") && document.getElementById("iso-host").classList.contains("iso-live")) return;
+      var meters = document.querySelectorAll("#empty-infer [data-meter]");
+      if (!meters.length) return;
+      gsap.set(meters, { scaleX: 0.16, transformOrigin: "0% 50%" });
+      var hop = gsap.timeline({ repeat: -1, repeatDelay: 0.2 });
+      hop.to(meters[0], { scaleX: 0.9, duration: 1.4, ease: "power2.inOut" }, 0.15);
+      hop.to(meters[1], { scaleX: 0.76, duration: 1.5, ease: "power2.inOut" }, 1.55);
+      hop.to(meters[2], { scaleX: 0.97, duration: 1.3, ease: "power2.inOut" }, 3.2);
+      hop.to(meters, { scaleX: 0.18, duration: 0.5, ease: "power2.in" }, 5.15);
+      this.emptyTl = hop;
+    },
+    stopEmptyScene: function () {
+      if (this.emptyTl) { this.emptyTl.kill(); this.emptyTl = null; }
+      if (this.ok()) gsap.killTweensOf("#empty-infer [data-meter]");
+    },
+    startStageLoop: function (key) {
+      this.stopStageLoop();
+      if (!this.ok() || this.reduced) return;
+      var meta = CredaStageMachine.scenes[key];
+      if (!meta) return;
+      var scene = document.getElementById(meta.id);
+      if (!scene) return;
+      var target = scene.querySelector("g, circle, rect, path, line") || scene;
+      if (key === "evidence") {
+        this.stageLoopTween = gsap.to("#evidence-pulse circle:first-child", {
+          scale: 1.12, opacity: 0.55, duration: 1.1, repeat: -1, yoyo: true, ease: "sine.inOut", transformOrigin: "50% 50%"
+        });
+        return;
+      }
+      if (key === "qwen_weigh") {
+        this.stageLoopTween = gsap.to("#scene-qwen", {
+          rotation: 2.5, duration: 1.4, repeat: -1, yoyo: true, ease: "sine.inOut", transformOrigin: "50% 50%"
+        });
+        return;
+      }
+      if (key === "stamp") {
+        this.stageLoopTween = gsap.to("#stage-stamp-press", {
+          y: 2, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut"
+        });
+        return;
+      }
+      this.stageLoopTween = gsap.to(target, {
+        y: -4, duration: 1.2, repeat: -1, yoyo: true, ease: "sine.inOut"
+      });
+    },
+    stopStageLoop: function () {
+      if (this.stageLoopTween) {
+        this.stageLoopTween.kill();
+        this.stageLoopTween = null;
+      }
+      if (!this.ok()) return;
+      ["#scene-intake", "#scene-evidence", "#scene-careers", "#scene-qwen", "#stage-stamp-press", "#evidence-pulse circle:first-child"].forEach(function (sel) {
+        try { gsap.set(sel, { clearProps: "transform,opacity" }); } catch (e) {}
+      });
+    },
     revealTargets: function () {
       return [
         ".board-stamp", ".board-stamp-host", ".ruling-stamp-press",
-        "#board-headline", "#board-meta",
-        "#orders-host .action-chip", "#tactics-host .tactic-tile",
-        "#exhibits-host .extra-checks", "#judgment-host .why-collapsed"
+      "#board-headline", "#board-meta", "#board-consequence",
+      "#orders-host .action-badge", "#tactics-host .tactic-tile",
+      "#exhibits-host .extra-checks", "#judgment-host .why-collapsed",
+      ".report-hero", "#report-stats", "#conversation-host .conv-bubble",
+      ".timeline-item", ".ticket", ".evidence-card"
       ];
     },
     forceRevealVisible: function () {
@@ -353,14 +594,18 @@
       var stamp = document.querySelector(".ruling-stamp-press");
       if (stamp) stamp.classList.add("is-pressed");
       this.forceRevealVisible();
+      bindTiltCards();
       if (!this.ok() || this.reduced) {
         this.forceRevealVisible();
+        animateConfBar(true);
         return;
       }
       var targets = this.revealTargets();
       var sel = targets.join(", ");
       var self = this;
       try { gsap.set(sel, { autoAlpha: 1, opacity: 1, visibility: "visible" }); } catch (e0) {}
+      var timelineLine = document.querySelector(".timeline-line");
+      if (timelineLine) gsap.set(timelineLine, { scaleY: 0, transformOrigin: "top center" });
       var tl = gsap.timeline({
         defaults: { ease: "power3.out" },
         onComplete: function () {
@@ -369,21 +614,68 @@
         }
       });
       this._revealTl = tl;
-      tl.fromTo(".board-stamp", { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.4 })
-        .fromTo(stamp || ".ruling-stamp-press", { scale: 2.1, rotation: -14, autoAlpha: 0 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: 0.5, ease: "back.out(2.2)" }, "-=0.18")
-        .fromTo("#board-headline", { y: 8, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.28 }, "-=0.12")
-        .fromTo("#board-meta:not(.is-empty)", { y: 6, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.22 }, "-=0.12")
-        .fromTo("#orders-host .action-chip", { y: 8, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.24, stagger: 0.05 }, "-=0.08")
-        .fromTo("#tactics-host .tactic-tile", { y: 12, autoAlpha: 0 }, {
-          y: 0, autoAlpha: 1, duration: 0.28, stagger: { each: 0.05, from: "start" }, ease: "power2.out"
-        }, "-=0.05")
-        .fromTo("#exhibits-host .extra-checks", { y: 8, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.25 }, "-=0.1");
-      var urgent = document.querySelector(".action-chip.urgent");
+      tl.fromTo(".report-hero", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.18 })
+        .fromTo(".board-stamp", { y: 10, scale: 0.9, rotation: -6 }, { y: 0, scale: 1, rotation: 0, autoAlpha: 1, duration: 0.4, ease: "back.out(1.7)" }, "-=0.1")
+        .fromTo(stamp || ".ruling-stamp-press", { scale: 1.08, rotation: -4 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: 0.36, ease: "back.out(1.6)" }, "<")
+        .fromTo("#board-headline", { y: 10 }, { y: 0, autoAlpha: 1, duration: 0.3 }, "-=0.2")
+        .fromTo("#board-meta:not(.is-empty)", { y: 6 }, { y: 0, autoAlpha: 1, duration: 0.22 }, "-=0.18")
+        .fromTo("#board-consequence", { y: 6 }, { y: 0, autoAlpha: 1, duration: 0.24 }, "-=0.16")
+        .call(function () { animateConfBar(false); }, null, "-=0.1")
+        .to(timelineLine, { scaleY: 1, duration: 0.55, ease: "power2.inOut" }, "-=0.05")
+        .fromTo(".timeline-dot", { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.32, stagger: 0.14, ease: "back.out(2.4)" }, "-=0.45")
+        .fromTo(".timeline-copy", { x: -10, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.3, stagger: 0.14 }, "<0.05")
+        .fromTo(".ticket", { y: 16, autoAlpha: 0, rotation: -1.5 }, {
+          y: 0, autoAlpha: 1, rotation: 0, duration: 0.34, stagger: 0.06, ease: "back.out(1.5)"
+        }, "-=0.25")
+        .fromTo(".evidence-card", { x: 14, autoAlpha: 0 }, {
+          x: 0, autoAlpha: 1, duration: 0.28, stagger: 0.05
+        }, "-=0.4")
+        .fromTo("#conversation-host .conv-bubble, .followup-composer .chip", { y: 8, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 0.24, stagger: 0.04
+        }, "-=0.15");
+      var urgent = document.querySelector(".action-badge.urgent");
       if (urgent) {
         gsap.to(urgent, { scale: 1.03, duration: 0.18, yoyo: true, repeat: 1, ease: "power1.inOut", delay: 0.45 });
       }
     }
   };
+
+  function animateConfBar(instant) {
+    var fill = document.querySelector(".conf-bar-fill");
+    if (!fill) return;
+    var target = fill.style.width || "0%";
+    if (instant || !CredaMotion.ok() || CredaMotion.reduced) {
+      fill.style.width = target;
+      return;
+    }
+    gsap.fromTo(fill, { width: "0%" }, { width: target, duration: 0.9, ease: "power3.out", delay: 0.15 });
+  }
+
+  var TILT_MAX = 6;
+  function bindTiltCards() {
+    if (!CredaMotion.ok() || CredaMotion.reduced) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    var cards = document.querySelectorAll(".ticket, .evidence-card");
+    cards.forEach(function (card) {
+      if (card._tiltBound) return;
+      card._tiltBound = true;
+      var qx = gsap.quickTo(card, "rotateX", { duration: 0.35, ease: "power3.out" });
+      var qy = gsap.quickTo(card, "rotateY", { duration: 0.35, ease: "power3.out" });
+      var qs = gsap.quickTo(card, "y", { duration: 0.35, ease: "power3.out" });
+      card.style.transformPerspective = "600px";
+      card.addEventListener("mousemove", function (e) {
+        var r = card.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - 0.5;
+        var py = (e.clientY - r.top) / r.height - 0.5;
+        qx(-py * TILT_MAX);
+        qy(px * TILT_MAX);
+        qs(-2);
+      });
+      card.addEventListener("mouseleave", function () {
+        qx(0); qy(0); qs(0);
+      });
+    });
+  }
 
   function formatStreamBranches(text) {
     if (!text) return "";
@@ -423,6 +715,81 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function formatReportHtml(text) {
+    var raw = String(text || "").trim();
+    if (!raw) return "";
+    var blocks = raw.split(/\n{2,}/).map(function (b) { return b.trim(); }).filter(Boolean);
+    if (blocks.length === 1 && raw.length > 160 && raw.indexOf("\n") < 0) {
+      blocks = raw.replace(/([.!?])\s+(?=[A-Z])/g, "$1\n\n").split(/\n{2,}/).filter(Boolean);
+    }
+    return '<div class="report-prose">' + blocks.map(function (block) {
+      var lines = block.split(/\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+      var list = lines.length > 1 && lines.every(function (l) { return /^[-•*]\s+/.test(l); });
+      if (list) {
+        return "<ul>" + lines.map(function (l) {
+          return "<li>" + linkifyEsc(l.replace(/^[-•*]\s+/, "")) + "</li>";
+        }).join("") + "</ul>";
+      }
+      return "<p>" + linkifyEsc(lines.join(" ")) + "</p>";
+    }).join("") + "</div>";
+  }
+
+  function splitFindings(text) {
+    var raw = String(text || "").trim();
+    if (!raw) return [];
+    var blocks = raw.split(/\n{2,}/).map(function (b) { return b.trim(); }).filter(Boolean);
+    if (blocks.length === 1) {
+      blocks = raw.replace(/([.!?])\s+(?=[A-Z])/g, "$1\n\n").split(/\n{2,}/).map(function (b) { return b.trim(); }).filter(Boolean);
+    }
+    if (blocks.length === 1 && raw.length > 90) {
+      var bits = raw.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [raw];
+      blocks = bits.map(function (s) { return s.trim(); }).filter(Boolean);
+    }
+    return blocks.slice(0, 3);
+  }
+
+  function findingsHtml(text) {
+    var parts = splitFindings(text);
+    if (!parts.length) return "";
+    return (
+      '<div class="report-timeline">' +
+        '<div class="timeline-line" aria-hidden="true"></div>' +
+        parts.map(function (p, i) {
+          return (
+            '<div class="timeline-item">' +
+              '<span class="timeline-dot">' + (i + 1) + "</span>" +
+              '<div class="timeline-copy">' + linkifyEsc(p) + "</div>" +
+            "</div>"
+          );
+        }).join("") +
+      "</div>"
+    );
+  }
+
+  var ACTION_ICONS = [
+    { test: /\bpay|\bfee|\botp|\bid\b|aadhaar|kyc|share.*(id|otp|bank)/i,
+      svg: '<path d="M12 3 4 6.5V11c0 5 3.4 8.4 8 9.7 4.6-1.3 8-4.7 8-9.7V6.5L12 3Z" stroke-linejoin="round"/><path d="M9.2 12.1 11.2 14l3.6-4.2" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { test: /verify|official|careers|domain|jobs page|website|url|link/i,
+      svg: '<circle cx="11" cy="11" r="6.4" opacity=".14" fill="currentColor" stroke-width="1.6"/><path d="M8.4 11.2 10.3 13l3.6-4.2" stroke-linecap="round" stroke-linejoin="round"/><path d="m16.2 16.2 4 4" stroke-linecap="round"/>' },
+    { test: /report|flag|forward|scam desk|block/i,
+      svg: '<path d="M6 21V4h11l-2 3.5L17 11H6" stroke-linejoin="round"/>' },
+    { test: /mailbox|email|domain|sender/i,
+      svg: '<rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="m4.5 7.5 7.5 6 7.5-6" stroke-linecap="round" stroke-linejoin="round"/>' }
+  ];
+  function actionIconSvg(label) {
+    var found = ACTION_ICONS.find(function (a) { return a.test.test(label || ""); });
+    var body = found ? found.svg : '<path d="M5 12h13M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>';
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">' + body + "</svg>";
+  }
+
+  function linkifyEsc(text) {
+    var escaped = esc(text);
+    return escaped.replace(/https?:\/\/[^\s<&]+/g, function (url) {
+      var clean = url.replace(/[.,);]+$/, "");
+      return '<a href="' + clean + '" target="_blank" rel="noopener noreferrer">' + clean + "</a>";
+    });
   }
 
   function $(id) { return document.getElementById(id); }
@@ -930,8 +1297,23 @@
     }
     if (fu) fu.disabled = name !== "result" || conversationPending;
     if (report) report.disabled = name === "wait";
+    var eta = $("wait-eta");
+    if (eta) eta.textContent = followupPollMode ? "Usually up to ~100s on follow-ups" : "Usually 45–90s";
     document.body.classList.toggle("ui-waiting", name === "wait" || conversationPending);
     document.body.classList.toggle("ui-ready", name === "result" && !conversationPending);
+    if (window.CredaPass && typeof CredaPass.mount === "function") {
+      if (name === "wait") CredaPass.mount($("wait-iso-slot"), "live");
+      else CredaPass.mount($("iso-home"), "idle");
+    }
+    if (name !== "wait") CredaMotion.stopStageLoop();
+    // The pipeline strip only lives in the intake lane; don't burn frames when it's hidden.
+    if (name === "intake") {
+      CredaMotion.startPipelineLoop();
+      CredaMotion.startEmptyScene();
+    } else {
+      CredaMotion.stopPipelineLoop();
+      CredaMotion.stopEmptyScene();
+    }
     CredaMotion.enterView(name);
   }
 
@@ -956,6 +1338,9 @@
     var opts = options || {};
     var headers = Object.assign({}, opts.headers || {});
     var url = API_URL.replace(/\/$/, "") + path;
+    if (session.token && /^\/cases\/[^/?]+$/.test(path.split("?")[0]) && (!opts.method || opts.method === "GET")) {
+      if (!headers["X-Case-Token"] && !headers["x-case-token"]) headers["X-Case-Token"] = session.token;
+    }
     var resp;
     try {
       resp = await fetch(url, Object.assign({}, opts, { headers: headers }));
@@ -985,8 +1370,8 @@
       if (dot) dot.className = "footer-health-dot ok";
       return data;
     } catch (e) {
-      $("health-dot").className = "dot err";
-      $("health-label").textContent = "API unreachable";
+      if ($("health-dot")) $("health-dot").className = "dot err";
+      if ($("health-label")) $("health-label").textContent = "API unreachable";
       var dot = $("footer-health-dot");
       if (dot) dot.className = "footer-health-dot err";
       return null;
@@ -1094,10 +1479,18 @@
   function autoResizeComposer() {
     var ta = $("offer-text");
     if (!ta) return;
+    // Desktop: CSS flexes the textarea to fill the lane, so JS must not set a height.
+    if (window.matchMedia("(min-width: 1024px)").matches) {
+      ta.style.height = "";
+      ta.style.overflowY = ta.scrollHeight > ta.clientHeight ? "auto" : "hidden";
+      syncSendButton();
+      return;
+    }
+    var maxPx = Math.max(220, Math.floor(window.innerHeight * 0.6));
     ta.style.height = "0";
-    var next = Math.min(ta.scrollHeight, 280);
+    var next = Math.min(ta.scrollHeight, maxPx);
     ta.style.height = next + "px";
-    ta.style.overflowY = ta.scrollHeight > 280 ? "auto" : "hidden";
+    ta.style.overflowY = ta.scrollHeight > maxPx ? "auto" : "hidden";
     syncSendButton();
   }
 
@@ -1299,6 +1692,7 @@
     });
     autoResizeComposer();
     syncParsedLinksFromText();
+    window.addEventListener("resize", autoResizeComposer);
   }
 
   function stopPolling() {
@@ -1400,7 +1794,7 @@
     if (/ocr|screenshot|image|pdf/.test(lower)) return "Reading your screenshot…";
     if (/signal|tactic|evidence|compared/.test(lower)) return "Pulling scam signals…";
     if (/official|careers|ats|vacancy|employer/.test(lower)) return "Checking official careers listing…";
-    if (/qwen|weigh|judge|stream|inference/.test(lower)) return "Qwen weighing evidence…";
+    if (/qwen|weigh|judge|stream|inference/.test(lower)) return "Weighing evidence…";
     if (/writing|explanation|ruling|stamp|computed/.test(lower)) return "Stamping your ruling…";
     return s || "Preparing the case file…";
   }
@@ -1467,35 +1861,14 @@
     if (sub) sub.textContent = pipelineWaitCopy(data);
   }
 
-  function renderStickyUrgent(data) {
+  function renderStickyUrgent() {
     var host = $("sticky-urgent");
-    if (!host) return;
-    if (normalize(data.verdict) !== "high_risk") {
-      host.classList.add("hidden");
-      host.innerHTML = "";
-      return;
-    }
-    var blocks = synthesizeBlocks(data);
-    var actions = [];
-    blocks.forEach(function (b) {
-      if (b.type === "safe_actions" && b.props && b.props.items) actions = actions.concat(b.props.items);
-    });
-    var urgent = actions.find(function (a) {
-      var tone = normalize(a.tone || a.urgency || "");
-      return tone === "urgent" || /do not pay|don't pay|never pay/i.test(String(a.label || a.title || ""));
-    }) || actions[0];
-    if (!urgent) {
-      host.classList.add("hidden");
-      host.innerHTML = "";
-      return;
-    }
-    host.classList.remove("hidden");
-    host.innerHTML = "<strong>" + esc(urgent.label || urgent.title || "Do not pay") + "</strong><span>" +
-      esc(urgent.detail || urgent.description || "Stop and verify on the employer official careers site before sending money.") + "</span>";
+    if (host) { host.classList.add("hidden"); host.innerHTML = ""; }
   }
 
   function renderLiveExhibits(data) {
     var host = $("live-exhibits");
+    if (!host) return;
     var items = data.evidence || [];
     if (!items.length) {
       host.innerHTML = '<div class="empty"><svg width="120" height="80" viewBox="0 0 120 80" fill="none" aria-hidden="true"><rect x="20" y="18" width="80" height="50" rx="8" stroke="#c5d0da" stroke-width="2"/><path d="M40 38h40M40 48h24" stroke="#c5d0da" stroke-width="2" stroke-linecap="round"/><circle cx="92" cy="22" r="10" fill="#eef2f6" stroke="#c5d0da" stroke-width="2"/></svg><div>Exhibits will slip in as checks finish.</div></div>';
@@ -1555,7 +1928,6 @@
     }
     var statusEl = $("official-status");
     if (statusEl) statusEl.textContent = pipelineWaitCopy(data);
-    renderLiveExhibits(data);
   }
 
   function humanizeEvidence(ev) {
@@ -1566,7 +1938,8 @@
     if (check === "payment_demand") return excerpt || "The message asks for money before you start.";
     if (check === "domain_match" && normalize(ev.outcome) === "conflict") return excerpt || "Sender domain does not match the employer’s official site.";
     if (check === "vacancy_match" && normalize(ev.outcome) === "confirmed") return excerpt || "Role appears on an official careers page.";
-    return excerpt || String(ev.outcome || "");
+    var cleaned = String(excerpt || "").replace(/\s*Discovery context only[^.]*\.?/gi, "").trim();
+    return cleaned || String(ev.outcome || "").replace(/_/g, " ");
   }
 
   function theySaid(ev, data) {
@@ -1725,7 +2098,7 @@
       var items = props.items || [];
       if (!items.length) return "";
       return items.slice(0, 6).map(function (item, idx) {
-        var smoking = clipWords(item.text || item.excerpt || humanizeEvidence(item) || theySaid(item, data) || "", 12);
+        var smoking = clipWords(item.text || item.excerpt || humanizeEvidence(item) || theySaid(item, data) || "", 22);
         if (!smoking && item.check) smoking = clipWords(String(item.check).replace(/_/g, " "), 12);
         var tone = outcomeTone(item.outcome);
         var pin = "E" + (idx + 1);
@@ -1828,17 +2201,20 @@
   function renderConversationHtml(turns, pending) {
     if (!turns || !turns.length) {
       if (pending) {
-        return '<div class="conv-thread"><div class="conv-bubble assistant pending"><div class="conv-role">Creda</div>Thinking…</div></div>';
+        return '<div class="conv-thread"><div class="conv-bubble assistant pending"><div class="conv-role">Checking</div>Reading the case file…</div></div>';
       }
       return "";
     }
     var html = '<div class="conv-thread">' + turns.map(function (t) {
       var role = normalize(t.role) || "user";
-      var label = role === "user" ? "You" : "Creda";
-      return '<div class="conv-bubble ' + esc(role) + '"><div class="conv-role">' + esc(label) + "</div>" + esc((t.text || "").slice(0, 1200)) + "</div>";
+      var label = role === "user" ? "You" : "Answer";
+      var body = role === "user"
+        ? "<p>" + esc((t.text || "").slice(0, 1200)) + "</p>"
+        : formatReportHtml((t.text || "").slice(0, 4000));
+      return '<div class="conv-bubble ' + esc(role) + '"><div class="conv-role">' + esc(label) + "</div>" + body + "</div>";
     }).join("");
     if (pending) {
-      html += '<div class="conv-bubble assistant pending"><div class="conv-role">Creda</div>Creda is checking that domain…</div>';
+      html += '<div class="conv-bubble assistant pending"><div class="conv-role">Checking</div>Working on that question…</div>';
     }
     return html + "</div>";
   }
@@ -2051,7 +2427,7 @@
     if (!rawHeadline || interimHeadline.test(rawHeadline)) {
       rawHeadline = (followupBaseline && followupBaseline.headline) || stampLabel(data.verdict);
     }
-    $("board-headline").textContent = clipWords(rawHeadline, 8);
+    CredaMotion.setHeadlineWords($("board-headline"), clipWords(rawHeadline, 22));
 
     // Optional one meta line (sender/domain) — never full URLs/email body
     var metaEl = $("board-meta");
@@ -2067,6 +2443,8 @@
         }
       }
       if (!meta && data.employer) meta = clipWords(String(data.employer), 6);
+      var channel = normalize(data.sourceChannel || data.channel || data.intakeChannel || "");
+      if (channel === "telegram") meta = meta ? meta + " · Telegram" : "From Telegram";
       metaEl.textContent = meta;
       metaEl.classList.toggle("is-empty", !meta);
     }
@@ -2079,88 +2457,80 @@
       var looksGeneric = data.nextActions.length <= 1 && /wait for the agent|review the stamps|review exhibits/i.test((data.nextActions[0] && data.nextActions[0].label) || "");
       if (!extractRawActions(data).length || looksGeneric) data.nextActions = followupBaseline.nextActions;
     }
-    var actionList = (data.nextActions || []).slice(0, 3);
-    $("orders-host").innerHTML = '<div class="action-chips">' + actionList.map(function (a) {
-      var urgent = a.tone === "urgent" || a.tone === "high_risk" ? " urgent" : "";
-      return '<button type="button" class="action-chip' + urgent + '" tabindex="-1">' + esc(clipWords(a.label, 4)) + "</button>";
-    }).join("") + "</div>";
-
-    // Build ≤6 tiles: icon + 2-word label + ONE fact
-    var blocks = synthesizeBlocks(data);
-    var tacticItems = collectTacticItems(blocks);
-    if (!tacticItems.length && data.tactics && data.tactics.length) tacticItems = data.tactics;
-    if (!tacticItems.length && data.matchedTactics && data.matchedTactics.length) {
-      tacticItems = data.matchedTactics.map(function (t) {
-        return typeof t === "string" ? { title: t, guidance: "" } : t;
-      });
-    }
-    var exhibitSeed = dedupeExhibits(evidenceHighlightItems(data), 12);
-    if (tacticItems.length < 3 && exhibitSeed.length) {
-      exhibitSeed.forEach(function (ev) {
-        if (tacticItems.length >= 6) return;
-        tacticItems.push({
-          title: ev.check || "Signal",
-          guidance: ev.text || ev.claimText || "",
-          sourceUrl: ev.sourceUrl,
-          outcome: ev.outcome
-        });
-      });
-    }
-    if (!tacticItems.length && followupBaseline && followupBaseline.tactics && followupBaseline.tactics.length) {
-      tacticItems = followupBaseline.tactics;
+    var statsEl = $("report-stats");
+    if (statsEl) {
+      var conf = data.confidence != null ? data.confidence : data.agentConfidence;
+      statsEl.innerHTML = confBarHtml(conf) || "";
     }
 
-    var visibleTiles = tacticItems.slice(0, 6);
-    var overflow = Math.max(0, tacticItems.length - 6) + Math.max(0, exhibitSeed.length - visibleTiles.length);
-
-    function twoWordLabel(title) {
-      var words = String(title || "Signal").replace(/_/g, " ").trim().split(/\s+/).filter(Boolean);
-      if (!words.length) return "Signal";
-      if (words.length === 1) return words[0].slice(0, 14);
-      return (words[0] + " " + words[1]).slice(0, 18);
-    }
-
-    $("tactics-host").innerHTML = '<div class="tile-grid tile-grid-3x2">' + visibleTiles.map(function (item) {
-      var title = item.title || item.display_name || item.type || item.tactic_id || item.check || "Pattern";
-      var label = twoWordLabel(title);
-      var fact = clipWords(item.guidance || item.user_guidance || item.detail || item.matched_text || item.text || label, 8);
-      var key = (item.tactic_id || item.tacticId || title || "").toLowerCase();
-      var chip = item.sourceUrl
-        ? '<a class="source-chip" href="' + esc(item.sourceUrl) + '" target="_blank" rel="noopener noreferrer">src</a>'
-        : '<span class="source-chip source-chip-muted">src</span>';
-      return (
-        '<div class="tactic-tile tone-' + esc(outcomeTone(item.outcome || data.verdict)) + '">' +
-          '<div class="tactic-tile-icon">' + tacticVectorSvg(key, title) + "</div>" +
-          '<div class="tactic-label">' + esc(label) + "</div>" +
-          '<p class="tactic-gun">' + esc(fact) + "</p>" +
-          chip +
-        "</div>"
-      );
-    }).join("") + "</div>";
-
-    // Extra signals collapse — never dump essays/URLs/email body on canvas
-    var extra = exhibitSeed.slice(visibleTiles.length);
-    if (!extra.length && overflow > 0) extra = exhibitSeed.slice(0, Math.min(6, overflow));
-    if (extra.length) {
-      $("exhibits-host").innerHTML =
-        '<details class="extra-checks"><summary>+' + extra.length + ' checks</summary>' +
-        '<div class="extra-checks-body">' +
-        BLOCK_RENDERERS.evidence_highlights({ props: { items: extra.slice(0, 8) } }, data) +
-        "</div></details>";
-    } else {
-      $("exhibits-host").innerHTML = "";
-    }
-
-    // Long reasoning collapsed only
-    var judgmentHost = $("judgment-host");
-    var researchHost = $("research-host");
     var why = (data.agentReasoning || data.explanation || "").trim();
+    var judgmentHost = $("judgment-host");
     if (judgmentHost) {
       judgmentHost.classList.remove("hidden");
       judgmentHost.innerHTML = why
-        ? '<details class="why-collapsed"><summary>Why Creda ruled this way</summary><div class="why-body">' + esc(clipWords(why, 80)) + (why.split(/\s+/).length > 80 ? "…" : "") + "</div></details>"
+        ? '<p class="report-section-kicker">Why this stamp</p>' + findingsHtml(why)
         : "";
     }
+
+    var actionList = (data.nextActions || []).slice(0, 4);
+    $("orders-host").innerHTML = actionList.length
+      ? '<p class="report-section-kicker">Do this next</p><div class="ticket-row">' + actionList.map(function (a, i) {
+        var detail = a.detail && a.detail !== a.label ? clipWords(a.detail, 22) : "";
+        return (
+          '<div class="ticket">' +
+            '<span class="ticket-icon">' + actionIconSvg(a.label) + "</span>" +
+            '<span class="ticket-n">Step ' + (i + 1) + "</span>" +
+            "<b>" + esc(clipWords(a.label, 18)) + "</b>" +
+            (detail ? "<p>" + esc(detail) + "</p>" : "") +
+          "</div>"
+        );
+      }).join("") + "</div>"
+      : "";
+
+    var citedIds = data.citedEvidenceIds || data.agentCitedEvidence || [];
+    var evidence = data.evidence || [];
+    var byId = {};
+    evidence.forEach(function (ev) { if (ev && ev.id) byId[ev.id] = ev; });
+    var sources = [];
+    (Array.isArray(citedIds) ? citedIds : []).forEach(function (id) {
+      var ev = typeof id === "string" ? byId[id] : (id && id.id ? byId[id.id] || id : id);
+      if (ev && sources.indexOf(ev) < 0) sources.push(ev);
+    });
+    if (!sources.length) {
+      evidence.forEach(function (ev) {
+        if (ev && (ev.sourceUrl || ev.excerpt) && sources.length < 5) sources.push(ev);
+      });
+    }
+    sources = sources.slice(0, 5);
+    $("tactics-host").innerHTML = sources.length
+      ? '<p class="report-section-kicker">Sources on file</p><div class="evidence-row">' + sources.map(function (ev, i) {
+        var label = "";
+        try {
+          if (ev.sourceUrl) {
+            var parsed = new URL(ev.sourceUrl);
+            label = parsed.hostname.replace(/^www\./, "");
+            var leaf = parsed.pathname.replace(/\/$/, "").split("/").filter(Boolean).pop() || "";
+            if (leaf && leaf !== "en" && leaf.length < 40) label += " / " + leaf.replace(/[-_]/g, " ");
+          }
+        } catch (e1) {}
+        if (!label) label = String(ev.check || ev.kind || "source").replace(/_/g, " ");
+        var note = clipWords(humanizeEvidence(ev) || "", 20);
+        var link = ev.sourceUrl
+          ? '<a href="' + esc(ev.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(label) + "</a>"
+          : "<span>" + esc(label) + "</span>";
+        return (
+          '<div class="evidence-card">' +
+            '<span class="evidence-index">' + (i + 1) + "</span>" +
+            '<div class="evidence-body">' + link +
+              (note ? '<p class="evidence-note">' + esc(note) + "</p>" : "") +
+            "</div>" +
+          "</div>"
+        );
+      }).join("") + "</div>"
+      : "";
+
+    if ($("exhibits-host")) $("exhibits-host").innerHTML = "";
+    var researchHost = $("research-host");
     if (researchHost) researchHost.innerHTML = "";
 
     var turns;
@@ -2187,6 +2557,7 @@
     }
     $("conversation-host").innerHTML = renderConversationHtml(turns, conversationPending);
 
+    renderChipRows(data);
     renderStickyUrgent(data);
     // Reset opacity/visibility before every reveal so 2nd/3rd cases never stay ghosted
     CredaMotion.forceRevealVisible();
@@ -2336,7 +2707,7 @@
       WaitStoryboard.start();
       readySince = 0;
       showView("wait");
-      $("live-exhibits").innerHTML = "";
+      if ($("live-exhibits")) $("live-exhibits").innerHTML = "";
       lastLiveExhibitCount = 0;
       lastStreamBody = "";
       lastActiveStage = -1;
@@ -2457,24 +2828,80 @@
     }
   }
 
-  function toggleReportPanel(open) {
+  function setHidden(el, hide) {
+    if (el) el.classList.toggle("hidden", !!hide);
+  }
+
+  function toggleReportPanel(open, mode) {
+    if (mode) reportMode = mode;
     var sheet = $("report-sheet");
     if (sheet) sheet.classList.toggle("hidden", !open);
     showError("report-error", "");
-    if (open) {
+    var titleEl = $("report-sheet-title");
+    var kicker = $("report-kicker");
+    var lede = $("report-lede");
+    var sendBtn = $("btn-report-send");
+    var cancelBtn = $("btn-report-cancel");
+    var textArea = $("report-text");
+    var kind = $("report-kind");
+    var company = $("report-company");
+    var isLimits = reportMode === "limits";
+    var isCompany = reportMode === "company";
+    setHidden($("report-limits-body"), !isLimits);
+    setHidden($("report-form-body"), isLimits);
+    if (sendBtn) sendBtn.classList.toggle("hidden", isLimits);
+    if (cancelBtn) cancelBtn.textContent = isLimits ? "Close" : "Cancel";
+    if (isLimits) {
+      if (kicker) kicker.textContent = "Coverage";
+      if (titleEl) titleEl.textContent = "What Creda can check today";
+      if (lede) lede.textContent = "Text-only today. Screenshots and PDFs need a vision path we have not turned on.";
+    } else if (isCompany) {
+      if (kicker) kicker.textContent = "Registry";
+      if (titleEl) titleEl.textContent = "Request a company";
+      if (lede) lede.textContent = "Ask Creda to add an employer or scam pattern to the approved registry. This does not change the live ruling.";
+      if (textArea) textArea.placeholder = "Why should this employer or pattern be in coverage?";
+      if (sendBtn) sendBtn.textContent = "Send request";
+      if (kind) kind.value = "company_request";
+    } else {
+      if (kicker) kicker.textContent = "Incident";
+      if (titleEl) titleEl.textContent = "Report a missed scam";
+      if (lede) lede.textContent = "File what the current ruling missed. It goes to the tactic registry, not the live judge.";
+      if (textArea) textArea.placeholder = "Paste the offer or describe what Creda missed.";
+      if (sendBtn) sendBtn.textContent = "Send report";
+      if (kind) kind.value = "missed_scam";
+    }
+    if (open && !isLimits) {
       var prefill = ($("offer-text").value || "").trim();
       if (!prefill && lastData) prefill = (lastData.offerText || lastData.headline || "").trim();
       if (!prefill && lastData) {
         prefill = [lastData.headline, lastData.verdict, (lastData.links || []).join("\n")].filter(Boolean).join("\n\n");
       }
-      if (prefill && !($("report-text").value || "").trim()) $("report-text").value = prefill;
-      $("report-text").focus();
+      if (isCompany && lastData && lastData.employer && company && !(company.value || "").trim()) {
+        company.value = lastData.employer;
+      }
+      if (prefill && textArea && !(textArea.value || "").trim()) textArea.value = prefill;
+      var focusEl = isCompany && company ? company : textArea;
+      if (focusEl) focusEl.focus();
+    } else if (!open) {
+      reportMode = "scam";
     }
   }
 
   async function submitReport() {
+    if (reportMode === "limits") {
+      toggleReportPanel(false);
+      return;
+    }
     var text = ($("report-text").value || "").trim();
-    if (!text) {
+    var company = ($("report-company") && $("report-company").value || "").trim();
+    var kind = ($("report-kind") && $("report-kind").value || "").trim();
+    var url = ($("report-url") && $("report-url").value || "").trim();
+    var contact = ($("report-contact") && $("report-contact").value || "").trim();
+    if (reportMode === "company" && !company && !text) {
+      showError("report-error", "Name the employer or pattern to add.", { focusId: "report-company" });
+      return;
+    }
+    if (reportMode !== "company" && !text) {
       showError("report-error", "Paste the scam message or describe what Creda missed.", { focusId: "report-text" });
       return;
     }
@@ -2482,9 +2909,16 @@
     showError("report-error", "");
     try {
       var body = {
-        reportText: text,
-        notes: "Creda UI report. User believes a scam was missed.",
-        contactConsent: false
+        reportText: text || company,
+        companyName: company || undefined,
+        reportKind: kind || undefined,
+        sourceUrl: url || undefined,
+        reportType: reportMode === "company" || kind === "company_request" ? "company_request" : "missed_scam",
+        notes: reportMode === "company"
+          ? "Creda UI company/pattern request."
+          : "Creda UI report. User believes a scam was missed.",
+        contactConsent: !!contact,
+        contact: contact || undefined
       };
       if (session.caseId) body.linkedCaseId = session.caseId;
       if (lastData && lastData.verdict) body.linkedVerdict = lastData.verdict;
@@ -2493,10 +2927,29 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       });
+      var sentCompany = reportMode === "company" || kind === "company_request";
       toggleReportPanel(false);
       $("report-text").value = "";
-      $("btn-report").textContent = "Report sent";
-      setTimeout(function () { $("btn-report").textContent = "Report a missed scam"; }, 2500);
+      if ($("report-company")) $("report-company").value = "";
+      if ($("report-url")) $("report-url").value = "";
+      if ($("report-contact")) $("report-contact").value = "";
+      if (sentCompany) {
+        var companyBtn = $("btn-limits-company");
+        var companyLabel = companyBtn && companyBtn.querySelector("span:last-child");
+        if (companyLabel) companyLabel.textContent = "Request sent";
+        setTimeout(function () {
+          if (companyLabel) companyLabel.textContent = "Request company";
+        }, 2500);
+      } else {
+        $("btn-report").textContent = "Report sent";
+        var reportChip = $("btn-limits-report") && $("btn-limits-report").querySelector("span:last-child");
+        if (reportChip) reportChip.textContent = "Report sent";
+        setTimeout(function () {
+          $("btn-report").textContent = "Report a missed scam";
+          if (reportChip) reportChip.textContent = "Report scam";
+        }, 2500);
+      }
+      reportMode = "scam";
     } catch (e) {
       showError("report-error", e, { focusId: "report-text", onRetry: submitReport });
     } finally {
@@ -2516,8 +2969,10 @@
     followupGraceStartedAt = 0;
     CredaStageMachine.reset();
     WaitStoryboard.reset();
+    CredaMotion.stopStageLoop();
     lastActiveStage = -1;
     toggleReportPanel(false);
+    reportMode = "scam";
     clearComposer();
     saveSession();
     document.body.removeAttribute("data-verdict");
@@ -2531,23 +2986,47 @@
     CredaShieldArt.init();
     $("btn-check").addEventListener("click", submitCase);
     wireComposer();
-    $("btn-clear").addEventListener("click", clearComposer);
+    var clearBtn = $("btn-clear");
+    if (clearBtn) clearBtn.addEventListener("click", clearComposer);
     $("btn-cancel-wait").addEventListener("click", resetToIntake);
     $("btn-new").addEventListener("click", resetToIntake);
     $("btn-followup").addEventListener("click", function () { sendFollowup(); });
     $("followup-input").addEventListener("keydown", function (e) {
       if (e.key === "Enter") sendFollowup();
     });
-    $("btn-report").addEventListener("click", function () { toggleReportPanel(true); });
+    $("btn-report").addEventListener("click", function () { toggleReportPanel(true, "scam"); });
     $("btn-report-cancel").addEventListener("click", function () { toggleReportPanel(false); });
     $("btn-report-send").addEventListener("click", submitReport);
+    var limitsInfo = $("btn-limits-info");
+    var limitsReport = $("btn-limits-report");
+    var limitsCompany = $("btn-limits-company");
+    if (limitsInfo) limitsInfo.addEventListener("click", function () { toggleReportPanel(true, "limits"); });
+    if (limitsReport) limitsReport.addEventListener("click", function () { toggleReportPanel(true, "scam"); });
+    if (limitsCompany) limitsCompany.addEventListener("click", function () { toggleReportPanel(true, "company"); });
+    var sheet = $("report-sheet");
+    if (sheet) {
+      sheet.addEventListener("click", function (e) {
+        if (e.target === sheet) toggleReportPanel(false);
+      });
+    }
     bootstrapSessionFromUrl();
     restoreSession();
     checkHealth().then(function () {
       if (session.caseId && session.token) resumeSession();
+    }).catch(function () {
+      if (session.caseId && session.token) resumeSession();
     });
   }
 
-  wire();
+  window.CredaPreviewResult = function (data) {
+    showView("result");
+    renderResult(data || {});
+  };
+
+  try {
+    wire();
+  } catch (err) {
+    console.error("creda wire failed", err);
+  }
 
 })();
