@@ -135,7 +135,7 @@ Written with **Kiro** and **Cursor Agent**. Humans designed the gather-then-judg
 
 ## First Commit tracks
 
-**Build it:** SAM CLI, Docker + DynamoDB Local, Strands in the worker, Qwen served next to the ECS worker. Agents: Kiro, Cursor Agent.
+**Build it:** SAM CLI, Docker + DynamoDB Local, Strands in the worker, Qwen served next to the ECS worker.
 
 **Ship it:** Amplify, API Gateway, Lambda, SQS, DynamoDB, S3, ECS Fargate, EventBridge, CloudWatch, IAM.
 
