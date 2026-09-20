@@ -115,19 +115,27 @@ Operator notes: `DEPLOY.md`, `docs/TELEGRAM_SETUP.md`.
 
 ## Repo
 
+The product is **Python** (Lambda intake/gatherer/ingest, ECS Qwen worker, SAM) plus a small Amplify UI.
+
+GitHub's language bar can look like "mostly HTML." That is saved employer policy pages under `data/raw` and `data/manual_snapshots` (evidence snapshots, not the app). There is one real UI file: `frontend/index.html`. `.gitattributes` marks those snapshots as vendored so Linguist does not treat crawl HTML as the stack.
+
 ```
-backend/     intake, gatherer, ingest
-frontend/     Amplify UI (HTML/CSS/JS)
-infra/        SAM + ECS Qwen worker
-scripts/      deploy and smoke tests
-data/         curated employers, tactics, ATS sources
+backend/     Python Lambdas: intake, gatherer, ingest
+frontend/     Amplify UI (one HTML file + CSS/JS)
+infra/        SAM + ECS Qwen worker (Python)
+scripts/      deploy and smoke tests (shell)
+data/         employer snapshots, tactics, ATS sources
 extension/    Chrome helper (optional)
 docs/         architecture still and setup notes
 ```
 
+## How it was built
+
+Written with **Kiro** and **Cursor Agent**. Humans designed the gather-then-judge path, the Mumbai deploy, and the cost cap. The agents implemented and iterated the code.
+
 ## First Commit tracks
 
-**Build it:** SAM CLI, Docker + DynamoDB Local, Strands in the worker, Qwen served next to the ECS worker.
+**Build it:** SAM CLI, Docker + DynamoDB Local, Strands in the worker, Qwen served next to the ECS worker. Agents: Kiro, Cursor Agent.
 
 **Ship it:** Amplify, API Gateway, Lambda, SQS, DynamoDB, S3, ECS Fargate, EventBridge, CloudWatch, IAM.
 

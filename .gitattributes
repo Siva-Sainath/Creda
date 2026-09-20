@@ -1,0 +1,7 @@
+# Employer policy snapshots used as evidence. Not application source.
+# GitHub Linguist was counting these HTML pages as "the repo is HTML."
+data/raw/** linguist-vendored
+data/manual_snapshots/** linguist-documentation
+data/curated/** linguist-vendored
+data/india_priority_pipelines/** linguist-documentation
+data/reports/** linguist-documentation
