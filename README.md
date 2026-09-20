@@ -1,135 +1,134 @@
 # Creda
 
-## You get a job offer. 30 seconds to tell if it's real.
+## You get a job offer. Check it before you reply.
 
-Every month, thousands of students in India see a WhatsApp message with a company logo, a salary, and a bank account. "Send Rs 2,500 for the kit and you're hired." It's never real.
+Every month, students in India get a WhatsApp hire with a company logo, a salary, and a UPI id. "Send Rs 2,500 for the kit and you are in." It is never real.
 
-**Creda checks if a job offer is a scam** — paste the text, get a verdict in 30 seconds. No login. Same check on the web, Telegram, or Chrome.
+**Creda checks if a job offer is a scam.** Paste the message. Get a stamp, the sources, and what to do next. No login.
 
 **[Open the app](https://main.d32sg54oqu2gcb.amplifyapp.com/)** · **[Telegram @CredashieldBot](https://t.me/CredashieldBot)**
 
-![Creda checks your offer against real employer data](docs/architecture.png)
+![Creda path in ap-south-1: paste on Amplify or Telegram, API Gateway, gather evidence, Qwen writes the stamp](docs/architecture.png)
+
+Live in **Mumbai (`ap-south-1`)**. That Amplify URL is the demo. It does not change.
 
 ## What you get
 
-**Three honest verdicts.** We don't scare you just to scare you.
+Three honest verdicts. We do not scare you just to scare you.
 
-- **High risk**: They ask for money upfront, fake email, or known scammer tactics.
-- **Unverified**: Real company, but something doesn't add up (vague role, no clear hiring process).
-- **No conflict found**: The company is hiring, this looks real, go for it.
+- **High risk**: money up front, fake mailbox, or known scam tactics.
+- **Unverified**: a real company, but the message does not line up (vague role, no hiring path we can back).
+- **No conflict found**: the company is hiring this way. Still be careful. We did not find a conflict.
 
-**Works with what you already have.** Paste the actual WhatsApp text the scammer sent. Copy a screenshot. Drop a job URL. We'll check it.
-
-**Answers in 30 seconds.** We compare your offer against official employer careers pages, ATS indexes, and a database of known scam fee structures. It's fast because we cache the evidence overnight.
-
-**Runs where you are.** Amplify web app in India. Telegram for anyone. No account, no tracking.
+Paste WhatsApp text, an email, a screenshot, or a job URL. Same check on the web and on Telegram.
 
 ## Try it
 
-**Definitely a scam:**
+**High risk (fee + fake Amazon mail):**
 
 ```
-Flipkart hiring for WFH catalog tagging. Salary 35k/month. 
-Buy starter kit Rs 2499 on PhonePe to hr.flipkart.wfh@gmail.com. 
-Training on WhatsApp group only.
+Amazon India WFH listing specialist. Salary 42,000/month.
+Pay Rs 1,999 joining kit on PhonePe to amazon.hr.wfh@gmail.com
+to confirm the offer. Training only on WhatsApp.
 ```
 
-**Suspicious but not proof:**
+**Unverified (real brand, weak process):**
 
 ```
-LinkedIn InMail from Notion Talent: We loved your profile for a remote PM role. 
-Reply with your salary expectation. Interview tomorrow on Google Meet, no prep needed.
+LinkedIn InMail from Notion Talent: We loved your profile for a remote PM role.
+Reply with salary. Interview tomorrow on Google Meet, no prep needed.
 ```
 
-**Probably real:** a direct link to Flipkart Careers or LinkedIn from a verified account, no upfront fee.
+**Cleaner:** a careers-page link from a company you can name, no kit fee, no personal Gmail.
 
-## Why we built this
+A check usually takes about a minute. The site waits on purpose. Facts run first. The model writes the stamp second.
 
-A student who pays Rs 2,499 (USD 3) for a fake "starter kit" loses two weeks of part-time income. If Creda takes 30 seconds to save one student a month, it pays for itself. We built it because scam offers keep changing but the pattern doesn't.
+## How it works
 
-## How it works (the short version)
+1. You paste the offer on the Amplify app or in Telegram.
+2. **API Gateway** takes the request. **Intake Lambda** opens a case, issues a one-time token, and puts work on **SQS**.
+3. **Gatherer Lambda** checks employer records, careers domains, fee/tactics, the ATS vacancy index, and forum exhibits. It does **not** scrape the open web on every paste.
+4. **EventBridge** refreshes that evidence overnight, so the stamp can say unverified instead of inventing a page.
+5. **Qwen on ECS Fargate** reads the evidence packet and writes the stamp, headline, confidence, cited sources, and next steps.
+6. The browser polls **GET /cases/{id}**. DynamoDB holds the case. S3 holds the bundle and optional uploads.
 
-You paste an offer → we check it against real employer websites → we look for fee tactics (UPI requests, "kit" payments, registration fees) → we tell you what we found.
+If the model output is junk, code still has a verdict from the checks. Citations have to exist in the packet.
 
-If you send a screenshot, we can read it with image AI. If you're not sure what service to trust, we tell you honestly: we couldn't verify, so be careful.
+## What is live in Mumbai
 
-## The stack
+This is the source of truth for the URL above. Not a wishlist.
 
-We run it cheap so students can use it free. Here's what you need to know:
+| Piece | Live |
+|---|---|
+| UI | Amplify `https://main.d32sg54oqu2gcb.amplifyapp.com/` |
+| API | API Gateway `https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com` |
+| Intake / gather / ingest / Telegram | Lambda (`creda-mumbai-*`) |
+| Wait vs hang | SQS WorkerQueue + QwenQueue + DLQ |
+| Case + token + reports | DynamoDB |
+| Evidence bundle + uploads | S3 |
+| Daily ATS + forum refresh | EventBridge `CredaDailyIngest` |
+| Stamp | ECS Fargate `creda-qwen-cpu` (one warm task, Qwen3-4B) |
+| Auth | Per-case token. No Cognito. |
+| Bedrock | Off |
+| SageMaker | Tried, then deleted. Not on this URL. |
+| GPU g4dn | Built in repo. Not on this URL (quota). |
 
-- **Web:** Amplify (static hosting)
-- **API:** Lambda functions that check employers and scam patterns
-- **Database:** DynamoDB (stores your cases so you can follow up)
-- **Search:** Overnight batch job that refreshes employer data from ATS indexes
-- **Judge:** Small Qwen model on Fargate (decides if it's a scam)
-- **Optional:** GPU when you upload a screenshot (usually off, costs almost nothing at this scale)
-
-**What it costs:**
-
-| Scenario | Cost |
-|----------|------|
-| 1,000 students checking offers per month (text only) | under USD 5 |
-| Keep the judge warm 24/7 | ~USD 5/day |
-| GPU for screenshot reading (when used) | ~USD 0.58/hour |
-
-One fake deposit that doesn't work out costs way more than a month of Creda.
-
-## Set it up
-
-**For you (try it live right now):**
-
-[Open app](https://main.d32sg54oqu2gcb.amplifyapp.com/)
-
-**For Telegram:**
-
-Message [@CredashieldBot](https://t.me/CredashieldBot), paste an offer, get a verdict.
-
-**For developers (run it yourself):**
+**Health check:**
 
 ```bash
-# Set up Python
+curl -s https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com/health | jq .
+```
+
+Expect `status: ok`, `dataReady: true`, `bedrockEnabled: false`, `judgeMode: creda`, `vacancyRefresh: daily`.
+
+## Cost (why it is this shape)
+
+Students use it free. The bill has to stay boring.
+
+| What | About |
+|---|---|
+| Text checks at hackathon volume | a few dollars |
+| Keep the Qwen task warm 24/7 | ~USD 5/day |
+| SageMaker GPU endpoint | killed. sticky idle cost |
+| g4dn always-on | ~USD 0.58/hour if quota ever lands. not live |
+
+One fake "joining kit" costs a student more than a month of Creda.
+
+## Run it
+
+**Use the live app (this is the demo):**
+
+https://main.d32sg54oqu2gcb.amplifyapp.com/
+
+**Telegram:** message [@CredashieldBot](https://t.me/CredashieldBot), paste an offer.
+
+**Frontend locally (still talks to Mumbai):**
+
+```bash
 python -m venv .venv
 source .venv/bin/activate
-
-# Install and run
 pip install -r requirements.txt
 bash scripts/serve_frontend.sh
 ```
 
-```bash
-# Check the API is alive
-curl -s https://x1ed4uf5q9.execute-api.ap-south-1.amazonaws.com/health | jq .
-```
+Operator notes: `DEPLOY.md`, `docs/TELEGRAM_SETUP.md`.
 
-**Full setup:** See `DEPLOY.md` and `docs/TELEGRAM_SETUP.md`.
-
-**Telegram hardening:** See `docs/TELEGRAM_BOT_HARDENING.md`.
-
-## Structure
+## Repo
 
 ```
-backend/           Lambda functions that do the checking
-frontend/          The web app (Amplify)
-infra/             Deployment templates (SAM, ECS)
-scripts/           Deploy, tests, and GPU scaling
-docs/              Setup guides, architecture notes
-deploy/bundle/     Employer evidence (built offline)
-extension/         Chrome helper
+backend/     intake, gatherer, ingest
+frontend/     Amplify UI (HTML/CSS/JS)
+infra/        SAM + ECS Qwen worker
+scripts/      deploy and smoke tests
+data/         curated employers, tactics, ATS sources
+extension/    Chrome helper (optional)
+docs/         architecture still and setup notes
 ```
 
-## For your own domain
+## First Commit tracks
 
-The app lives at `*.amplifyapp.com` and you can't rename that. To use your own domain:
+**Build it:** SAM CLI, Docker + DynamoDB Local, Strands in the worker, Qwen served next to the ECS worker.
 
-1. Buy a domain in Route 53 (e.g., `creda.in`)
-2. In the Amplify console, go to **Hosting** → **Custom domains**
-3. Map your domain to the `main` branch
+**Ship it:** Amplify, API Gateway, Lambda, SQS, DynamoDB, S3, ECS Fargate, EventBridge, CloudWatch, IAM.
 
-That's it. You'll have your own URL in a few minutes.
-
-## Next
-
-- **Run it locally:** `DEPLOY.md`
-- **Set up Telegram:** `docs/TELEGRAM_SETUP.md`
-- **How we check:** `docs/MVP-HARDENED-ARCHITECTURE.md`
-- **Report a bug:** [GitHub Issues](https://github.com/Siva-Sainath/Creda/issues)
+Issues: [github.com/Siva-Sainath/Creda/issues](https://github.com/Siva-Sainath/Creda/issues)
