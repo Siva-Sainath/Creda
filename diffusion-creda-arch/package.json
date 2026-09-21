@@ -1,0 +1,34 @@
+{
+  "name": "diffusion-creda-arch",
+  "projectId": "ne11vSGzfby3QPq0POpU2",
+  "displayName": "diffusion-creda-arch",
+  "private": true,
+  "type": "module",
+  "main": "index.tsx",
+  "scripts": {
+    "open": "dapi open .",
+    "context": "dapi context",
+    "capture": "dapi capture",
+    "probe": "dapi media probe",
+    "transcribe": "dapi media transcribe",
+    "grab": "dapi media grab",
+    "filmstrip": "dapi media filmstrip",
+    "waveform": "dapi media waveform",
+    "listen": "dapi media listen",
+    "models": "dapi models",
+    "voices": "dapi voices",
+    "fonts": "dapi fonts",
+    "whoami": "dapi whoami",
+    "logs": "dapi logs",
+    "screenshot": "dapi screenshot",
+    "report": "dapi report"
+  },
+  "devDependencies": {
+    "@diffusionstudio/jsx": "latest",
+    "solid-js": "^1.9.10"
+  },
+  "dependencies": {
+    "@aws-icons/svg": "^4.1.1",
+    "three": "^0.186.0"
+  }
+}

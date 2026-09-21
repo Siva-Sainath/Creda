@@ -416,23 +416,20 @@
     enterView: function (name) {
       if (!this.ok() || this.reduced || name === lastView) return;
       lastView = name;
-      var el = name === "wait" ? "#view-wait" : name === "result" ? "#view-result" : "#view-intake";
+      if (name === "wait") {
+        // Never fade the wait pane — WebGL lives inside it and opacity tweens read as flicker.
+        gsap.set("#view-wait, .wait-iso-slot", { autoAlpha: 1, y: 0 });
+        gsap.fromTo(".wait-meta", { y: 8, autoAlpha: 0 }, {
+          y: 0, autoAlpha: 1, duration: 0.35, ease: "power2.out",
+          onComplete: function () { gsap.set(".wait-meta", { clearProps: "opacity,transform,autoAlpha" }); }
+        });
+        return;
+      }
+      var el = name === "result" ? "#view-result" : "#view-intake";
       gsap.fromTo(el, { autoAlpha: 0, y: 12 }, {
         autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out",
         onComplete: function () { gsap.set(el, { clearProps: "opacity,visibility,transform,autoAlpha" }); }
       });
-      if (name === "wait") {
-        gsap.fromTo(".prestream-rail .prestream-step",
-          { y: 8, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.35, stagger: 0.06, ease: "power2.out", delay: 0.08,
-            onComplete: function () { gsap.set(".prestream-rail .prestream-step", { clearProps: "opacity,transform,autoAlpha" }); }
-          });
-        gsap.fromTo(".wait-iso-slot",
-          { autoAlpha: 0 },
-          { autoAlpha: 1, duration: 0.4, ease: "power2.out",
-            onComplete: function () { gsap.set(".wait-iso-slot", { clearProps: "opacity,visibility,autoAlpha" }); }
-          });
-      }
     },
     pulseStage: function (idx) {
       if (!this.ok() || this.reduced) return;
@@ -1299,9 +1296,9 @@
       result.setAttribute("aria-hidden", name === "result" ? "false" : "true");
     }
     if (empty) {
-      var showEmpty = name === "intake";
-      empty.classList.toggle("hidden", !showEmpty);
-      empty.setAttribute("aria-hidden", showEmpty ? "false" : "true");
+      var hideEmpty = name === "result";
+      empty.classList.toggle("hidden", hideEmpty);
+      empty.setAttribute("aria-hidden", name === "intake" ? "false" : "true");
     }
     document.body.classList.remove("view-bleed");
     document.body.classList.toggle("view-wide", name === "wait" || name === "result");
@@ -1326,12 +1323,17 @@
     if (eta) eta.textContent = followupPollMode ? "Usually up to ~100s on follow-ups" : "Usually 45–90s";
     document.body.classList.toggle("ui-waiting", name === "wait" || conversationPending);
     document.body.classList.toggle("ui-ready", name === "result" && !conversationPending);
-    if (window.CredaPass && typeof CredaPass.mount === "function") {
-      if (name === "wait") CredaPass.mount($("wait-iso-slot"), "live");
-      else CredaPass.mount($("iso-home"), "idle");
+    if (name === "wait" && wait) void wait.offsetHeight;
+    function mountIsoPass() {
+      if (!window.CredaPass || typeof CredaPass.mount !== "function") return;
+      CredaPass.mount($("iso-home"), name === "wait" ? "live" : "idle");
       requestAnimationFrame(function () {
         if (window.CredaPass && typeof CredaPass.sync === "function") CredaPass.sync();
       });
+    }
+    mountIsoPass();
+    if (!window.CredaPass || typeof CredaPass.mount !== "function") {
+      window.addEventListener("creda-pass-ready", mountIsoPass, { once: true });
     }
     if (name !== "wait") CredaMotion.stopStageLoop();
     // The pipeline strip only lives in the intake lane; don't burn frames when it's hidden.

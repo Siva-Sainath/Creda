@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Creda architecture</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #f4f7fb;
+        font-family: Inter, ui-sans-serif, system-ui;
+        color: #1b2430;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      #stage {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        transform-origin: 0 0;
+      }
+      .cam {
+        position: absolute;
+        inset: 0;
+        transform-origin: 0 0;
+        transition: transform 1.1s cubic-bezier(0.7, 0, 0.3, 1);
+      }
+      .box {
+        position: absolute;
+        border: 1.5px solid #9bb7e6;
+        background: #eaf1fb;
+        border-radius: 20px;
+        box-sizing: border-box;
+        opacity: 0;
+        transition: opacity 0.45s ease;
+      }
+      .box.on {
+        opacity: 1;
+      }
+      .box .ttl {
+        position: absolute;
+        left: 18px;
+        top: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #2c4a86;
+      }
+      .node {
+        position: absolute;
+        width: 150px;
+        text-align: center;
+      }
+      .node img {
+        width: 72px;
+        height: 72px;
+        display: block;
+        margin: 0 auto;
+      }
+      .node span,
+      .mark span {
+        display: block;
+        margin-top: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.25;
+      }
+      .mark {
+        position: absolute;
+        width: 130px;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.45s ease;
+      }
+      .mark.on {
+        opacity: 1;
+      }
+      svg.wires {
+        position: absolute;
+        inset: 0;
+        overflow: visible;
+        pointer-events: none;
+      }
+      svg.wires path {
+        fill: none;
+        stroke: #4c7dff;
+        stroke-width: 2.4;
+        stroke-linecap: round;
+        stroke-dasharray: 12 9;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+      }
+      svg.wires path.on {
+        opacity: 1;
+      }
+      .lab {
+        position: absolute;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: #f4f7fb;
+        font-size: 12px;
+        font-weight: 600;
+        color: #3a5bb8;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        z-index: 3;
+      }
+      .lab.on {
+        opacity: 1;
+      }
+      .hud-top,
+      .hud-bot {
+        position: absolute;
+        left: 0;
+        width: 1920px;
+        z-index: 5;
+        pointer-events: none;
+      }
+      .hud-top {
+        top: 0;
+        height: 132px;
+        background: linear-gradient(180deg, #f4f7fb 70%, transparent);
+      }
+      .hud-bot {
+        top: 900px;
+        height: 180px;
+        background: #f4f7fb;
+      }
+      .title {
+        position: absolute;
+        left: 64px;
+        top: 36px;
+        font-size: 44px;
+        font-weight: 700;
+        letter-spacing: -1px;
+      }
+      .region {
+        position: absolute;
+        left: 66px;
+        top: 88px;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 3.4px;
+        color: #4c7dff;
+        text-transform: uppercase;
+      }
+      .kicker {
+        position: absolute;
+        left: 64px;
+        top: 924px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 2.8px;
+        color: #4c7dff;
+      }
+      .copy {
+        position: absolute;
+        left: 64px;
+        top: 952px;
+        font-size: 34px;
+        font-weight: 600;
+        letter-spacing: -0.6px;
+        white-space: nowrap;
+      }
+      .hint {
+        position: absolute;
+        right: 64px;
+        top: 964px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #8aa0b8;
+      }
+      .dots {
+        position: absolute;
+        left: 64px;
+        top: 1034px;
+        display: flex;
+        gap: 8px;
+      }
+      .dots i {
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: #d5e0ee;
+      }
+      .dots i.on {
+        background: #4c7dff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div class="cam" id="cam">
+        <svg class="wires" width="1920" height="1080" viewBox="0 0 1920 1080">
+          <path data-from="0" d="M121,560 H250" />
+          <path data-from="0" d="M121,684 H250" />
+          <path data-from="1" d="M470,560 C506,560 524,627 560,627" />
+          <path data-from="1" d="M470,684 C506,684 524,627 560,627" />
+          <path data-from="2" d="M770,627 H850" />
+          <path data-from="3" d="M1026,560 H1140" />
+          <path data-from="3" d="M1026,684 H1140" />
+          <path data-from="3" d="M360,780 V818 H1215 V780" />
+          <path data-from="4" d="M768,162 H880" />
+          <path data-from="4" d="M768,274 C813,274 835,210 880,210" />
+          <path data-from="5" d="M1080,210 H1220" />
+          <path data-from="5" d="M1398,198 H1510" />
+          <path data-from="6" d="M693,360 V420 H951 V480" />
+          <path data-from="6" d="M945,360 V400 H1215 V480" />
+        </svg>
+        <div class="lab" data-from="0" style="left: 148px; top: 538px">paste offer</div>
+        <div class="lab" data-from="0" style="left: 148px; top: 692px">paste offer</div>
+        <div class="lab" data-from="1" style="left: 478px; top: 538px">webhook</div>
+        <div class="lab" data-from="1" style="left: 492px; top: 692px">HTTPS</div>
+        <div class="lab" data-from="3" style="left: 736px; top: 792px">poll results</div>
+        <div class="lab" data-from="4" style="left: 790px; top: 140px">ATS index</div>
+        <div class="lab" data-from="5" style="left: 1096px; top: 186px">evidence packet</div>
+        <div class="lab" data-from="5" style="left: 1418px; top: 174px">stamp + why</div>
+        <div class="lab" data-from="6" style="left: 718px; top: 400px">enqueue</div>
+
+        <div class="mark" data-layer="flow" style="left: 56px; top: 575px">
+          <img src="assets/icons/users.svg" alt="" /><span>Job seeker</span>
+        </div>
+        <div class="box" data-layer="flow" style="left: 250px; top: 480px; width: 220px; height: 300px">
+          <div class="ttl">Clients</div>
+          <div class="node" style="left: 45px; top: 44px"><img src="assets/icons/telegram.svg" alt="" /><span>@CredashieldBot</span></div>
+          <div class="node" style="left: 45px; top: 168px"><img src="assets/icons/amplify.svg" alt="" /><span>Amplify UI</span></div>
+        </div>
+        <div class="box" data-id="edge" data-layer="flow" style="left: 560px; top: 535px; width: 210px; height: 220px">
+          <div class="ttl">Edge</div>
+          <div class="node" style="left: 40px; top: 56px"><img src="assets/icons/apigateway.svg" alt="" /><span>API Gateway</span></div>
+        </div>
+        <div class="box" data-id="case" data-layer="flow" style="left: 850px; top: 480px; width: 500px; height: 300px">
+          <div class="ttl">Case</div>
+          <div class="node" style="left: 36px; top: 90px"><img src="assets/icons/lambda.svg" alt="" /><span>Intake</span></div>
+          <div class="node" style="left: 300px; top: 44px"><img src="assets/icons/dynamodb.svg" alt="" /><span>Cases</span></div>
+          <div class="node" style="left: 300px; top: 168px"><img src="assets/icons/s3.svg" alt="" /><span>Evidence</span></div>
+        </div>
+        <div class="box" data-layer="top" style="left: 600px; top: 90px; width: 480px; height: 270px">
+          <div class="ttl">Evidence tools</div>
+          <div class="node" style="left: 28px; top: 36px"><img src="assets/icons/eventbridge.svg" alt="" /><span>Daily refresh</span></div>
+          <div class="node" style="left: 28px; top: 148px"><img src="assets/icons/sqs.svg" alt="" /><span>Worker queue</span></div>
+          <div class="node" style="left: 280px; top: 84px"><img src="assets/icons/lambda.svg" alt="" /><span>Gatherer + Searcher</span></div>
+        </div>
+        <div class="box" data-layer="top" style="left: 1220px; top: 110px; width: 480px; height: 230px">
+          <div class="ttl">LLM as judge</div>
+          <div class="node" style="left: 28px; top: 52px"><img src="assets/icons/sqs.svg" alt="" /><span>Qwen queue</span></div>
+          <div class="node" style="left: 290px; top: 52px"><img src="assets/icons/ec2.svg" alt="" /><span>g4dn + Qwen-VL</span></div>
+        </div>
+      </div>
+      <div class="hud-top"></div>
+      <div class="title">Creda</div>
+      <div class="region">ap-south-1</div>
+      <div class="hud-bot"></div>
+      <div class="kicker" id="kicker"></div>
+      <div class="copy" id="copy"></div>
+      <div class="hint">Click or → to continue · ← back</div>
+      <div class="dots" id="dots"></div>
+    </div>
+    <script>
+      const SLIDES = [
+        { lx: 250, ly: 640, z: 1.12, kicker: "01  START", copy: "A job seeker pastes an offer.", min: 0, flow: true, top: false, edge: false, cse: false },
+        { lx: 380, ly: 640, z: 1.14, kicker: "02  CLIENTS", copy: "Telegram bot. Amplify UI.", min: 1, flow: true, top: false, edge: true, cse: false },
+        { lx: 660, ly: 650, z: 1.18, kicker: "03  EDGE", copy: "HTTPS and webhooks hit API Gateway.", min: 2, flow: true, top: false, edge: true, cse: true },
+        { lx: 1000, ly: 640, z: 1.12, kicker: "04  CASE", copy: "Intake writes Cases and Evidence.", min: 3, flow: true, top: false, edge: true, cse: true },
+        { lx: 840, ly: 220, z: 1.2, kicker: "05  EVIDENCE", copy: "Queues feed Gatherer + Searcher.", min: 4, flow: false, top: true, edge: false, cse: false },
+        { lx: 1320, ly: 230, z: 1.18, kicker: "06  JUDGE", copy: "Qwen-VL stamps the verdict.", min: 5, flow: false, top: true, edge: false, cse: false },
+        { lx: 960, ly: 500, z: 1.0, kicker: "CREDA", copy: "ap-south-1 · the full path.", min: 6, flow: true, top: true, edge: true, cse: true },
+      ];
+      const cam = document.getElementById("cam");
+      const dots = document.getElementById("dots");
+      SLIDES.forEach(() => dots.appendChild(document.createElement("i")));
+      let i = 0;
+      function fit() {
+        const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+        document.getElementById("stage").style.transform = `scale(${s})`;
+        document.getElementById("stage").style.left = `${(innerWidth - 1920 * s) / 2}px`;
+        document.getElementById("stage").style.top = `${(innerHeight - 1080 * s) / 2}px`;
+        document.getElementById("stage").style.position = "absolute";
+      }
+      function go(n) {
+        i = Math.max(0, Math.min(SLIDES.length - 1, n));
+        const s = SLIDES[i];
+        cam.style.transform = `translate(${960 - s.lx * s.z}px, ${540 - s.ly * s.z}px) scale(${s.z})`;
+        document.getElementById("kicker").textContent = s.kicker;
+        document.getElementById("copy").textContent = s.copy;
+        [...dots.children].forEach((d, k) => d.classList.toggle("on", k <= i));
+        document.querySelectorAll("[data-layer='flow']").forEach((el) => {
+          const id = el.getAttribute("data-id");
+          let on = s.flow;
+          if (id === "edge") on = s.edge;
+          if (id === "case") on = s.cse;
+          el.classList.toggle("on", on);
+        });
+        document.querySelectorAll("[data-layer='top']").forEach((el) => el.classList.toggle("on", s.top));
+        document.querySelectorAll("[data-from]").forEach((el) => {
+          el.classList.toggle("on", Number(el.getAttribute("data-from")) <= s.min && (s.flow || s.top));
+        });
+        document.querySelectorAll("svg.wires path, .lab").forEach((el) => {
+          const from = Number(el.getAttribute("data-from"));
+          const topOnly = from === 4 || from === 5;
+          const flowOnly = from !== 4 && from !== 5;
+          const layerOk = topOnly ? s.top : flowOnly ? s.flow || from >= 6 : true;
+          el.classList.toggle("on", from <= s.min && (from >= 6 ? s.flow && s.top : layerOk));
+        });
+      }
+      addEventListener("resize", fit);
+      addEventListener("click", () => go(i + 1));
+      addEventListener("keydown", (e) => {
+        if (["ArrowRight", " ", "PageDown", "Enter"].includes(e.key)) {
+          e.preventDefault();
+          go(i + 1);
+        }
+        if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) {
+          e.preventDefault();
+          go(i - 1);
+        }
+      });
+      fit();
+      go(0);
+    </script>
+  </body>
+</html>

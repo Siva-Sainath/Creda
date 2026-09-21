@@ -1,0 +1,114 @@
+# Diffusion Studio asset library. Edited by the app; hand edits are read on the next load.
+version: 1
+folders: []
+assets:
+  - id: 7bd3ff6dda80f5e2
+    path: icons/telegram.svg
+    source: assets/icons/telegram.svg
+    createdAt: 2026-09-19T19:34:44.887Z
+    mimeType: image/svg+xml
+    stat:
+      size: 263
+      mtime: 1789846484552
+    type: IMAGE
+    width: 64
+    height: 64
+  - id: 319774bcc9a3d90d
+    path: icons/users.svg
+    source: assets/icons/users.svg
+    createdAt: 2026-09-19T19:34:31.904Z
+    mimeType: image/svg+xml
+    stat:
+      size: 1487
+      mtime: 1789846471462
+    type: IMAGE
+    width: 48
+    height: 48
+  - id: f878d7fa26cddfa5
+    path: icons/sqs.svg
+    source: assets/icons/sqs.svg
+    createdAt: 2026-09-19T19:34:31.887Z
+    mimeType: image/svg+xml
+    stat:
+      size: 2171
+      mtime: 1789846471261
+    type: IMAGE
+    width: 64
+    height: 64
+  - id: 7cc7b02bf3e11968
+    path: icons/s3.svg
+    source: assets/icons/s3.svg
+    createdAt: 2026-09-19T19:34:31.870Z
+    mimeType: image/svg+xml
+    stat:
+      size: 1046
+      mtime: 1789846471247
+    type: IMAGE
+    width: 64
+    height: 64
+  - id: 353e5d43cdf1dac3
+    path: icons/dynamodb.svg
+    source: assets/icons/dynamodb.svg
+    createdAt: 2026-09-19T19:34:31.845Z
+    mimeType: image/svg+xml
+    stat:
+      size: 2089
+      mtime: 1789846471228
+    type: IMAGE
+    width: 64
+    height: 64
+  - id: 205463b66d06f4ea
+    path: icons/lambda.svg
+    source: assets/icons/lambda.svg
+    createdAt: 2026-09-19T19:34:31.835Z
+    mimeType: image/svg+xml
+    stat:
+      size: 700
+      mtime: 1789846471160
+    type: IMAGE
+    width: 64
+    height: 64
+  - id: 3b1d16c32e401560
+    path: icons/apigateway.svg
+    source: assets/icons/apigateway.svg
+    createdAt: 2026-09-19T19:34:31.830Z
+    mimeType: image/svg+xml
+    stat:
+      size: 763
+      mtime: 1789846471187
+    type: IMAGE
+    width: 64
+    height: 64
+  - id: 619db122c321858c
+    path: icons/eventbridge.svg
+    source: assets/icons/eventbridge.svg
+    createdAt: 2026-09-19T19:34:31.788Z
+    mimeType: image/svg+xml
+    stat:
+      size: 1826
+      mtime: 1789846471270
+    type: IMAGE
+    width: 64
+    height: 64
+  - id: 46296b7676e8af4a
+    path: icons/ec2.svg
+    source: assets/icons/ec2.svg
+    createdAt: 2026-09-19T19:34:31.765Z
+    mimeType: image/svg+xml
+    stat:
+      size: 784
+      mtime: 1789846471285
+    type: IMAGE
+    width: 64
+    height: 64
+  - id: 0d52418a2bc02df8
+    path: icons/amplify.svg
+    source: assets/icons/amplify.svg
+    createdAt: 2026-09-19T19:34:31.592Z
+    mimeType: image/svg+xml
+    stat:
+      size: 814
+      mtime: 1789846471383
+    type: IMAGE
+    width: 64
+    height: 64
