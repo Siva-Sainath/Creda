@@ -21,6 +21,24 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
+// #region agent log
+function dbgLog(hypothesisId, location, message, data) {
+  fetch("http://127.0.0.1:7669/ingest/4ad1f601-7980-4b32-bbec-c86691d43e55", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "2641c1" },
+    body: JSON.stringify({
+      sessionId: "2641c1",
+      runId: "pre-fix",
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(function () {});
+}
+// #endregion
+
 function texCard(title, lines, head) {
   const c = document.createElement("canvas");
   c.width = 256;
@@ -282,6 +300,14 @@ function start() {
   let lastResizeH = -1;
   let resizeQueued = false;
   let resizeObserver = null;
+  let cameraFitted = false;
+  let mountParentId = "";
+  let resizeCalls = 0;
+  let fitCalls = 0;
+  let setSizeCalls = 0;
+  let tickFrames = 0;
+  let tickSkips = 0;
+  let lastDbgAt = 0;
 
   function captureRestBox() {
     stations.forEach(function (s) {
@@ -317,19 +343,9 @@ function start() {
     host.classList.add("is-hud-ready");
   }
 
-  function resize(force) {
-    if (!rendering) return;
-    const w = Math.round(host.clientWidth || 0);
-    const h = Math.round(host.clientHeight || 0);
-    if (w < 48 || h < 48) return;
-    if (!force && Math.abs(w - lastResizeW) < 8 && Math.abs(h - lastResizeH) < 8) return;
-    lastResizeW = w;
-    lastResizeH = h;
-    renderer.setSize(w, h, false);
-
+  function fitCamera(aspect) {
     camera.updateMatrixWorld();
     const inv = camera.matrixWorldInverse;
-    const aspect = w / h;
     let minX = Infinity;
     let maxX = -Infinity;
     let minY = Infinity;
@@ -360,6 +376,49 @@ function start() {
     camera.top = cy + halfH;
     camera.bottom = cy - halfH;
     camera.updateProjectionMatrix();
+    cameraFitted = true;
+  }
+
+  function resize(force) {
+    if (!rendering) return;
+    const w = Math.round(host.clientWidth || 0);
+    const h = Math.round(host.clientHeight || 0);
+    if (w < 48 || h < 48) return;
+    if (!force && Math.abs(w - lastResizeW) < 8 && Math.abs(h - lastResizeH) < 8) return;
+    resizeCalls += 1;
+    const dpr = renderer.getPixelRatio();
+    const bufW = renderer.domElement.width;
+    const bufH = renderer.domElement.height;
+    const needSize = Math.round(w * dpr) !== bufW || Math.round(h * dpr) !== bufH;
+    const needFit = !cameraFitted || force;
+    // #region agent log
+    if (resizeCalls <= 8 || resizeCalls % 20 === 0) {
+      dbgLog("H1", "iso-loop.js:resize", "resize tick", {
+        force: !!force,
+        w,
+        h,
+        needSize,
+        needFit,
+        cameraFitted,
+        resizeCalls,
+        fitCalls,
+        setSizeCalls,
+        parentId: host.parentElement ? host.parentElement.id : null,
+      });
+    }
+    // #endregion
+    lastResizeW = w;
+    lastResizeH = h;
+    if (needSize) {
+      setSizeCalls += 1;
+      renderer.setSize(w, h, false);
+    }
+    if (needFit) {
+      fitCalls += 1;
+      fitCamera(w / h);
+    } else if (needSize) {
+      fitCamera(w / h);
+    }
     placeHud();
   }
 
@@ -372,16 +431,26 @@ function start() {
     });
   }
 
-  function setRendering(on) {
+  function setRendering(on, forceResize) {
     rendering = !!on;
     if (rendering) {
       if (!resizeObserver) {
-        resizeObserver = new ResizeObserver(requestResize);
+        resizeObserver = new ResizeObserver(function () {
+          // #region agent log
+          dbgLog("H1", "iso-loop.js:ResizeObserver", "observer fired", {
+            w: Math.round(host.clientWidth || 0),
+            h: Math.round(host.clientHeight || 0),
+          });
+          // #endregion
+          requestResize();
+        });
         resizeObserver.observe(host);
       }
-      lastResizeW = -1;
-      lastResizeH = -1;
-      requestAnimationFrame(function () { resize(true); });
+      if (forceResize) {
+        requestAnimationFrame(function () { resize(true); });
+      } else {
+        requestResize();
+      }
       return;
     }
     if (resizeObserver) {
@@ -394,9 +463,45 @@ function start() {
 
   function tick(now) {
     requestAnimationFrame(tick);
-    if (!rendering || document.hidden || contextLost) return;
+    tickFrames += 1;
+    if (!rendering || document.hidden || contextLost) {
+      tickSkips += 1;
+      return;
+    }
     const r = host.getBoundingClientRect();
-    if (r.width < 40 || r.height < 40) return;
+    if (r.width < 40 || r.height < 40) {
+      tickSkips += 1;
+      // #region agent log
+      if (now - lastDbgAt > 2000) {
+        lastDbgAt = now;
+        dbgLog("H4", "iso-loop.js:tick", "tick skip small rect", {
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+          tickFrames,
+          tickSkips,
+          resizeCalls,
+          fitCalls,
+          setSizeCalls,
+        });
+      }
+      // #endregion
+      return;
+    }
+    // #region agent log
+    if (now - lastDbgAt > 2000) {
+      lastDbgAt = now;
+      dbgLog("H5", "iso-loop.js:tick", "tick render heartbeat", {
+        liveMode,
+        stage: lastStage,
+        tickFrames,
+        tickSkips,
+        resizeCalls,
+        fitCalls,
+        setSizeCalls,
+        parentId: host.parentElement ? host.parentElement.id : null,
+      });
+    }
+    // #endregion
 
     let stage;
     let targetU;
@@ -472,13 +577,32 @@ function start() {
   window.CredaPass = {
     mount: function (el, mode) {
       const isLive = mode === "live";
-      if (el && host.parentNode !== el) el.appendChild(host);
+      const nextParentId = el ? el.id || "anon" : "";
+      const parentChanged = !!(el && host.parentNode !== el);
+      const modeChanged = liveMode !== isLive;
+      // #region agent log
+      dbgLog("H3", "iso-loop.js:mount", "mount called", {
+        mode,
+        parentChanged,
+        modeChanged,
+        nextParentId,
+        prevParentId: mountParentId,
+      });
+      // #endregion
+      if (parentChanged && el) el.appendChild(host);
       liveMode = isLive;
       if (!isLive) liveKey = "intake";
-      host.classList.toggle("iso-live", isLive);
+      host.classList.add("iso-live");
       host.classList.toggle("iso-live-hud", isLive);
       host.classList.remove("is-hud-ready");
-      setRendering(isLive);
+      renderer.setClearColor(isLive ? 0xf3f1ec : 0xffffff, 1);
+      if (parentChanged || modeChanged || !mountParentId) {
+        cameraFitted = false;
+        lastResizeW = -1;
+        lastResizeH = -1;
+      }
+      mountParentId = nextParentId;
+      setRendering(true, parentChanged || modeChanged || !cameraFitted);
     },
     sync: function () {
       if (rendering) requestResize();
