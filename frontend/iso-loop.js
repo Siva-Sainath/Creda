@@ -153,7 +153,7 @@ function start() {
   const host = document.getElementById("iso-host");
   const canvas = document.getElementById("iso-canvas");
   if (!host || !canvas || REDUCED) {
-    window.CredaPass = { mount: function () {}, setStage: function () {}, setMode: function () {} };
+    window.CredaPass = { mount: function () {}, setStage: function () {}, setMode: function () {}, sync: function () {} };
     return;
   }
 
@@ -169,16 +169,13 @@ function start() {
       preserveDrawingBuffer: false,
     });
   } catch (err) {
-    window.CredaPass = { mount: function () {}, setStage: function () {}, setMode: function () {} };
+    window.CredaPass = { mount: function () {}, setStage: function () {}, setMode: function () {}, sync: function () {} };
     return;
   }
-  renderer.setClearColor(0xffffff, 1);
+  renderer.setClearColor(0xf3f1ec, 1);
   renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  // If the GL context is ever lost (GPU switch, tab backgrounding, driver
-  // hiccup), stop rendering instead of drawing garbage/blank frames, and
-  // pick back up cleanly once the browser restores it.
   let contextLost = false;
   canvas.addEventListener("webglcontextlost", function (e) {
     e.preventDefault();
@@ -266,16 +263,15 @@ function start() {
     root.add(a);
   });
   const hud = {};
-  const hudPos = {};
   host.querySelectorAll("[data-hud]").forEach(function (el) {
     hud[el.getAttribute("data-hud")] = el;
   });
 
   let liveMode = false;
   let liveKey = "intake";
+  let rendering = false;
   let packetU = 0.12;
   let lastStage = -1;
-  let hudSnap = true;
   const metersNow = [0.22, 0.16, 0.16];
   const cycle = 7.2;
   const _fitV = new THREE.Vector3();
@@ -285,14 +281,7 @@ function start() {
   let lastResizeW = -1;
   let lastResizeH = -1;
   let resizeQueued = false;
-  let mountTarget = document.getElementById("iso-home");
-  let portalSyncQueued = false;
-
-  const portal = document.createElement("div");
-  portal.id = "iso-portal";
-  portal.className = "iso-portal";
-  document.body.appendChild(portal);
-  portal.appendChild(host);
+  let resizeObserver = null;
 
   function captureRestBox() {
     stations.forEach(function (s) {
@@ -313,6 +302,7 @@ function start() {
   }
 
   function placeHud() {
+    if (!liveMode) return;
     const cw = canvas.clientWidth || host.clientWidth;
     const ch = canvas.clientHeight || host.clientHeight;
     const inset = 22;
@@ -322,17 +312,17 @@ function start() {
       const p = project(camera, anchors[k], canvas);
       const x = Math.min(cw - inset, Math.max(inset, p.x));
       const y = Math.min(ch - inset, Math.max(inset, p.y));
-      hudPos[k] = { x: x, y: y };
       el.style.transform = "translate(" + x.toFixed(0) + "px," + y.toFixed(0) + "px) translate(-50%,-50%)";
     });
-    hudSnap = false;
+    host.classList.add("is-hud-ready");
   }
 
   function resize(force) {
+    if (!rendering) return;
     const w = Math.round(host.clientWidth || 0);
     const h = Math.round(host.clientHeight || 0);
     if (w < 48 || h < 48) return;
-    if (!force && Math.abs(w - lastResizeW) < 6 && Math.abs(h - lastResizeH) < 6) return;
+    if (!force && Math.abs(w - lastResizeW) < 8 && Math.abs(h - lastResizeH) < 8) return;
     lastResizeW = w;
     lastResizeH = h;
     renderer.setSize(w, h, false);
@@ -370,13 +360,11 @@ function start() {
     camera.top = cy + halfH;
     camera.bottom = cy - halfH;
     camera.updateProjectionMatrix();
-    host.classList.toggle("iso-live-hud", !!liveMode);
     placeHud();
-    host.classList.add("is-hud-ready");
   }
 
   function requestResize() {
-    if (resizeQueued) return;
+    if (!rendering || resizeQueued) return;
     resizeQueued = true;
     requestAnimationFrame(function () {
       resizeQueued = false;
@@ -384,80 +372,31 @@ function start() {
     });
   }
 
-  function syncPortal(force) {
-    if (!mountTarget) {
-      portal.style.visibility = "hidden";
-      return;
-    }
-    const rect = mountTarget.getBoundingClientRect();
-    if (rect.width < 48 || rect.height < 48) {
-      portal.style.visibility = "hidden";
-      return;
-    }
-    portal.style.visibility = "visible";
-    portal.style.left = rect.left + "px";
-    portal.style.top = rect.top + "px";
-    portal.style.width = rect.width + "px";
-    portal.style.height = rect.height + "px";
-    if (force) {
+  function setRendering(on) {
+    rendering = !!on;
+    if (rendering) {
+      if (!resizeObserver) {
+        resizeObserver = new ResizeObserver(requestResize);
+        resizeObserver.observe(host);
+      }
       lastResizeW = -1;
       lastResizeH = -1;
+      requestAnimationFrame(function () { resize(true); });
+      return;
     }
-    resize(force);
-  }
-
-  function requestPortalSync(force) {
-    if (portalSyncQueued) return;
-    portalSyncQueued = true;
-    requestAnimationFrame(function () {
-      portalSyncQueued = false;
-      syncPortal(!!force);
-    });
-  }
-
-  const targetObserver = new ResizeObserver(function () { requestPortalSync(false); });
-  function watchTarget(el) {
-    if (!el || el.__isoWatched) return;
-    el.__isoWatched = true;
-    targetObserver.observe(el);
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
+    }
   }
 
   captureRestBox();
-  watchTarget(mountTarget);
-  watchTarget(document.getElementById("wait-iso-slot"));
-  window.addEventListener("resize", function () { requestPortalSync(false); }, { passive: true });
-  window.addEventListener("scroll", function () { requestPortalSync(false); }, { passive: true });
-  syncPortal(true);
-  host.classList.add("iso-live");
-
-  function visible() {
-    if (document.hidden || portal.style.visibility === "hidden") return false;
-    const r = host.getBoundingClientRect();
-    return r.width > 40 && r.height > 40;
-  }
-
-  function meterTargets(stage) {
-    return [
-      stage >= 0 ? 0.88 : 0.16,
-      stage >= 1 ? (stage >= 2 ? 0.84 : 0.52) : 0.16,
-      stage >= 3 ? 0.96 : stage >= 2 ? 0.28 : 0.16,
-    ];
-  }
-
-  function applyMeters(stage, instant) {
-    const t = meterTargets(stage);
-    metersNow.forEach(function (v, i) {
-      metersNow[i] = instant ? t[i] : lerp(v, t[i], 0.085);
-    });
-    document.querySelectorAll("[data-meter]").forEach(function (el) {
-      var i = Number(el.getAttribute("data-meter"));
-      if (i >= 0 && i < metersNow.length) el.style.transform = "scaleX(" + metersNow[i].toFixed(3) + ")";
-    });
-  }
 
   function tick(now) {
     requestAnimationFrame(tick);
-    if (!visible() || contextLost) return;
+    if (!rendering || document.hidden || contextLost) return;
+    const r = host.getBoundingClientRect();
+    if (r.width < 40 || r.height < 40) return;
 
     let stage;
     let targetU;
@@ -512,21 +451,37 @@ function start() {
     applyMeters(stage, false);
     renderer.render(scene, camera);
   }
+
+  function applyMeters(stage, instant) {
+    const t = [
+      stage >= 0 ? 0.88 : 0.16,
+      stage >= 1 ? (stage >= 2 ? 0.84 : 0.52) : 0.16,
+      stage >= 3 ? 0.96 : stage >= 2 ? 0.28 : 0.16,
+    ];
+    metersNow.forEach(function (v, i) {
+      metersNow[i] = instant ? t[i] : lerp(v, t[i], 0.085);
+    });
+    document.querySelectorAll("[data-meter]").forEach(function (el) {
+      var i = Number(el.getAttribute("data-meter"));
+      if (i >= 0 && i < metersNow.length) el.style.transform = "scaleX(" + metersNow[i].toFixed(3) + ")";
+    });
+  }
+
   requestAnimationFrame(tick);
 
   window.CredaPass = {
     mount: function (el, mode) {
-      if (el) {
-        mountTarget = el;
-        watchTarget(el);
-      }
-      this.setMode(mode || "idle");
-      renderer.setClearColor(mode === "live" ? 0xf3f1ec : 0xffffff, 1);
-      portal.classList.toggle("is-wait", mode === "live");
-      requestPortalSync(true);
+      const isLive = mode === "live";
+      if (el && host.parentNode !== el) el.appendChild(host);
+      liveMode = isLive;
+      if (!isLive) liveKey = "intake";
+      host.classList.toggle("iso-live", isLive);
+      host.classList.toggle("iso-live-hud", isLive);
+      host.classList.remove("is-hud-ready");
+      setRendering(isLive);
     },
     sync: function () {
-      requestPortalSync(true);
+      if (rendering) requestResize();
     },
     setMode: function (mode) {
       liveMode = mode === "live";
@@ -539,6 +494,8 @@ function start() {
       liveKey = key;
     },
   };
+
+  window.CredaPass.mount(document.getElementById("iso-home"), "idle");
 }
 
 start();

@@ -3093,6 +3093,7 @@
       session.caseId = null;
       session.token = null;
       try { sessionStorage.removeItem("creda_case"); } catch (e) {}
+      showView("intake");
       checkHealth().catch(function () {});
     }
   }
