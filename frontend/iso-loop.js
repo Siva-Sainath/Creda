@@ -156,25 +156,24 @@ function start() {
     window.CredaPass = { mount: function () {}, setStage: function () {}, setMode: function () {} };
     return;
   }
-  const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-  if (!gl) {
+
+  const scene = new THREE.Scene();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: false,
+      powerPreference: "default",
+      preserveDrawingBuffer: false,
+    });
+  } catch (err) {
     window.CredaPass = { mount: function () {}, setStage: function () {}, setMode: function () {} };
     return;
   }
-
-  const scene = new THREE.Scene();
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: true,
-    // "low-power" can make macOS switch the tab to the integrated GPU mid-session
-    // whenever the discrete GPU is released elsewhere, which shows up as a brief
-    // black/flicker frame while the context migrates. Default avoids that churn.
-    powerPreference: "default",
-    preserveDrawingBuffer: false,
-  });
-  renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0xffffff, 1);
+  renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   // If the GL context is ever lost (GPU switch, tab backgrounding, driver
@@ -187,8 +186,9 @@ function start() {
   });
   canvas.addEventListener("webglcontextrestored", function () {
     contextLost = false;
-    hudSnap = true;
-    resize();
+    lastResizeW = -1;
+    lastResizeH = -1;
+    resize(true);
   });
 
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 50);
@@ -280,35 +280,66 @@ function start() {
   const cycle = 7.2;
   const _fitV = new THREE.Vector3();
   const _fitBox = new THREE.Box3();
+  const restMin = new THREE.Vector3();
+  const restMax = new THREE.Vector3();
   let lastResizeW = -1;
   let lastResizeH = -1;
-  let lastResizeLive = null;
+  let resizeQueued = false;
+  let mountTarget = document.getElementById("iso-home");
+  let portalSyncQueued = false;
 
-  function resize() {
-    const w = Math.max(1, host.clientWidth || 480);
-    const h = Math.max(1, host.clientHeight || 280);
-    // Some layouts (flex/grid reflow, font swap, sibling GSAP tweens) fire the
-    // ResizeObserver repeatedly for the same effective size. Recomputing the
-    // camera frustum and re-snapping the HUD labels on every one of those
-    // no-op callbacks is what reads as "flicker" — skip when nothing changed.
-    if (w === lastResizeW && h === lastResizeH && liveMode === lastResizeLive) return;
-    lastResizeW = w;
-    lastResizeH = h;
-    lastResizeLive = liveMode;
-    renderer.setSize(w, h, false);
-    const aspect = w / h;
+  const portal = document.createElement("div");
+  portal.id = "iso-portal";
+  portal.className = "iso-portal";
+  document.body.appendChild(portal);
+  portal.appendChild(host);
 
+  function captureRestBox() {
+    stations.forEach(function (s) {
+      s.position.y = s.userData.baseY;
+      s.scale.setScalar(1);
+    });
+    packet.scale.setScalar(0.5);
+    root.updateMatrixWorld(true);
     camera.updateMatrixWorld();
-    const inv = camera.matrixWorldInverse;
     _fitBox.makeEmpty();
     stations.forEach(function (s) { _fitBox.expandByObject(s); });
     marks.forEach(function (m) { _fitBox.expandByObject(m); });
     _fitBox.expandByObject(rail);
-    _fitBox.min.y -= 0.15;
-    _fitBox.max.y += liveMode ? 1.15 : 0.85;
+    _fitBox.min.y -= 0.25;
+    _fitBox.max.y += 1.25;
+    restMin.copy(_fitBox.min);
+    restMax.copy(_fitBox.max);
+  }
 
-    const min = _fitBox.min;
-    const max = _fitBox.max;
+  function placeHud() {
+    const cw = canvas.clientWidth || host.clientWidth;
+    const ch = canvas.clientHeight || host.clientHeight;
+    const inset = 22;
+    Object.keys(anchors).forEach(function (k) {
+      const el = hud[k];
+      if (!el) return;
+      const p = project(camera, anchors[k], canvas);
+      const x = Math.min(cw - inset, Math.max(inset, p.x));
+      const y = Math.min(ch - inset, Math.max(inset, p.y));
+      hudPos[k] = { x: x, y: y };
+      el.style.transform = "translate(" + x.toFixed(0) + "px," + y.toFixed(0) + "px) translate(-50%,-50%)";
+    });
+    hudSnap = false;
+  }
+
+  function resize(force) {
+    const w = Math.round(host.clientWidth || 0);
+    const h = Math.round(host.clientHeight || 0);
+    if (w < 48 || h < 48) return;
+    if (!force && Math.abs(w - lastResizeW) < 6 && Math.abs(h - lastResizeH) < 6) return;
+    lastResizeW = w;
+    lastResizeH = h;
+    renderer.setSize(w, h, false);
+
+    camera.updateMatrixWorld();
+    const inv = camera.matrixWorldInverse;
+    const aspect = w / h;
     let minX = Infinity;
     let maxX = -Infinity;
     let minY = Infinity;
@@ -316,7 +347,7 @@ function start() {
     for (let ix = 0; ix < 2; ix++) {
       for (let iy = 0; iy < 2; iy++) {
         for (let iz = 0; iz < 2; iz++) {
-          _fitV.set(ix ? max.x : min.x, iy ? max.y : min.y, iz ? max.z : min.z);
+          _fitV.set(ix ? restMax.x : restMin.x, iy ? restMax.y : restMin.y, iz ? restMax.z : restMin.z);
           _fitV.applyMatrix4(inv);
           if (_fitV.x < minX) minX = _fitV.x;
           if (_fitV.x > maxX) maxX = _fitV.x;
@@ -325,7 +356,7 @@ function start() {
         }
       }
     }
-    const pad = liveMode ? 1.06 : 1.16;
+    const pad = 1.22;
     let halfW = ((maxX - minX) / 2) * pad;
     let halfH = ((maxY - minY) / 2) * pad;
     if (!isFinite(halfW) || halfW < 0.4) halfW = 3.6;
@@ -339,14 +370,68 @@ function start() {
     camera.top = cy + halfH;
     camera.bottom = cy - halfH;
     camera.updateProjectionMatrix();
-    hudSnap = true;
+    host.classList.toggle("iso-live-hud", !!liveMode);
+    placeHud();
+    host.classList.add("is-hud-ready");
   }
-  new ResizeObserver(resize).observe(host);
-  resize();
+
+  function requestResize() {
+    if (resizeQueued) return;
+    resizeQueued = true;
+    requestAnimationFrame(function () {
+      resizeQueued = false;
+      resize(false);
+    });
+  }
+
+  function syncPortal(force) {
+    if (!mountTarget) {
+      portal.style.visibility = "hidden";
+      return;
+    }
+    const rect = mountTarget.getBoundingClientRect();
+    if (rect.width < 48 || rect.height < 48) {
+      portal.style.visibility = "hidden";
+      return;
+    }
+    portal.style.visibility = "visible";
+    portal.style.left = rect.left + "px";
+    portal.style.top = rect.top + "px";
+    portal.style.width = rect.width + "px";
+    portal.style.height = rect.height + "px";
+    if (force) {
+      lastResizeW = -1;
+      lastResizeH = -1;
+    }
+    resize(force);
+  }
+
+  function requestPortalSync(force) {
+    if (portalSyncQueued) return;
+    portalSyncQueued = true;
+    requestAnimationFrame(function () {
+      portalSyncQueued = false;
+      syncPortal(!!force);
+    });
+  }
+
+  const targetObserver = new ResizeObserver(function () { requestPortalSync(false); });
+  function watchTarget(el) {
+    if (!el || el.__isoWatched) return;
+    el.__isoWatched = true;
+    targetObserver.observe(el);
+  }
+
+  captureRestBox();
+  watchTarget(mountTarget);
+  watchTarget(document.getElementById("wait-iso-slot"));
+  window.addEventListener("resize", function () { requestPortalSync(false); }, { passive: true });
+  window.addEventListener("scroll", function () { requestPortalSync(false); }, { passive: true });
+  syncPortal(true);
   host.classList.add("iso-live");
 
   function visible() {
-    if (document.hidden) return false;
+    if (document.hidden || portal.style.visibility === "hidden") return false;
     const r = host.getBoundingClientRect();
     return r.width > 40 && r.height > 40;
   }
@@ -389,20 +474,19 @@ function start() {
 
     const pt = path.getPointAt(Math.min(0.999, Math.max(0.001, packetU)));
     packet.position.copy(pt);
-    packet.rotation.y = 0.25 + Math.sin(now / 900) * 0.12;
-    const pulse = 0.48 + 0.04 * Math.sin(now / 260);
-    packet.scale.setScalar(pulse);
+    packet.rotation.y = 0.25 + Math.sin(now / 1400) * 0.08;
+    packet.scale.setScalar(0.5);
     packet.visible = packetU < 0.97;
 
     stations.forEach(function (s, i) {
       const on = i === stage;
-      const wantY = s.userData.baseY + (on ? 0.05 : 0);
-      const wantS = on ? 1.05 : 1;
-      s.position.y = lerp(s.position.y, wantY, 0.08);
-      stationScale[i] = lerp(stationScale[i], wantS, 0.08);
+      const wantY = s.userData.baseY + (on ? 0.04 : 0);
+      const wantS = on ? 1.04 : 1;
+      s.position.y = lerp(s.position.y, wantY, 0.06);
+      stationScale[i] = lerp(stationScale[i], wantS, 0.06);
       s.scale.setScalar(stationScale[i]);
       if (marks[i] && marks[i].material) {
-        markOp[i] = lerp(markOp[i], on ? 0.42 : 0.12, 0.1);
+        markOp[i] = lerp(markOp[i], on ? 0.42 : 0.12, 0.08);
         marks[i].material.opacity = markOp[i];
       }
     });
@@ -426,54 +510,28 @@ function start() {
       host.setAttribute("data-stage", String(stage));
     }
     applyMeters(stage, false);
-
-    Object.keys(anchors).forEach(function (k) {
-      const el = hud[k];
-      if (!el) return;
-      const p = project(camera, anchors[k], canvas);
-      const prev = hudPos[k];
-      if (!prev || hudSnap) {
-        hudPos[k] = { x: p.x, y: p.y };
-      } else {
-        const dx = p.x - prev.x;
-        const dy = p.y - prev.y;
-        if (dx * dx + dy * dy > 6400) {
-          hudPos[k] = { x: p.x, y: p.y };
-        } else {
-          prev.x = lerp(prev.x, p.x, 0.22);
-          prev.y = lerp(prev.y, p.y, 0.22);
-        }
-      }
-      el.style.transform =
-        "translate(" + hudPos[k].x.toFixed(1) + "px," + hudPos[k].y.toFixed(1) + "px) translate(-50%,-50%)";
-    });
-    hudSnap = false;
-
     renderer.render(scene, camera);
   }
   requestAnimationFrame(tick);
 
-  const waitView = document.getElementById("view-wait");
-  if (waitView && !waitView.classList.contains("hidden")) {
-    const slot = document.getElementById("wait-iso-slot");
-    if (slot) slot.appendChild(host);
-    liveMode = true;
-  }
-
   window.CredaPass = {
     mount: function (el, mode) {
-      if (el && host.parentNode !== el) el.appendChild(host);
+      if (el) {
+        mountTarget = el;
+        watchTarget(el);
+      }
       this.setMode(mode || "idle");
-      hudSnap = true;
-      resize();
-      requestAnimationFrame(function () {
-        resize();
-        requestAnimationFrame(resize);
-      });
+      renderer.setClearColor(mode === "live" ? 0xf3f1ec : 0xffffff, 1);
+      portal.classList.toggle("is-wait", mode === "live");
+      requestPortalSync(true);
+    },
+    sync: function () {
+      requestPortalSync(true);
     },
     setMode: function (mode) {
       liveMode = mode === "live";
       if (!liveMode) liveKey = "intake";
+      host.classList.toggle("iso-live-hud", liveMode);
     },
     setStage: function (key) {
       if (!key || LIVE_STAGE[key] == null) return;

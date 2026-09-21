@@ -639,7 +639,7 @@
         .fromTo(".evidence-index", { scale: 0 }, {
           scale: 1, duration: 0.28, stagger: 0.05, ease: "back.out(2.6)"
         }, "-=0.32")
-        .fromTo("#conversation-host .conv-bubble, .followup-composer .chip", { y: 8, autoAlpha: 0 }, {
+        .fromTo("#conversation-host .conv-bubble", { y: 8, autoAlpha: 0 }, {
           y: 0, autoAlpha: 1, duration: 0.24, stagger: 0.04
         }, "-=0.15");
       var urgent = document.querySelector(".action-badge.urgent");
@@ -1329,6 +1329,9 @@
     if (window.CredaPass && typeof CredaPass.mount === "function") {
       if (name === "wait") CredaPass.mount($("wait-iso-slot"), "live");
       else CredaPass.mount($("iso-home"), "idle");
+      requestAnimationFrame(function () {
+        if (window.CredaPass && typeof CredaPass.sync === "function") CredaPass.sync();
+      });
     }
     if (name !== "wait") CredaMotion.stopStageLoop();
     // The pipeline strip only lives in the intake lane; don't burn frames when it's hidden.
@@ -2244,6 +2247,38 @@
     return html + "</div>";
   }
 
+  var NEED_ICON =
+    '<svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 16.5h.01M10.3 3.9L2.7 17.1a1.8 1.8 0 0 0 1.56 2.7h15.48a1.8 1.8 0 0 0 1.56-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ASK_ICON =
+    '<svg viewBox="0 0 24 24" fill="none"><path d="M12 17.5c4.5 0 8-2.9 8-6.5s-3.5-6.5-8-6.5-8 2.9-8 6.5c0 1.6.7 3 1.85 4.15C5.55 16.1 5 18 5 18s2.1-.5 3.35-1.15A9.5 9.5 0 0 0 12 17.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ARROW_ICON =
+    '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function chipHtml(kind, icon, text, attr) {
+    return (
+      '<button type="button" class="chip ' + kind + '" ' + attr + '="' + esc(text) + '">' +
+        '<span class="chip-icon">' + icon + "</span>" +
+        '<span class="chip-text">' + esc(text) + "</span>" +
+        '<span class="chip-arrow">' + ARROW_ICON + "</span>" +
+      "</button>"
+    );
+  }
+
+  function animateChipsIn(host) {
+    if (!host) return;
+    var items = host.querySelectorAll(".chip");
+    if (!items.length) return;
+    items.forEach(function (el) {
+      el.style.opacity = "1";
+      el.style.visibility = "visible";
+    });
+    if (!CredaMotion.ok() || CredaMotion.reduced) return;
+    gsap.fromTo(items, { y: 10 }, {
+      y: 0, duration: 0.28, stagger: 0.045, ease: "power3.out",
+      onComplete: function () { gsap.set(items, { clearProps: "transform" }); }
+    });
+  }
+
   function renderChipRows(data) {
     var tax = chipTaxonomy(data);
     var needHost = $("need-chips-host");
@@ -2252,25 +2287,29 @@
     var askSection = $("ask-section");
     if (needHost) {
       needHost.innerHTML = tax.need.map(function (text) {
-        return '<button type="button" class="chip need" data-need="' + esc(text) + '">' + esc(text) + "</button>";
+        return chipHtml("need", NEED_ICON, text, "data-need");
       }).join("");
       needHost.querySelectorAll("[data-need]").forEach(function (btn) {
         btn.addEventListener("click", function () {
           var val = needChipPrefill(btn.getAttribute("data-need") || "");
-          $("followup-input").value = val;
-          $("followup-input").focus();
+          var input = $("followup-input");
+          input.value = val;
+          input.focus();
+          try { input.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {}
         });
       });
+      animateChipsIn(needHost);
     }
     if (askHost) {
       askHost.innerHTML = tax.ask.map(function (text) {
-        return '<button type="button" class="chip ask" data-ask="' + esc(text) + '">' + esc(text) + "</button>";
+        return chipHtml("ask", ASK_ICON, text, "data-ask");
       }).join("");
       askHost.querySelectorAll("[data-ask]").forEach(function (btn) {
         btn.addEventListener("click", function () {
           sendFollowup(btn.getAttribute("data-ask") || "");
         });
       });
+      animateChipsIn(askHost);
     }
     if (needSection) needSection.classList.toggle("hidden", !tax.need.length);
     if (askSection) askSection.classList.toggle("hidden", !tax.ask.length);
@@ -2798,6 +2837,7 @@
 
   async function sendFollowup(presetText) {
     showError("followup-error", "");
+    if (conversationPending) return;
     var q = (presetText || $("followup-input").value || "").trim();
     if (!q) { showError("followup-error", "Type a question first.", { focusId: "followup-input" }); return; }
     if (!session.caseId || !session.token) { showError("followup-error", "No active case.", { onRetry: resetToIntake }); return; }
@@ -3017,7 +3057,10 @@
     $("btn-new").addEventListener("click", resetToIntake);
     $("btn-followup").addEventListener("click", function () { sendFollowup(); });
     $("followup-input").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") sendFollowup();
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (!conversationPending) sendFollowup();
+      }
     });
     $("btn-report").addEventListener("click", function () { toggleReportPanel(true, "scam"); });
     $("btn-report-cancel").addEventListener("click", function () { toggleReportPanel(false); });
