@@ -12,6 +12,8 @@ Every month, students in India get a WhatsApp hire with a company logo, a salary
 
 Live in **Mumbai (`ap-south-1`)**. That Amplify URL is the demo. It does not change.
 
+**Current UI build:** `baseten-20260923-v119-linkchip` — paste a URL and it shows once as a chip, not duplicated in the textarea ([details](docs/BUGFIX_v119_LINK_CHIP.md)).
+
 ## What you get
 
 Three honest verdicts. We do not scare you just to scare you.
@@ -112,6 +114,14 @@ bash scripts/serve_frontend.sh
 ```
 
 Operator notes: `DEPLOY.md`, `docs/TELEGRAM_SETUP.md`.
+
+**Deploy frontend only** (after `aws login --profile creda-dev`):
+
+```bash
+bash scripts/deploy_amplify_frontend.sh
+```
+
+Recent UI fixes are documented under `docs/BUGFIX_v*.md` (latest: [v119 link chip](docs/BUGFIX_v119_LINK_CHIP.md)).
 
 ## Repo
 
