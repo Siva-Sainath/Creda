@@ -1495,11 +1495,33 @@
     if (!busy) syncSendButton();
   }
 
+  function composerContentLength() {
+    var text = ($("offer-text").value || "").trim();
+    var links = parsedLinks.join("");
+    return (text + links).replace(/\s+/g, "").length;
+  }
+
+  function updateComposerChrome() {
+    var shell = $("composer-shell");
+    if (!shell) return;
+    var hasLinks = parsedLinks.length > 0;
+    var textEmpty = !($("offer-text").value || "").trim();
+    shell.classList.toggle("has-link-chips", hasLinks);
+    shell.classList.toggle("links-only", hasLinks && textEmpty);
+  }
+
+  function stripDetectedUrls(text, urls) {
+    var out = text || "";
+    urls.forEach(function (url) {
+      out = out.split(url).join("");
+    });
+    return out.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ").trim();
+  }
+
   function syncSendButton() {
     var btn = $("btn-check");
     if (!btn) return;
-    var textLen = ($("offer-text").value || "").trim().length;
-    var ready = textLen >= 12;
+    var ready = composerContentLength() >= 12;
     btn.classList.toggle("is-active", ready);
     btn.disabled = !ready;
     var clearBtn = $("btn-clear");
@@ -1525,9 +1547,21 @@
   }
 
   function syncParsedLinksFromText() {
-    parsedLinks = extractUrls(($("offer-text").value || "")).slice(0, 5);
+    var ta = $("offer-text");
+    var raw = ta.value || "";
+    var found = extractUrls(raw);
+    found.forEach(function (url) {
+      if (parsedLinks.indexOf(url) < 0) parsedLinks.push(url);
+    });
+    parsedLinks = parsedLinks.slice(0, 5);
+    if (parsedLinks.length) {
+      var stripped = stripDetectedUrls(raw, parsedLinks);
+      if (stripped !== raw) ta.value = stripped;
+    }
     renderParsedLinks();
     syncSendButton();
+    updateComposerChrome();
+    autoResizeComposer();
   }
 
   function renderParsedLinks() {
@@ -1555,11 +1589,11 @@
   }
 
   function removeParsedLink(idx) {
-    var url = parsedLinks[idx];
-    if (!url) return;
-    var ta = $("offer-text");
-    ta.value = (ta.value || "").replace(url, "").replace(/\s{2,}/g, " ").trim();
-    syncParsedLinksFromText();
+    if (!parsedLinks[idx]) return;
+    parsedLinks.splice(idx, 1);
+    renderParsedLinks();
+    syncSendButton();
+    updateComposerChrome();
     autoResizeComposer();
   }
 
@@ -1567,6 +1601,7 @@
     $("offer-text").value = "";
     parsedLinks = [];
     renderParsedLinks();
+    updateComposerChrome();
     pendingAttachments.forEach(function (item) {
       if (item.preview) URL.revokeObjectURL(item.preview);
     });
@@ -1618,8 +1653,11 @@
   }
 
   function buildPayload() {
-    var offerText = $("offer-text").value.trim();
-    if (!offerText || offerText.length < 12) {
+    var offerText = ($("offer-text").value || "").trim();
+    var links = parsedLinks.concat(collectLinkInputs()).concat(extractUrls(offerText));
+    links = links.filter(function (u, i) { return links.indexOf(u) === i; }).slice(0, 5);
+    if (!offerText && links.length) offerText = links.join("\n");
+    if (composerContentLength() < 12) {
       throw new Error("Paste the complete email or message, including sender and any links.");
     }
     var payload = {
@@ -1627,8 +1665,6 @@
       locale: "en-IN",
       sourceChannel: "web"
     };
-    var links = parsedLinks.concat(collectLinkInputs()).concat(extractUrls(offerText));
-    links = links.filter(function (u, i) { return links.indexOf(u) === i; }).slice(0, 5);
     if (links.length) payload.links = links;
     return payload;
   }

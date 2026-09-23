@@ -11,7 +11,7 @@ aws sts get-caller-identity --profile "$AWS_PROFILE" >/dev/null
 
 cd "$ROOT/frontend"
 mkdir -p dist
-cp index.html styles.css app.js iso-loop.js dist/
+cp index.html styles.css app.js iso-loop.js iso-anim.js dist/
 (cd dist && zip -r -q ../deploy.zip .)
 
 DEPLOY=$(aws amplify create-deployment --app-id "$APP_ID" --branch-name "$BRANCH" --region "$REGION" --profile "$AWS_PROFILE" --output json)

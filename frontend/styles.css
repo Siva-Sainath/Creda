@@ -329,6 +329,12 @@ body.creda.has-case .pane-casefile { min-height: calc(100dvh - var(--header-h) -
 .attachment-row.hidden { display: none; }
 .parsed-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.45rem; }
 .parsed-links.hidden { display: none; }
+.composer-card.has-link-chips textarea { min-height: 72px; }
+.composer-card.links-only textarea {
+  min-height: 0; height: 0 !important; padding: 0; margin: 0;
+  overflow: hidden; opacity: 0; pointer-events: none;
+}
+.composer-card.links-only .composer-toolbar { margin-top: 0.35rem; }
 .attach-chip {
   display: inline-flex; align-items: center; gap: 0.35rem; max-width: 100%;
   padding: 0.25rem 0.4rem; border: 1px solid var(--line); border-radius: 8px;
